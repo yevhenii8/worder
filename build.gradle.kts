@@ -48,4 +48,9 @@ kotlin {
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
         kotlinOptions.jvmTarget = JavaVersion.VERSION_12.majorVersion
     }
+    tasks.withType<Test> {
+        this.testLogging {
+            this.showStandardStreams = true
+        }
+    }
 }
