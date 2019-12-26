@@ -88,17 +88,11 @@ class SqlLiteFile(fileName: String) : WordsDB {
         get() {
             val total = WordTable.id.count()
             val learned = Sum(
-                with(CaseWhen<Int>(null)) {
-                    When(WordTable.rate eq 100, intParam(1))
-                    Else(intParam(0))
-                },
+                CaseWhen<Int>(null).When(WordTable.rate eq 100, intParam(1)).Else(intParam(0)),
                 LongColumnType()
             )
             val unlearned = Sum(
-                with(CaseWhen<Int>(null)) {
-                    When(WordTable.rate neq 100, intParam(1))
-                    Else(intParam(0))
-                },
+                CaseWhen<Int>(null).When(WordTable.rate neq 100, intParam(1)).Else(intParam(0)),
                 LongColumnType()
             )
 
