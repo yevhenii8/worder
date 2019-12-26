@@ -3,6 +3,3 @@
 
 # Ignore Gradle build output directory
 build
-
-#ignore all test samples of Db
-testDbs

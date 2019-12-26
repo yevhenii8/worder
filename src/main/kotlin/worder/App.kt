@@ -3,6 +3,8 @@
  */
 package worder
 
+import worder.database.SqlLiteFile
+
 class App {
     val greeting: String
         get() {
@@ -11,5 +13,9 @@ class App {
 }
 
 fun main(args: Array<String>) {
-    println(App().greeting)
+    val path = "/home/yevhenii/IdeaProjects/worder_deprecated/updated.bck"
+    val db = SqlLiteFile(path)
+    val stats = listOf(db.sessionStat, db.summary, db.worderTrack)
+    for(statObj in stats)
+        println(statObj)
 }
