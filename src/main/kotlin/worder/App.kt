@@ -3,7 +3,10 @@
  */
 package worder
 
-import worder.database.SqlLiteFile
+import org.jetbrains.exposed.sql.SortOrder
+import worder.database.sqllite.SqlLiteFileUpdater
+import worder.model.BaseWord
+import worder.model.UpdatedWord
 
 class App {
     val greeting: String
@@ -14,8 +17,16 @@ class App {
 
 fun main(args: Array<String>) {
     val path = "/home/yevhenii/IdeaProjects/worder_deprecated/updated.bck"
-    val db = SqlLiteFile(path)
-    val stats = listOf(db.sessionStat, db.summary, db.worderTrack)
-    for(statObj in stats)
-        println(statObj)
+    val db = SqlLiteFileUpdater(path)
+    if (db.hasNextWord())  {
+        val word = db.getNextWord(SortOrder.ASC)
+        println("received: $word")
+        val updatedWord = UpdatedWord(
+            name = word.name,
+            transcription = null,
+            primaryDefinition = "primary",
+            secondaryDefinition = null
+        )
+        db.updateWord(updatedWord)
+    }
 }

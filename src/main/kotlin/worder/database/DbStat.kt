@@ -8,19 +8,7 @@ sealed class DbStat : Iterable<Map.Entry<String, Int>> {
 }
 
 
-class DbSessionStat(removed: Int = 0, updated: Int = 0, skipped: Int = 0) : DbStat() {
-    override val map = mapOf(
-        "removed" to removed,
-        "updated" to updated,
-        "skipped" to skipped
-    )
-
-    val removed by map
-    val updated by map
-    val skipped by map
-}
-
-class DbSummary(total: Int = 0, unlearned: Int = 0, learned: Int = 0) : DbStat() {
+class DbSummary(total: Int, unlearned: Int, learned: Int) : DbStat() {
     override val map = mapOf(
         "total" to total,
         "learned" to learned,
@@ -32,7 +20,7 @@ class DbSummary(total: Int = 0, unlearned: Int = 0, learned: Int = 0) : DbStat()
     val unlearned by map
 }
 
-class DbWorderTrack(totalInserted: Int = 0, totalReset: Int = 0, totalUpdated: Int = 0) : DbStat() {
+class DbWorderTrack(totalInserted: Int, totalReset: Int, totalUpdated: Int) : DbStat() {
     override val map = mapOf(
         "totalInserted" to totalInserted,
         "totalReset" to totalReset,
@@ -42,4 +30,29 @@ class DbWorderTrack(totalInserted: Int = 0, totalReset: Int = 0, totalUpdated: I
     val totalInserted by map
     val totalReset by map
     val totalUpdated by map
+}
+
+
+class UpdaterSessionStat(removed: Int, updated: Int, skipped: Int, learned: Int) : DbStat() {
+    override val map = mapOf(
+        "removed" to removed,
+        "updated" to updated,
+        "skipped" to skipped,
+        "learned" to learned
+    )
+
+    val removed by map
+    val updated by map
+    val skipped by map
+    val learned by map
+}
+
+class InserterSessionStat(inserted: Int, reset: Int) : DbStat() {
+    override val map = mapOf(
+        "inserted" to inserted,
+        "reset" to reset
+    )
+
+    val inserted by map
+    val reset by map
 }

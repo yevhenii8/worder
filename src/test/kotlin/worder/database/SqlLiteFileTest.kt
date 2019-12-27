@@ -3,10 +3,8 @@ package worder.database
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
-import java.nio.file.Path
+import worder.database.sqllite.SqlLiteFile
 import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 class SqlLiteFileTest {
     companion object {
