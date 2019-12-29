@@ -13,9 +13,9 @@ interface WordsUpdateDB : WordsDB {
 
     fun updateWord(word: UpdatedWord)
 
-    fun removeWord(word: BaseWord)
+    fun removeWord(word: Word)
 
-    fun setSkipped(word: BaseWord)
+    fun setSkipped(word: Word)
 
-    fun setLearned(word: BaseWord)
+    fun setLearned(word: Word)
 }

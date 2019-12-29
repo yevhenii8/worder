@@ -6,6 +6,8 @@ package worder
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 
+annotation class Tested
+
 class AppTest {
     @Test fun testAppHasAGreeting() {
         val classUnderTest = App()

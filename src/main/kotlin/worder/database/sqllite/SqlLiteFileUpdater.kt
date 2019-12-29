@@ -1,16 +1,14 @@
 package worder.database.sqllite
 
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.coalesce
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.isNull
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import worder.database.UpdaterSessionStat
 import worder.database.WordsUpdateDB
 import worder.database.sqllite.SqlLiteFile.Companion.WordTable
-import worder.model.*
-import java.sql.Connection
+import worder.model.Word
+import worder.model.DatabaseWord
+import worder.model.UpdatedWord
 
 class SqlLiteFileUpdater(fileName: String) : SqlLiteFile(fileName), WordsUpdateDB {
     private val skippedWords = mutableListOf<String>()
@@ -32,7 +30,7 @@ class SqlLiteFileUpdater(fileName: String) : SqlLiteFile(fileName), WordsUpdateD
 
 
     override fun hasNextWord(): Boolean {
-        nextWord = transaction(Connection.TRANSACTION_SERIALIZABLE, 1) {
+        nextWord = defaultSqlLiteTransaction {
             WordTable.slice(WordTable.columns.drop(2) + WordTable.name.lowerCase()).select {
                 (WordTable.tags notLike "%$updatedTagId%" or WordTable.tags.isNull()) and
                         (WordTable.rate less 100) and
@@ -68,29 +66,27 @@ class SqlLiteFileUpdater(fileName: String) : SqlLiteFile(fileName), WordsUpdateD
         return nextWord != null
     }
 
-    override fun setSkipped(word: BaseWord) = skippedWords.add(skippedWords.size, word.name).also { skipped++ }
-    override fun getNextWord(order: SortOrder) = nextWord
-        ?: throw IllegalStateException("hasNextWord() wasn't called or last call returned FALSE!")
+    override fun setSkipped(word: Word) = skippedWords.add(skippedWords.size, word.name).also { skipped++ }
+
+    override fun getNextWord(order: SortOrder) = nextWord ?: throw IllegalStateException("hasNextWord() wasn't called or returned FALSE!")
 
     override fun updateWord(word: UpdatedWord) {
         val tagsCase = CaseWhen<String?>(null)
             .When(WordTable.tags like "%$updatedTagId%", WordTable.tags)
-            .When(WordTable.tags like "%#", Concat("", WordTable.tags, stringLiteral("$updatedTagId#") as Expression<String?>))
-            .Else(stringParam("#$updatedTagId#"))
+            .When(WordTable.tags like "%#", Concat("", WordTable.tags as Column<String>, stringLiteral("$updatedTagId#")))
+            .Else(stringLiteral("#$updatedTagId#"))
         val exampleStr = stringLiteral(word.examples.joinToString("#"))
         val exampleCase = CaseWhen<String?>(null)
             .When(exampleStr eq stringLiteral(""), WordTable.example)
             .Else(exampleStr)
-        val transcriptionCase = CaseWhen<String?>(WordTable.tags)
-            .When(stringLiteral(word.transcription ?: "NULL") eq "NULL", WordTable.tags)
+        val transcriptionCase = CaseWhen<String?>(null)
+            .When(stringLiteral(word.transcription ?: "NULL") eq "NULL", WordTable.transcription)
             .Else(stringLiteral(word.transcription ?: "NULL"))
 
-
-        transaction(Connection.TRANSACTION_SERIALIZABLE, 1) {
+        defaultSqlLiteTransaction {
             addLogger(StdOutSqlLogger)
             WordTable.update({ (WordTable.name eq word.name) and (WordTable.dictionaryId eq dictionaryId) }) {
-                //it[transcription] = transcriptionCase
-                it[transcription] = Coalesce(stringParam(word.transcription), transcription)
+                it[transcription] = transcriptionCase
                 it[translation] = word.primaryDefinition
                 it[translationAddition] = word.secondaryDefinition
                 it[exampleTranslation] = null
@@ -100,11 +96,15 @@ class SqlLiteFileUpdater(fileName: String) : SqlLiteFile(fileName), WordsUpdateD
         }
     }
 
-    override fun removeWord(word: BaseWord) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun removeWord(word: Word): Unit = defaultSqlLiteTransaction {
+        WordTable.deleteWhere { (WordTable.name eq word.name) and (WordTable.dictionaryId eq dictionaryId) }
     }
 
-    override fun setLearned(word: BaseWord) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun setLearned(word: Word): Unit = defaultSqlLiteTransaction {
+        WordTable.update({ (WordTable.name eq word.name) and (WordTable.dictionaryId eq dictionaryId) })
+        {
+            it[rate] = 100
+            it[closed] = 1
+        }
     }
 }

@@ -8,6 +8,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import worder.database.DbSummary
 import worder.database.DbWorderTrack
 import worder.database.WordsDB
+import java.io.File
 import java.sql.Connection
 import java.time.Instant
 
@@ -42,6 +43,7 @@ abstract class SqlLiteFile(fileName: String) : WordsDB {
             val dictionaryId: Column<Int> = integer("dictionary_id")
             val rate: Column<Int> = integer("rate").default(0)
             val register: Column<Long> = long("register").default(Instant.now().toEpochMilli())
+            val closed: Column<Int?> = integer("closed").nullable()
             val lastModification: Column<Long> = long("last_modification").default(Instant.now().toEpochMilli())
             val lastRateModification: Column<Long> = long("last_rate_modification").default(Instant.now().toEpochMilli())
             val lastTraining: Column<Int> = integer("register").default(0)
@@ -49,6 +51,7 @@ abstract class SqlLiteFile(fileName: String) : WordsDB {
     }
 
 
+    private val connection: Database
     protected val dictionaryId: Int
     protected val updatedTagId: Int
     protected val insertedTagId: Int
@@ -56,11 +59,13 @@ abstract class SqlLiteFile(fileName: String) : WordsDB {
 
 
     init {
-        Database.connect("jdbc:sqlite:$fileName", "org.sqlite.JDBC")
+        val file = File(fileName)
+        if (!(file.exists() && file.canRead() && file.canWrite()))
+            throw IllegalArgumentException("File should be permissible for reading and writing!")
 
-        dictionaryId = transaction(Connection.TRANSACTION_SERIALIZABLE, 1) {
-            DictionaryTable.select { DictionaryTable.langId eq LANG_ID }.firstOrNull()?.get(
-                DictionaryTable.id)
+        connection = Database.connect("jdbc:sqlite:$fileName", "org.sqlite.JDBC")
+        dictionaryId = defaultSqlLiteTransaction {
+            DictionaryTable.select { DictionaryTable.langId eq LANG_ID }.firstOrNull()?.get(DictionaryTable.id)
                 ?: throw IllegalArgumentException("There's no an English dictionary (LANG_ID: $LANG_ID) in the Database!")
         }.value
 
@@ -89,7 +94,7 @@ abstract class SqlLiteFile(fileName: String) : WordsDB {
                 LongColumnType()
             )
 
-            val resultRow = transaction(Connection.TRANSACTION_SERIALIZABLE, 1) {
+            val resultRow = defaultSqlLiteTransaction {
                 WordTable.slice(total, learned, unlearned)
                     .selectAll()
                     .first()
@@ -103,21 +108,20 @@ abstract class SqlLiteFile(fileName: String) : WordsDB {
         }
 
 
-    private fun getTagId(tagName: String): Int {
-        return transaction(Connection.TRANSACTION_SERIALIZABLE, 1) {
-            TagsTable.select { (TagsTable.name eq tagName) and (TagsTable.dictionaryId eq dictionaryId) }.firstOrNull()?.get(
-                TagsTable.id
-            )
-                ?: TagsTable.insert {
-                    it[dictionaryId] = this@SqlLiteFile.dictionaryId
-                    it[name] = tagName
-                }[TagsTable.id]
-        }.value
-    }
+    private fun getTagId(tagName: String) = defaultSqlLiteTransaction {
+        TagsTable.select { (TagsTable.name eq tagName) and (TagsTable.dictionaryId eq dictionaryId) }.firstOrNull()?.get(TagsTable.id)
+            ?: TagsTable.insert {
+                it[dictionaryId] = this@SqlLiteFile.dictionaryId
+                it[name] = tagName
+            }[TagsTable.id]
+    }.value
 
-    private fun getWordsCount(tagId: Int): Int {
-        return transaction(Connection.TRANSACTION_SERIALIZABLE, 1) {
-            WordTable.select { WordTable.tags like "%$tagId%" }.count()
-        }
-    }
+    private fun getWordsCount(tagId: Int) = defaultSqlLiteTransaction { WordTable.select { WordTable.tags like "%$tagId%" }.count() }
+
+    protected fun <T> defaultSqlLiteTransaction(statement: Transaction.() -> T): T = transaction(
+        transactionIsolation = Connection.TRANSACTION_SERIALIZABLE,
+        repetitionAttempts = 1,
+        db = connection,
+        statement = statement
+    )
 }
