@@ -1,4 +1,4 @@
-package worder.request.sites
+package worder.request.implementations
 
 import worder.model.Word
 import worder.request.*

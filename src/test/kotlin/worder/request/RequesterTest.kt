@@ -6,7 +6,7 @@ import worder.model.Word
 class RequesterTest {
     @Test
     fun allRequestersTest() {
-        val requesters = Requester.getAllKnownImplementation()
+        val requesters = Requester.getAllDefaultImplementations()
 //        val word = Word("excel")
 //        val word = Word("grill")
         val word1 = Word("diverse")

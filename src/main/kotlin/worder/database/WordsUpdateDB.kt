@@ -1,7 +1,7 @@
 package worder.database
 
-import org.jetbrains.exposed.sql.SortOrder
 import worder.model.*
+
 
 interface WordsUpdateDB : WordsDB {
     override val sessionStat: UpdaterSessionStat
@@ -9,7 +9,7 @@ interface WordsUpdateDB : WordsDB {
 
     fun hasNextWord() : Boolean
 
-    fun getNextWord(order: SortOrder): DatabaseWord
+    fun getNextWord(order: SelectOrder): DatabaseWord
 
     fun updateWord(word: UpdatedWord)
 
@@ -18,4 +18,9 @@ interface WordsUpdateDB : WordsDB {
     fun setSkipped(word: Word)
 
     fun setLearned(word: Word)
+
+
+    enum class SelectOrder {
+        ASC, DESC, RANDOM
+    }
 }

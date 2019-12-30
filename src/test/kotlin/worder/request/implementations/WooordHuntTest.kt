@@ -1,7 +1,6 @@
-package worder.request.sites
+package worder.request.implementations
 
 import org.junit.Test
-import worder.model.Word
 
 class WooordHuntTest {
     @Test

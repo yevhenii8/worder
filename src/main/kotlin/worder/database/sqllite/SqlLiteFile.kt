@@ -60,8 +60,12 @@ abstract class SqlLiteFile(fileName: String) : WordsDB {
 
     init {
         val file = File(fileName)
-        if (!(file.exists() && file.canRead() && file.canWrite()))
-            throw IllegalArgumentException("File should be permissible for reading and writing!")
+
+        if (!file.exists())
+            throw IllegalArgumentException("File not found! file_path=${file.absolutePath}")
+        if (!(file.canRead() && file.canWrite()))
+            throw IllegalArgumentException("File should be permissible for reading and writing! file_path=${file.absolutePath}")
+
 
         connection = Database.connect("jdbc:sqlite:$fileName", "org.sqlite.JDBC")
         dictionaryId = defaultSqlLiteTransaction {

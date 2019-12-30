@@ -1,10 +1,10 @@
 package worder.request
 
 import worder.model.Word
-import worder.request.sites.Cambridge
-import worder.request.sites.Lingvo
-import worder.request.sites.Macmillan
-import worder.request.sites.WooordHunt
+import worder.request.implementations.Cambridge
+import worder.request.implementations.Lingvo
+import worder.request.implementations.Macmillan
+import worder.request.implementations.WooordHunt
 
 
 interface Requester {
@@ -14,7 +14,7 @@ interface Requester {
     fun acceptWord(word: Word)
 
     companion object {
-        fun getAllKnownImplementation() : List<Requester> = listOf(
+        fun getAllDefaultImplementations() : Set<Requester> = setOf(
             Lingvo.newInstance(),
             Macmillan.newInstance(),
             WooordHunt.newInstance(),

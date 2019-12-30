@@ -2,6 +2,7 @@ package worder.database
 
 import worder.model.Word
 
+
 interface WordsInsertDB : WordsDB {
     override val sessionStat: InserterSessionStat
 

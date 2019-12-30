@@ -6,7 +6,7 @@ import worder.model.Word
 class TranscriptionRequesterTest {
     @Test
     fun generalTestingAll() {
-        val requesters = Requester.getAllKnownImplementation()
+        val requesters = Requester.getAllDefaultImplementations()
             .filterIsInstance<TranscriptionRequester>()
         val word =  Word("tyranny")
 

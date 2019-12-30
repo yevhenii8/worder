@@ -2,6 +2,7 @@ package worder.request
 
 
 class RequesterStat(
+    val className: String,
     definitions: Int?,
     translations: Int?,
     examples: Int?,
@@ -17,5 +18,5 @@ class RequesterStat(
 
 
     override fun iterator(): Iterator<Map.Entry<String, Int>> = map.iterator()
-    override fun toString(): String = map.toString()
+    override fun toString(): String = "${className}: $map"
 }

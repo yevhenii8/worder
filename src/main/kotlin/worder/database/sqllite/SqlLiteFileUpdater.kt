@@ -5,15 +5,25 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import worder.database.UpdaterSessionStat
 import worder.database.WordsUpdateDB
+import worder.database.WordsUpdateDB.SelectOrder
 import worder.database.sqllite.SqlLiteFile.Companion.WordTable
+import worder.model.BaseDatabaseWord
 import worder.model.Word
 import worder.model.DatabaseWord
 import worder.model.UpdatedWord
 
 class SqlLiteFileUpdater(fileName: String) : SqlLiteFile(fileName), WordsUpdateDB {
     private val skippedWords = mutableListOf<String>()
+    private val selectQuery = defaultSqlLiteTransaction {
+        addLogger(StdOutSqlLogger)
+        WordTable.slice(WordTable.columns.drop(2) + WordTable.name.lowerCase()).select {
+            (WordTable.tags notLike "%$updatedTagId%" or WordTable.tags.isNull()) and
+                    (WordTable.rate less 100) and
+                    (WordTable.name.notInList(skippedWords)) and
+                    (WordTable.dictionaryId eq dictionaryId)
+        }.limit(1)
+    }
 
-    private var nextWord: DatabaseWord? = null
     private var removed = 0
     private var updated = 0
     private var skipped = 0
@@ -29,46 +39,32 @@ class SqlLiteFileUpdater(fileName: String) : SqlLiteFile(fileName), WordsUpdateD
         )
 
 
-    override fun hasNextWord(): Boolean {
-        nextWord = defaultSqlLiteTransaction {
-            WordTable.slice(WordTable.columns.drop(2) + WordTable.name.lowerCase()).select {
-                (WordTable.tags notLike "%$updatedTagId%" or WordTable.tags.isNull()) and
-                        (WordTable.rate less 100) and
-                        (WordTable.name.notInList(skippedWords)) and
-                        (WordTable.dictionaryId eq dictionaryId)
-            }
-                .orderBy(WordTable.id, SortOrder.ASC)
-                .limit(1)
-                .firstOrNull()
-                ?.let { row ->
-                    DatabaseWord(
-                        name = row[WordTable.name.lowerCase()],
-                        transcription = row[WordTable.transcription],
-                        rate = row[WordTable.rate],
-                        register = row[WordTable.register],
-                        lastModification = row[WordTable.lastModification],
-                        lastRateModification = row[WordTable.lastRateModification],
-                        lastTraining = row[WordTable.lastTraining]
-                    ).apply {
-                        row[WordTable.translation]?.let {
-                            translations.addAll(it.split("#").filter(String::isNotBlank))
-                        }
-                        row[WordTable.translationAddition]?.let {
-                            translations.addAll(it.split("#").filter(String::isNotBlank))
-                        }
-                        row[WordTable.example]?.let {
-                            examples.addAll(it.split("#").filter(String::isNotBlank))
-                        }
-                    }
-                }
-        }
-
-        return nextWord != null
-    }
+    override fun hasNextWord() = defaultSqlLiteTransaction { !(selectQuery.empty()) }
 
     override fun setSkipped(word: Word) = skippedWords.add(skippedWords.size, word.name).also { skipped++ }
 
-    override fun getNextWord(order: SortOrder) = nextWord ?: throw IllegalStateException("hasNextWord() wasn't called or returned FALSE!")
+    override fun getNextWord(order: SelectOrder): DatabaseWord = defaultSqlLiteTransaction {
+            when (order) {
+                SelectOrder.ASC, SelectOrder.DESC -> selectQuery.orderBy(WordTable.id, SortOrder.valueOf(order.name))
+                SelectOrder.RANDOM -> selectQuery.orderBy(Random())
+            }.firstOrNull()?.let {
+                BaseDatabaseWord(
+                    name = it[WordTable.name.lowerCase()],
+                    transcription = it[WordTable.transcription],
+                    rate = it[WordTable.rate],
+                    register = it[WordTable.register],
+                    lastModification = it[WordTable.lastModification],
+                    lastRateModification = it[WordTable.lastRateModification],
+                    lastTraining = it[WordTable.lastTraining],
+                    examples = it[WordTable.example]?.split("#")?.filter(String::isNotBlank)?.toSet() ?: emptySet(),
+                    translations = run {
+                        val translations = it[WordTable.translation]?.split("#")?.filter(String::isNotBlank) ?: emptyList()
+                        val translationAdditions = it[WordTable.translationAddition]?.split("#")?.filter(String::isNotBlank) ?: emptyList()
+                        (translations + translationAdditions).toSet()
+                    }
+                )
+            } ?: throw IllegalStateException("Last call of hasNextWord() returned FALSE!")
+        }
 
     override fun updateWord(word: UpdatedWord) {
         val tagsCase = CaseWhen<String?>(null)
