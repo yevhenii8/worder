@@ -3,6 +3,7 @@ package worder.database.sqllite
 import org.junit.Test
 import worder.database.WordsInsertDB
 import worder.database.WordsUpdateDB
+import worder.model.BaseWord
 import worder.model.Word
 
 class SqlLiteFileUpdaterTest {
@@ -11,15 +12,15 @@ class SqlLiteFileUpdaterTest {
 
     @Test
     fun setLearned() {
-        db.setLearned(Word("hell", null))
-        db.setLearned(Word("hello", null))
-        db.setLearned(Word("table", null))
+        db.setLearned(BaseWord("hell", null))
+        db.setLearned(BaseWord("hello", null))
+        db.setLearned(BaseWord("table", null))
     }
 
     @Test
     fun removeWord() {
-        db.removeWord(Word("hell", null))
-        db.removeWord(Word("hello", null))
-        db.removeWord(Word("table", null))
+        db.removeWord(BaseWord("hell", null))
+        db.removeWord(BaseWord("hello", null))
+        db.removeWord(BaseWord("table", null))
     }
 }

@@ -2,6 +2,7 @@ package worder.database.sqllite
 
 import org.junit.Test
 import worder.database.WordsInsertDB
+import worder.model.BaseWord
 import worder.model.DatabaseWord
 import worder.model.UpdatedWord
 import worder.model.Word
@@ -37,8 +38,8 @@ class SqlLiteFileInserterTest {
 
     @Test
     fun resetWordTest() {
-        db.resetWord(Word("hell", null))
-        db.resetWord(Word("hello", null))
-        db.resetWord(Word("table", null))
+        db.resetWord(BaseWord("hell", null))
+        db.resetWord(BaseWord("hello", null))
+        db.resetWord(BaseWord("table", null))
     }
 }

@@ -1,6 +1,7 @@
 package worder.request
 
 import org.junit.Test
+import worder.model.BaseWord
 import worder.model.Word
 
 class TranscriptionRequesterTest {
@@ -8,7 +9,7 @@ class TranscriptionRequesterTest {
     fun generalTestingAll() {
         val requesters = Requester.getAllDefaultImplementations()
             .filterIsInstance<TranscriptionRequester>()
-        val word =  Word("tyranny")
+        val word =  BaseWord("tyranny")
 
         println()
         println()
