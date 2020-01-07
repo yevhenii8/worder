@@ -11,7 +11,7 @@ open class RequesterStatDecorator(private val requester: Requester) : Requester 
 
     override val sessionStat: RequesterStat
         get() = RequesterStat(
-            className = requester.javaClass.simpleName!!,
+            origin = requester.javaClass.simpleName,
             definitions = definitions,
             translations = translations,
             examples = examples,

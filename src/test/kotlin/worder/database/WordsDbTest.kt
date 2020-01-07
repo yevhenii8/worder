@@ -2,10 +2,9 @@ package worder.database
 
 import org.junit.Test
 import worder.database.sqllite.SqlLiteFileInserter
-import worder.database.sqllite.SqlLiteFileInserterTest
 import worder.database.sqllite.SqlLiteFileUpdater
 
-class WordsDBTest {
+class WordsDbTest {
     private val pathToSampleDb = "/home/yevhenii/IdeaProjects/worder_deprecated/updated.bck"
     private val testedImplementations = listOf(
         SqlLiteFileInserter::class,
@@ -24,19 +23,19 @@ class WordsDBTest {
         }
     }
 
-    private fun worderTrackTest(wordsDb: WordsDB) {
+    private fun worderTrackTest(wordsDb: WordsDb) {
         println(wordsDb.worderTrack)
     }
 
-    private fun summaryTest(wordsDb: WordsDB) {
+    private fun summaryTest(wordsDb: WordsDb) {
         println(wordsDb.summary)
     }
 
-    private fun sessionStatTest(wordsDb: WordsDB) {
+    private fun sessionStatTest(wordsDb: WordsDb) {
         println(wordsDb.sessionStat)
     }
 
-    private fun allStatsTest(wordsDb: WordsDB) {
+    private fun allStatsTest(wordsDb: WordsDb) {
         for(dbStat in wordsDb.allStats)
             println(dbStat)
     }

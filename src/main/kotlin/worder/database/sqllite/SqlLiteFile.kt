@@ -7,12 +7,12 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.neq
 import org.jetbrains.exposed.sql.transactions.transaction
 import worder.database.DbSummary
 import worder.database.DbWorderTrack
-import worder.database.WordsDB
+import worder.database.WordsDb
 import java.io.File
 import java.sql.Connection
 import java.time.Instant
 
-abstract class SqlLiteFile(fileName: String) : WordsDB {
+abstract class SqlLiteFile(fileName: String) : WordsDb {
     companion object {
         protected const val UPDATED_TAG = "(W) Updated"
         protected const val INSERTED_TAG = "(W) Inserted"
@@ -37,7 +37,7 @@ abstract class SqlLiteFile(fileName: String) : WordsDB {
             val tags: Column<String?> = text("tags").nullable()
             val translation: Column<String?> = text("translation").nullable()
             val translationAddition: Column<String?> = text("translation_addition").nullable()
-            val transcription: Column<String?> = text("transcription").nullable()
+            val transcription: Column<String> = text("transcription").default("")
             val example: Column<String?> = text("example").nullable()
             val exampleTranslation: Column<String?> = text("example_translation").nullable()
             val dictionaryId: Column<Int> = integer("dictionary_id")
@@ -81,6 +81,7 @@ abstract class SqlLiteFile(fileName: String) : WordsDB {
 
     override val worderTrack: DbWorderTrack
         get() = DbWorderTrack(
+            origin = this.javaClass.simpleName,
             totalInserted = getWordsCount(tagId = insertedTagId),
             totalReset = getWordsCount(tagId = resetTagId),
             totalUpdated = getWordsCount(tagId = updatedTagId)
@@ -105,6 +106,7 @@ abstract class SqlLiteFile(fileName: String) : WordsDB {
             }
 
             return DbSummary(
+                origin = this.javaClass.simpleName,
                 total = resultRow[total],
                 learned = resultRow[learned]!!,
                 unlearned = resultRow[unlearned]!!

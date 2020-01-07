@@ -2,12 +2,11 @@ package worder.request
 
 import org.junit.Test
 import worder.model.BaseWord
-import worder.model.Word
 
 class TranscriptionRequesterTest {
     @Test
     fun generalTestingAll() {
-        val requesters = Requester.getAllDefaultImplementations()
+        val requesters = Requester.allDefaultImplementations()
             .filterIsInstance<TranscriptionRequester>()
         val word =  BaseWord("tyranny")
 

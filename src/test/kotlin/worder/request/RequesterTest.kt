@@ -2,12 +2,11 @@ package worder.request
 
 import org.junit.Test
 import worder.model.BaseWord
-import worder.model.Word
 
 class RequesterTest {
     @Test
     fun allRequestersTest() {
-        val requesters = Requester.getAllDefaultImplementations()
+        val requesters = Requester.allDefaultImplementations()
 //        val word = Word("excel")
 //        val word = Word("grill")
         val word1 = BaseWord("diverse")

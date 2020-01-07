@@ -11,10 +11,10 @@ interface Requester {
     val sessionStat: RequesterStat
         get() = throw IllegalStateException("Should be used decorator's implementation!")
 
-    fun acceptWord(word: Word)
+    suspend fun acceptWord(word: Word)
 
     companion object {
-        fun getAllDefaultImplementations() : Set<Requester> = setOf(
+        fun allDefaultImplementations() : Set<Requester> = setOf(
             Lingvo.newInstance(),
             Macmillan.newInstance(),
             WooordHunt.newInstance(),

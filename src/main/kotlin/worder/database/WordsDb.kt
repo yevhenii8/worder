@@ -1,6 +1,7 @@
 package worder.database
 
-interface WordsDB {
+
+interface WordsDb {
     val worderTrack: DbWorderTrack
     val summary: DbSummary
     val sessionStat: DbStat

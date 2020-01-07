@@ -1,6 +1,6 @@
 package worder.model.update
 
-import worder.database.WordsUpdateDB
+import worder.database.WordsUpdateDb
 import worder.model.BaseUpdatedWord
 import worder.model.DatabaseWord
 import worder.model.UpdatedWord
@@ -9,8 +9,8 @@ import java.util.*
 
 
 class UpdateModel(
-    val database: WordsUpdateDB,
-    var selectOrder: WordsUpdateDB.SelectOrder,
+    val database: WordsUpdateDb,
+    var selectOrder: WordsUpdateDb.SelectOrder,
     val pipelineLength: Int,
     useDefaultRequesters: Boolean = true,
     userRequesters: Set<Requester> = emptySet()
@@ -21,7 +21,7 @@ class UpdateModel(
     private val transcriptionRequesters = mutableSetOf<TranscriptionRequester>()
 
     private val requesters: Set<Requester> = if (useDefaultRequesters)
-        userRequesters + Requester.getAllDefaultImplementations()
+        userRequesters + Requester.allDefaultImplementations()
     else
         userRequesters
 
@@ -48,7 +48,8 @@ class UpdateModel(
         override val examples: Set<String>,
         override val definitions: Set<String>,
         override val transcriptions: Set<String>
-    ) : WordBlock {
+    ) : WordBlock
+    {
         var command: BlockCommand? = null
             private set(value) {
                 if (isCommitted)

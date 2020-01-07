@@ -4,15 +4,15 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import worder.database.UpdaterSessionStat
-import worder.database.WordsUpdateDB
-import worder.database.WordsUpdateDB.SelectOrder
+import worder.database.WordsUpdateDb
+import worder.database.WordsUpdateDb.SelectOrder
 import worder.database.sqllite.SqlLiteFile.Companion.WordTable
 import worder.model.BaseDatabaseWord
 import worder.model.Word
 import worder.model.DatabaseWord
 import worder.model.UpdatedWord
 
-class SqlLiteFileUpdater(fileName: String) : SqlLiteFile(fileName), WordsUpdateDB {
+class SqlLiteFileUpdater(fileName: String) : SqlLiteFile(fileName), WordsUpdateDb {
     private val skippedWords = mutableListOf<String>()
     private val selectQuery = defaultSqlLiteTransaction {
         addLogger(StdOutSqlLogger)
@@ -32,6 +32,7 @@ class SqlLiteFileUpdater(fileName: String) : SqlLiteFile(fileName), WordsUpdateD
 
     override val sessionStat: UpdaterSessionStat
         get() = UpdaterSessionStat(
+            origin = this.javaClass.simpleName,
             removed = removed,
             updated = updated,
             skipped = skipped,

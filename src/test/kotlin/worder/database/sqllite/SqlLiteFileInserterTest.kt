@@ -1,18 +1,12 @@
 package worder.database.sqllite
 
 import org.junit.Test
-import worder.database.WordsInsertDB
+import worder.database.WordsExtractDb
 import worder.model.BaseWord
-import worder.model.DatabaseWord
-import worder.model.UpdatedWord
-import worder.model.Word
-import kotlin.test.assertFails
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 class SqlLiteFileInserterTest {
     private val pathToSampleDb = "/home/yevhenii/IdeaProjects/worder_deprecated/updated.bck"
-    private val db: WordsInsertDB = SqlLiteFileInserter(pathToSampleDb)
+    private val db: WordsExtractDb = SqlLiteFileInserter(pathToSampleDb)
 
     @Test
     fun baseTest() {

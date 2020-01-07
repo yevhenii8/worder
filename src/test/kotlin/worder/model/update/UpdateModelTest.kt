@@ -1,14 +1,14 @@
 package worder.model.update
 
 import org.junit.Test
-import worder.database.WordsUpdateDB
+import worder.database.WordsUpdateDb
 import worder.database.sqllite.SqlLiteFileUpdater
 
 class UpdateModelTest {
     @Test
     fun initTest() {
         val db = SqlLiteFileUpdater("../worder_deprecated/updated.bck")
-        val model = UpdateModel(db, WordsUpdateDB.SelectOrder.RANDOM, 0)
+        val model = UpdateModel(db, WordsUpdateDb.SelectOrder.RANDOM, 0)
 
         println(model.database.summary)
         println(model.database.worderTrack)
@@ -20,7 +20,7 @@ class UpdateModelTest {
     @Test
     fun learnedCommand() {
         val db = SqlLiteFileUpdater("../worder_deprecated/updated.bck")
-        val model = UpdateModel(db, WordsUpdateDB.SelectOrder.RANDOM, 0)
+        val model = UpdateModel(db, WordsUpdateDb.SelectOrder.RANDOM, 0)
 
         if(model.hasNext()) {
             val wordBlock = model.next()
@@ -47,7 +47,7 @@ class UpdateModelTest {
     @Test
     fun shouldNotCommit() {
         val db = SqlLiteFileUpdater("../worder_deprecated/updated.bck")
-        val model = UpdateModel(db, WordsUpdateDB.SelectOrder.RANDOM, 1)
+        val model = UpdateModel(db, WordsUpdateDb.SelectOrder.RANDOM, 1)
 
         if(model.hasNext()) {
             val wordBlock = model.next()
@@ -74,7 +74,7 @@ class UpdateModelTest {
     @Test
     fun shouldCommit() {
         val db = SqlLiteFileUpdater("../worder_deprecated/updated.bck")
-        val model = UpdateModel(db, WordsUpdateDB.SelectOrder.RANDOM, 1)
+        val model = UpdateModel(db, WordsUpdateDb.SelectOrder.RANDOM, 1)
 
         if(model.hasNext()) {
             val wordBlock = model.next()

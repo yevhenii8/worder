@@ -3,7 +3,7 @@ package worder.database
 import worder.model.*
 
 
-interface WordsUpdateDB : WordsDB {
+interface WordsUpdateDb : WordsDb {
     override val sessionStat: UpdaterSessionStat
 
 

@@ -1,14 +1,12 @@
 package worder.database.sqllite
 
 import org.junit.Test
-import worder.database.WordsInsertDB
-import worder.database.WordsUpdateDB
+import worder.database.WordsUpdateDb
 import worder.model.BaseWord
-import worder.model.Word
 
 class SqlLiteFileUpdaterTest {
     private val pathToSampleDb = "/home/yevhenii/IdeaProjects/worder_deprecated/updated.bck"
-    private val db: WordsUpdateDB = SqlLiteFileUpdater(pathToSampleDb)
+    private val db: WordsUpdateDb = SqlLiteFileUpdater(pathToSampleDb)
 
     @Test
     fun setLearned() {
