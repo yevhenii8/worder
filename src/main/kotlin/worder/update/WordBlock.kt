@@ -1,6 +1,6 @@
-package worder.model.update
+package worder.update
 
-import worder.model.DatabaseWord
+import worder.DatabaseWord
 
 interface WordBlock {
     val definitions: Set<String>

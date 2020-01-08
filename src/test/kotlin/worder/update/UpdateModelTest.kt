@@ -1,4 +1,4 @@
-package worder.model.update
+package worder.update
 
 import org.junit.Test
 import worder.database.WordsUpdateDb

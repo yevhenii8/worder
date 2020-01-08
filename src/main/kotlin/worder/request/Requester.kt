@@ -1,41 +1,43 @@
 package worder.request
 
-import worder.model.Word
-import worder.request.implementations.Cambridge
-import worder.request.implementations.Lingvo
-import worder.request.implementations.Macmillan
-import worder.request.implementations.WooordHunt
+import worder.Word
 
 
 interface Requester {
-    val sessionStat: RequesterStat
-        get() = throw IllegalStateException("Should be used decorator's implementation!")
+    val sessionStat: RequesterSessionStat
+        get() = throw IllegalStateException("Should be used RequesterStatDecorator() implementation!")
 
-    suspend fun acceptWord(word: Word)
+    val lastRequestStat: RequestStat
+        get() = throw IllegalStateException("Should be used RequesterStatDecorator() implementation!")
 
-    companion object {
-        fun allDefaultImplementations() : Set<Requester> = setOf(
-            Lingvo.newInstance(),
-            Macmillan.newInstance(),
-            WooordHunt.newInstance(),
-            Cambridge.newInstance()
-        )
-    }
+
+    suspend fun requestWord(word: Word)
 }
 
 
 interface RequesterProducer {
-     /*
-     has to use RequesterStatDecorator() in order to obtain out-of-box stat keeping functionality
-     it's been created only in order to unify stat structure and
-     incapsulate its boilerplate code from directly requester implementing
-      */
+    /*
+    Requester has to use RequesterStatDecorator() in order to obtain out-of-box stat's keeping functionality
+    it's been created only in order to unify stat structure and
+    incapsulate its boilerplate code from directly requester implementing
+     */
 
-    fun newInstance() : Requester
+    fun newInstance(): Requester
 }
 
 
-interface DefinitionRequester : Requester { fun getDefinitions() : Set<String> }
-interface TranslationRequester : Requester { fun getTranslations() : Set<String> }
-interface ExampleRequester : Requester { fun getExamples() : Set<String> }
-interface TranscriptionRequester : Requester { fun getTranscriptions() : Set<String> }
+interface DefinitionRequester : Requester {
+    val definitions: Set<String>
+}
+
+interface TranslationRequester : Requester {
+    val translations: Set<String>
+}
+
+interface ExampleRequester : Requester {
+    val examples: Set<String>
+}
+
+interface TranscriptionRequester : Requester {
+    val transcriptions: Set<String>
+}

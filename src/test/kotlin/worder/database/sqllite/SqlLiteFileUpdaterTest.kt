@@ -2,7 +2,7 @@ package worder.database.sqllite
 
 import org.junit.Test
 import worder.database.WordsUpdateDb
-import worder.model.BaseWord
+import worder.BaseWord
 
 class SqlLiteFileUpdaterTest {
     private val pathToSampleDb = "/home/yevhenii/IdeaProjects/worder_deprecated/updated.bck"

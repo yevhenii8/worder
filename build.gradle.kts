@@ -33,9 +33,13 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
 
 
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.3.3")
+
     implementation("org.xerial:sqlite-jdbc:3.30.1")
     implementation("org.jetbrains.exposed:exposed-core:0.19.3")
     implementation("org.jetbrains.exposed:exposed-jdbc:0.19.3")
+
     implementation("org.slf4j:slf4j-simple:1.7.9")
 }
 

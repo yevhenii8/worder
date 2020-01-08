@@ -1,26 +1,63 @@
 package worder.request
 
-import worder.model.Word
+import worder.Word
 
 
 open class RequesterStatDecorator(private val requester: Requester) : Requester {
-    var definitions: Int? = null
-    var translations: Int? = null
-    var examples: Int? = null
-    var transcriptions: Int? = null
+    private var totalRequests = 0
+    private var totalDefinitions: Int? = null
+    private var totalTranslations: Int? = null
+    private var totalExamples: Int? = null
+    private var totalTranscriptions: Int? = null
 
-    override val sessionStat: RequesterStat
-        get() = RequesterStat(
+
+    private var lastWord: String? = null
+    private var lastDefinitions: Int? = null
+    private var lastTranslations: Int? = null
+    private var lastExamples: Int? = null
+    private var lastTranscriptions: Int? = null
+
+
+    override val sessionStat: RequesterSessionStat
+        get() = RequesterSessionStat(
             origin = requester.javaClass.simpleName,
-            definitions = definitions,
-            translations = translations,
-            examples = examples,
-            transcriptions = transcriptions
+            totalRequests = totalRequests,
+            totalDefinitions = totalDefinitions,
+            totalTranslations = totalTranslations,
+            totalExamples = totalExamples,
+            totalTranscriptions = totalTranscriptions
         )
 
+    override val lastRequestStat: RequestStat
+        get() = if (lastWord != null) RequestStat(
+            origin = requester.javaClass.simpleName,
+            word = lastWord!!,
+            definitions = lastDefinitions,
+            translations = lastTranslations,
+            examples = lastExamples,
+            transcriptions = lastTranscriptions
+        ) else throw IllegalStateException("You should at least once call requestWord()")
 
-    override fun acceptWord(word: Word) = requester.acceptWord(word)
-    override fun toString(): String  = requester.javaClass.simpleName
+    override suspend fun requestWord(word: Word) {
+        requester.requestWord(word)
+        totalRequests++
+        lastWord = word.name
+
+        lastDefinitions = if (requester is DefinitionRequester) requester.definitions.count() else null
+        lastTranslations = if (requester is TranslationRequester) requester.translations.count() else null
+        lastExamples = if (requester is ExampleRequester) requester.examples.count() else null
+        lastTranscriptions = if (requester is TranscriptionRequester) requester.transcriptions.count() else null
+
+        totalDefinitions = lastDefinitions?.plus(totalDefinitions ?: 0)
+        lastTranslations = lastTranslations?.plus(lastTranslations ?: 0)
+        totalExamples = lastExamples?.plus(lastExamples ?: 0)
+        totalTranscriptions = lastTranscriptions?.plus(lastTranscriptions ?: 0)
+    }
+
+
+    override fun toString(): String = requester.javaClass.simpleName
+    override fun hashCode(): Int = requester.hashCode()
+    override fun equals(other: Any?): Boolean = requester == other
 
 
     /*
@@ -29,27 +66,15 @@ open class RequesterStatDecorator(private val requester: Requester) : Requester 
     DefinitionRequester, TranslationRequester, ExampleRequester, TranscriptionRequester
      */
 
-    fun getDefinitions(): Set<String> {
-        return if (requester is DefinitionRequester)
-            requester.getDefinitions().also { definitions = (definitions ?: 0).plus(it.size) }
-        else throw IllegalStateException("You can't use this requester as DefinitionRequester")
-    }
+    val definitions: Set<String> = if (requester is DefinitionRequester) requester.definitions
+    else throw IllegalStateException("You can't use this requester as DefinitionRequester")
 
-    fun getTranslations(): Set<String> {
-        return if (requester is TranslationRequester)
-            requester.getTranslations().also { translations = (translations ?: 0).plus(it.size) }
-        else throw IllegalStateException("You can't use this requester as TranslationRequester")
-    }
+    val translations: Set<String> = if (requester is TranslationRequester) requester.translations
+    else throw IllegalStateException("You can't use this requester as TranslationRequester")
 
-    fun getExamples(): Set<String> {
-        return if (requester is ExampleRequester)
-            requester.getExamples().also { examples = (examples ?: 0).plus(it.size) }
-        else throw IllegalStateException("You can't use this requester as ExampleRequester")
-    }
+    val examples: Set<String> = if (requester is ExampleRequester) requester.examples
+    else throw IllegalStateException("You can't use this requester as ExampleRequester")
 
-    fun getTranscriptions(): Set<String> {
-        return if (requester is TranscriptionRequester)
-            requester.getTranscriptions().also { transcriptions = (transcriptions ?: 0).plus(it.size) }
-        else throw IllegalStateException("You can't use this requester as TranscriptionRequester")
-    }
+    val transcriptions: Set<String> = if (requester is TranscriptionRequester) requester.transcriptions
+    else throw IllegalStateException("You can't use this requester as TranscriptionRequester")
 }

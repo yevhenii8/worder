@@ -1,4 +1,4 @@
-package worder.model.extract
+package worder.extract
 
 import worder.database.WordsExtractDb
 import java.io.File

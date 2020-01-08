@@ -1,6 +1,6 @@
 package worder.database
 
-import worder.model.Word
+import worder.Word
 
 
 interface WordsExtractDb : WordsDb {

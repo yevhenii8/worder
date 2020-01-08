@@ -7,10 +7,10 @@ import worder.database.UpdaterSessionStat
 import worder.database.WordsUpdateDb
 import worder.database.WordsUpdateDb.SelectOrder
 import worder.database.sqllite.SqlLiteFile.Companion.WordTable
-import worder.model.BaseDatabaseWord
-import worder.model.Word
-import worder.model.DatabaseWord
-import worder.model.UpdatedWord
+import worder.BaseDatabaseWord
+import worder.Word
+import worder.DatabaseWord
+import worder.UpdatedWord
 
 class SqlLiteFileUpdater(fileName: String) : SqlLiteFile(fileName), WordsUpdateDb {
     private val skippedWords = mutableListOf<String>()

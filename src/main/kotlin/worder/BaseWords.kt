@@ -1,4 +1,4 @@
-package worder.model
+package worder
 
 
 data class BaseWord(override val name: String) : Word {

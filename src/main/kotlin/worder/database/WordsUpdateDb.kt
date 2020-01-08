@@ -1,6 +1,8 @@
 package worder.database
 
-import worder.model.*
+import worder.DatabaseWord
+import worder.UpdatedWord
+import worder.Word
 
 
 interface WordsUpdateDb : WordsDb {

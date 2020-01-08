@@ -1,7 +1,7 @@
 package worder.request
 
 import org.junit.Test
-import worder.model.BaseWord
+import worder.BaseWord
 
 class RequesterTest {
     @Test

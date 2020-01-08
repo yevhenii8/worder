@@ -1,8 +1,7 @@
 package worder.request.implementations
 
-import worder.model.Word
+import worder.Word
 import worder.request.*
-import java.net.URL
 
 
 class Macmillan private constructor() : DefinitionRequester, ExampleRequester, TranscriptionRequester {
@@ -15,28 +14,31 @@ class Macmillan private constructor() : DefinitionRequester, ExampleRequester, T
         private val COMMON_FILTER = Regex("(<.*?>)|(resource=\"dict_british\">)")
 
         override fun newInstance(): Requester =
-            object : RequesterStatDecorator(Macmillan()), DefinitionRequester, ExampleRequester, TranscriptionRequester { }
+            object : RequesterStatDecorator(Macmillan()), DefinitionRequester, ExampleRequester, TranscriptionRequester {}
     }
 
 
-    private var siteBody: String = ""
+    override lateinit var definitions: Set<String>
+        private set
+    override lateinit var examples: Set<String>
+        private set
+    override lateinit var transcriptions: Set<String>
+        private set
 
-    override fun acceptWord(word: Word) {
-        siteBody = if (!word.name.contains(" ")) URL("$SITE_URL${word.name}_1").readText() + URL(SITE_URL + word.name).readText() else ""
-    }
 
-    override fun getExamples() : Set<String> =
-        EXAMPLE_PATTERN.findAll(siteBody)
+    override suspend fun requestWord(word: Word) {
+        val body = word.sendAsyncRequest(SITE_URL + word.name) + word.sendAsyncRequest("$SITE_URL${word.name}_1")
+
+        definitions = DEFINITION_PATTERN.findAll(body)
             .map { COMMON_FILTER.replace(it.value, "").trim() }
             .toSet()
 
-    override fun getDefinitions() : Set<String> =
-        DEFINITION_PATTERN.findAll(siteBody)
+        examples = EXAMPLE_PATTERN.findAll(body)
             .map { COMMON_FILTER.replace(it.value, "").trim() }
             .toSet()
 
-    override fun getTranscriptions(): Set<String> =
-        TRANSCRIPTION_PATTERN.findAll(siteBody)
+        transcriptions = TRANSCRIPTION_PATTERN.findAll(body)
             .map { "[${it.value}]" }
             .toSet()
+    }
 }

@@ -1,8 +1,7 @@
 package worder.request.implementations
 
-import worder.model.Word
+import worder.Word
 import worder.request.*
-import java.net.URL
 
 
 class Cambridge private constructor() : DefinitionRequester, ExampleRequester {
@@ -14,23 +13,26 @@ class Cambridge private constructor() : DefinitionRequester, ExampleRequester {
         private val COMMON_FILTER = Regex("(<.*?>)|(: )")
 
         override fun newInstance(): Requester =
-            object : RequesterStatDecorator(Cambridge()), DefinitionRequester, ExampleRequester { }
-        }
-
-
-    private var siteBody = ""
-
-    override fun acceptWord(word: Word) {
-        siteBody = if (!word.name.contains(" ")) URL(SITE_URL + word.name).readText() else ""
+            object : RequesterStatDecorator(Cambridge()), DefinitionRequester, ExampleRequester {}
     }
 
-    override fun getDefinitions(): Set<String> =
-        DEFINITION_PATTERN.findAll(siteBody)
+
+    override lateinit var definitions: Set<String>
+        private set
+
+    override lateinit var examples: Set<String>
+        private set
+
+
+    override suspend fun requestWord(word: Word) {
+        val body = word.sendAsyncRequest(SITE_URL + word.name)
+
+        definitions = DEFINITION_PATTERN.findAll(body)
             .map { COMMON_FILTER.replace(it.value, "").trim() }
             .toSet()
 
-    override fun getExamples(): Set<String> =
-        EXAMPLE_PATTERN.findAll(siteBody)
+        examples = EXAMPLE_PATTERN.findAll(body)
             .map { COMMON_FILTER.replace(it.value, "").trim() }
             .toSet()
+    }
 }

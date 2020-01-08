@@ -1,9 +1,9 @@
-package worder.model.update
+package worder.update
 
 import worder.database.WordsUpdateDb
-import worder.model.BaseUpdatedWord
-import worder.model.DatabaseWord
-import worder.model.UpdatedWord
+import worder.BaseUpdatedWord
+import worder.DatabaseWord
+import worder.UpdatedWord
 import worder.request.*
 import java.util.*
 
@@ -21,7 +21,7 @@ class UpdateModel(
     private val transcriptionRequesters = mutableSetOf<TranscriptionRequester>()
 
     private val requesters: Set<Requester> = if (useDefaultRequesters)
-        userRequesters + Requester.allDefaultImplementations()
+        userRequesters + getDefaultRequesters()
     else
         userRequesters
 
@@ -153,12 +153,12 @@ class UpdateModel(
             throw IllegalStateException("hasNext() returned false or wasn't called at all!")
 
         val dbWord = database.getNextWord(selectOrder)
-        requesters.forEach { it.acceptWord(dbWord) }
+        //requesters.forEach { it.requestWord(dbWord) }
 
-        val definitions = definitionRequesters.flatMap { it.getDefinitions() }.toSet()
-        val examples = (exampleRequesters.flatMap { it.getExamples() } + dbWord.examples).toSet()
-        val translations = (translationRequesters.flatMap { it.getTranslations() } + dbWord.translations).toSet()
-        val transcriptions = (transcriptionRequesters.flatMap { it.getTranscriptions() } + setOf(dbWord.transcription)).filterNotNull().toSet()
+        val definitions = definitionRequesters.flatMap { it.definitions }.toSet()
+        val examples = (exampleRequesters.flatMap { it.examples } + dbWord.examples).toSet()
+        val translations = (translationRequesters.flatMap { it.translations } + dbWord.translations).toSet()
+        val transcriptions = (transcriptionRequesters.flatMap { it.transcriptions } + setOf(dbWord.transcription)).filterNotNull().toSet()
 
         lastBlock = BaseWordBlock(
             dbWord = dbWord,

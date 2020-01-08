@@ -1,4 +1,4 @@
-package worder.model
+package worder
 
 
 interface Word {
