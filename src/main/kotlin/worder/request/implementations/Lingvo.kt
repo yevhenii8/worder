@@ -2,10 +2,11 @@ package worder.request.implementations
 
 import worder.Word
 import worder.request.*
+import worder.request.RequesterBaseDecorator.Companion.sendGetRequest
 
 
 class Lingvo private constructor() : TranslationRequester, TranscriptionRequester {
-    companion object : RequesterProducer {
+    companion object {
         private const val SITE_URL = "https://www.lingvolive.com/en-us/translate/en-ru/"
 
         private val TRANSCRIPTION_PATTERN = Regex("(?<=<span class=\"_2EnCi Zf_4w _3bSyz IAnu-\")( data-reactid=\".*?\">)(.*?)(?=</span>)")
@@ -13,7 +14,9 @@ class Lingvo private constructor() : TranslationRequester, TranscriptionRequeste
         private val TRANSLATION_FILTER = Regex("(?U)[А-Яа-я ]+")
         private val TRANSLATION_BODY_FILTER = Regex("(?<=<div class=\"_1mexQ Zf_4w _3bSyz\").*?(?=</div><div class=\"(_3dLzG)|(#quote)\")")
 
-        override fun newInstance(): Requester = object : RequesterStatDecorator(Lingvo()), TranslationRequester, TranscriptionRequester {}
+        val instance: Requester by lazy {
+            object : RequesterBaseDecorator(Lingvo()), TranslationRequester, TranscriptionRequester {}
+        }
     }
 
 
@@ -25,7 +28,7 @@ class Lingvo private constructor() : TranslationRequester, TranscriptionRequeste
 
 
     override suspend fun requestWord(word: Word) {
-        val body = word.sendAsyncRequest(SITE_URL + word.name)
+        val body = word.sendGetRequest(SITE_URL + word.name)
 
         translations = TRANSLATION_BODY_FILTER.find(body)?.let { matchResult ->
             TRANSLATION_PATTERN.findAll(matchResult.value)

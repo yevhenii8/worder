@@ -1,10 +1,10 @@
 package worder.extract
 
-import worder.database.WordsExtractDb
+import worder.database.LocalWordsExtractDb
 import java.io.File
 
 
-class ExtractModel(val database: WordsExtractDb) {
+class ExtractModel(val database: LocalWordsExtractDb) {
     fun addNewWords(file: File): AddingFileStat {
         checkFile(file)
 
@@ -34,7 +34,7 @@ class ExtractModel(val database: WordsExtractDb) {
             .toSet()
 
         val totalWords = allWords.count()
-        val newWords = allWords.filter { database.resolveWord(it) == WordsExtractDb.ResolveRes.INSERTED }.count()
+        val newWords = allWords.filter { database.resolveWord(it) == LocalWordsExtractDb.ResolveRes.INSERTED }.count()
 
         return ResolvingFileStat(
             origin = this.javaClass.simpleName,

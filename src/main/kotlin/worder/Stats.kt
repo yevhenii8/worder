@@ -7,6 +7,7 @@ interface Stat : Iterable<Map.Entry<String, String>> {
     fun asMap() : Map<String, String>
 }
 
+
 abstract class AbstractStat : Stat {
     protected abstract val map: Map<String, String>
 

@@ -1,11 +1,8 @@
 package worder.database
 
 
-interface WordsDb {
+interface LocalWordsDb {
     val worderTrack: DbWorderTrack
     val summary: DbSummary
     val sessionStat: DbStat
-
-    val allStats
-        get() = listOf(sessionStat, worderTrack, summary)
 }

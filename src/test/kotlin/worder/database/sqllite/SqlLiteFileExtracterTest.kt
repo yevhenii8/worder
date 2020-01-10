@@ -1,12 +1,12 @@
 package worder.database.sqllite
 
 import org.junit.Test
-import worder.database.WordsExtractDb
+import worder.database.LocalWordsExtractDb
 import worder.BaseWord
 
-class SqlLiteFileInserterTest {
+class SqlLiteFileExtracterTest {
     private val pathToSampleDb = "/home/yevhenii/IdeaProjects/worder_deprecated/updated.bck"
-    private val db: WordsExtractDb = SqlLiteFileInserter(pathToSampleDb)
+    private val db: LocalWordsExtractDb = SqlLiteFileExtracter(pathToSampleDb)
 
     @Test
     fun baseTest() {

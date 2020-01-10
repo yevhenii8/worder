@@ -3,7 +3,7 @@ package worder.database
 import worder.Word
 
 
-interface WordsExtractDb : WordsDb {
+interface LocalWordsExtractDb : LocalWordsDb {
     override val sessionStat: InserterSessionStat
 
 

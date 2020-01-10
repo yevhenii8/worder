@@ -1,13 +1,13 @@
 package worder.database
 
 import org.junit.Test
-import worder.database.sqllite.SqlLiteFileInserter
+import worder.database.sqllite.SqlLiteFileExtracter
 import worder.database.sqllite.SqlLiteFileUpdater
 
-class WordsDbTest {
+class LocalWordsDbTest {
     private val pathToSampleDb = "/home/yevhenii/IdeaProjects/worder_deprecated/updated.bck"
     private val testedImplementations = listOf(
-        SqlLiteFileInserter::class,
+        SqlLiteFileExtracter::class,
         SqlLiteFileUpdater::class
     )
 
@@ -23,19 +23,19 @@ class WordsDbTest {
         }
     }
 
-    private fun worderTrackTest(wordsDb: WordsDb) {
+    private fun worderTrackTest(wordsDb: LocalWordsDb) {
         println(wordsDb.worderTrack)
     }
 
-    private fun summaryTest(wordsDb: WordsDb) {
+    private fun summaryTest(wordsDb: LocalWordsDb) {
         println(wordsDb.summary)
     }
 
-    private fun sessionStatTest(wordsDb: WordsDb) {
+    private fun sessionStatTest(wordsDb: LocalWordsDb) {
         println(wordsDb.sessionStat)
     }
 
-    private fun allStatsTest(wordsDb: WordsDb) {
+    private fun allStatsTest(wordsDb: LocalWordsDb) {
         for(dbStat in wordsDb.allStats)
             println(dbStat)
     }

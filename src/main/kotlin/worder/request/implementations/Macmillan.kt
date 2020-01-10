@@ -2,10 +2,11 @@ package worder.request.implementations
 
 import worder.Word
 import worder.request.*
+import worder.request.RequesterBaseDecorator.Companion.sendGetRequest
 
 
 class Macmillan private constructor() : DefinitionRequester, ExampleRequester, TranscriptionRequester {
-    companion object : RequesterProducer {
+    companion object {
         private const val SITE_URL = "https://www.macmillandictionary.com/dictionary/british/"
 
         private val TRANSCRIPTION_PATTERN = Regex("(?<=<span class=\"SEP PRON-before\"> /</span>).*?(?=<)")
@@ -13,8 +14,9 @@ class Macmillan private constructor() : DefinitionRequester, ExampleRequester, T
         private val EXAMPLE_PATTERN = Regex("(?<=<p class=\"EXAMPLE\").*?(?=</p>)")
         private val COMMON_FILTER = Regex("(<.*?>)|(resource=\"dict_british\">)")
 
-        override fun newInstance(): Requester =
-            object : RequesterStatDecorator(Macmillan()), DefinitionRequester, ExampleRequester, TranscriptionRequester {}
+        val instance: Requester by lazy {
+            object : RequesterBaseDecorator(Macmillan()), DefinitionRequester, ExampleRequester, TranscriptionRequester {}
+        }
     }
 
 
@@ -27,7 +29,7 @@ class Macmillan private constructor() : DefinitionRequester, ExampleRequester, T
 
 
     override suspend fun requestWord(word: Word) {
-        val body = word.sendAsyncRequest(SITE_URL + word.name) + word.sendAsyncRequest("$SITE_URL${word.name}_1")
+        val body = word.sendGetRequest(SITE_URL + word.name) + word.sendGetRequest("$SITE_URL${word.name}_1")
 
         definitions = DEFINITION_PATTERN.findAll(body)
             .map { COMMON_FILTER.replace(it.value, "").trim() }

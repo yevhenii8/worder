@@ -1,44 +1,57 @@
 package worder.update
 
-import worder.database.WordsUpdateDb
-import worder.BaseUpdatedWord
-import worder.DatabaseWord
-import worder.UpdatedWord
+import worder.*
+import worder.database.LocalWordsUpdateDb
 import worder.request.*
+import worder.request.implementations.*
 import java.util.*
 
 
 class UpdateModel(
-    val database: WordsUpdateDb,
-    var selectOrder: WordsUpdateDb.SelectOrder,
     val pipelineLength: Int,
-    useDefaultRequesters: Boolean = true,
-    userRequesters: Set<Requester> = emptySet()
-) : Iterable<WordBlock>, Iterator<WordBlock> {
+    val database: LocalWordsUpdateDb,
+    var selectOrder: LocalWordsUpdateDb.SelectOrder
+) {
     private val definitionRequesters = mutableSetOf<DefinitionRequester>()
     private val exampleRequesters = mutableSetOf<ExampleRequester>()
     private val translationRequesters = mutableSetOf<TranslationRequester>()
     private val transcriptionRequesters = mutableSetOf<TranscriptionRequester>()
 
-    private val requesters: Set<Requester> = if (useDefaultRequesters)
-        userRequesters + getDefaultRequesters()
-    else
-        userRequesters
-
-    private val readyToCommit: Queue<BaseWordBlock> = ArrayDeque<BaseWordBlock>()
-    private var lastBlock: WordBlock? = null
-    private var hasNext = false
+    private val pipeline = WordBlockPipeline()
+//    private var lastBlock: WordBlock? = null
+//    private var hasNext = false
 
 
     init {
-        requesters.forEach {
-            if (it is DefinitionRequester) definitionRequesters += it
-            if (it is TranslationRequester) translationRequesters += it
-            if (it is ExampleRequester) exampleRequesters += it
-            if (it is TranscriptionRequester) transcriptionRequesters += it
-        }
+        setOf(Cambridge.instance, Lingvo.instance, Macmillan.instance, WooordHunt.instance)
+            .forEach {
+                if (it is DefinitionRequester) definitionRequesters += it
+                if (it is TranslationRequester) translationRequesters += it
+                if (it is ExampleRequester) exampleRequesters += it
+                if (it is TranscriptionRequester) transcriptionRequesters += it
+            }
     }
 
+
+    private inner class WordBlockPipeline {
+        private val readyToCommit: Queue<BaseWordBlock> = ArrayDeque<BaseWordBlock>()
+
+        private var waitingForClientResponse: BaseWordBlock? = null
+        private var readyForClientDelivery: BaseWordBlock? = null
+
+
+        init {
+        }
+
+
+        fun commitAll() {}
+
+        fun hasNext(): Boolean = waitingForClientResponse == null && readyForClientDelivery != null
+
+        private fun getNextWordBlock() : BaseWordBlock? {
+
+        }
+    }
 
     private inner class BaseWordBlock(
         override val dbWord: DatabaseWord,
@@ -48,8 +61,7 @@ class UpdateModel(
         override val examples: Set<String>,
         override val definitions: Set<String>,
         override val transcriptions: Set<String>
-    ) : WordBlock
-    {
+    ) : WordBlock {
         var command: BlockCommand? = null
             private set(value) {
                 if (isCommitted)
@@ -85,7 +97,7 @@ class UpdateModel(
 
         override fun skip(): Boolean = setResolution(SkippedCommand())
         override fun remove(): Boolean = setResolution(RemoveCommand())
-        override fun learned(): Boolean = setResolution(LearnedCommand())
+        override fun learn(): Boolean = setResolution(LearnedCommand())
         override fun update(primaryDefinition: String, secondaryDefinition: String?, examples: Set<String>, transcription: String?): Boolean =
             setResolution(
                 UpdateCommand(
@@ -107,7 +119,7 @@ class UpdateModel(
             }
 
             abstract fun execute()
-            abstract override fun toString() : String
+            abstract override fun toString(): String
         }
 
         inner class RemoveCommand : BlockCommand() {
@@ -141,14 +153,14 @@ class UpdateModel(
     }
 
 
-    override fun iterator(): Iterator<WordBlock> = this
+    fun iterator(): Iterator<WordBlock> = this
 
-    override fun hasNext(): Boolean {
+    fun hasNext(): Boolean {
         hasNext = database.hasNextWord() && lastBlock == null
         return hasNext
     }
 
-    override fun next(): WordBlock {
+    fun next(): WordBlock {
         if (!hasNext)
             throw IllegalStateException("hasNext() returned false or wasn't called at all!")
 
@@ -172,7 +184,6 @@ class UpdateModel(
 
         return lastBlock!!
     }
-
 
     fun exit() = readyToCommit.forEach { it.command!!.commit() }
 }

@@ -1,21 +1,21 @@
 package worder.database.sqllite
 
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.case
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import worder.database.UpdaterSessionStat
-import worder.database.WordsUpdateDb
-import worder.database.WordsUpdateDb.SelectOrder
+import worder.database.LocalWordsUpdateDb
+import worder.database.LocalWordsUpdateDb.SelectOrder
 import worder.database.sqllite.SqlLiteFile.Companion.WordTable
 import worder.BaseDatabaseWord
 import worder.Word
 import worder.DatabaseWord
 import worder.UpdatedWord
 
-class SqlLiteFileUpdater(fileName: String) : SqlLiteFile(fileName), WordsUpdateDb {
+class SqlLiteFileUpdater(fileName: String) : SqlLiteFile(fileName), LocalWordsUpdateDb {
     private val skippedWords = mutableListOf<String>()
     private val selectQuery = defaultSqlLiteTransaction {
-        addLogger(StdOutSqlLogger)
         WordTable.slice(WordTable.columns.drop(2) + WordTable.name.lowerCase()).select {
             (WordTable.tags notLike "%$updatedTagId%" or WordTable.tags.isNull()) and
                     (WordTable.rate less 100) and
@@ -23,6 +23,7 @@ class SqlLiteFileUpdater(fileName: String) : SqlLiteFile(fileName), WordsUpdateD
                     (WordTable.dictionaryId eq dictionaryId)
         }.limit(1)
     }
+
 
     private var removed = 0
     private var updated = 0
@@ -68,27 +69,21 @@ class SqlLiteFileUpdater(fileName: String) : SqlLiteFile(fileName), WordsUpdateD
         }
 
     override fun updateWord(word: UpdatedWord) {
-        val tagsCase = CaseWhen<String?>(null)
-            .When(WordTable.tags like "%$updatedTagId%", WordTable.tags)
-            .When(WordTable.tags like "%#", Concat("", WordTable.tags as Column<String>, stringLiteral("$updatedTagId#")))
-            .Else(stringLiteral("#$updatedTagId#"))
-        val exampleStr = stringLiteral(word.examples.joinToString("#"))
-        val exampleCase = CaseWhen<String?>(null)
-            .When(exampleStr eq stringLiteral(""), WordTable.example)
-            .Else(exampleStr)
-        val transcriptionCase = CaseWhen<String?>(null)
-            .When(stringLiteral(word.transcription ?: "NULL") eq "NULL", WordTable.transcription)
-            .Else(stringLiteral(word.transcription ?: "NULL"))
-
         defaultSqlLiteTransaction {
-            addLogger(StdOutSqlLogger)
             WordTable.update({ (WordTable.name eq word.name) and (WordTable.dictionaryId eq dictionaryId) }) {
-                it[transcription] = transcriptionCase
                 it[translation] = word.primaryDefinition
                 it[translationAddition] = word.secondaryDefinition
                 it[exampleTranslation] = null
-                it[example] = exampleCase
-                it[tags] = tagsCase
+                it[tags] = resolveTagId(updatedTagId)
+
+                it[transcription] =case()
+                    .When(stringLiteral(word.transcription ?: "NULL") eq "NULL", WordTable.transcription)
+                    .Else(stringLiteral(word.transcription ?: "NULL"))
+
+                val exampleStr = stringLiteral(word.examples.joinToString("#"))
+                it[example] = case()
+                    .When(exampleStr eq stringLiteral(""), example)
+                    .Else(exampleStr)
             }
         }
     }

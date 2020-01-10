@@ -1,21 +1,32 @@
 package worder.request
 
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import worder.BaseWord
+import worder.request.implementations.Cambridge
+import worder.request.implementations.Lingvo
+import worder.request.implementations.Macmillan
+import kotlin.system.measureTimeMillis
 
 class RequesterTest {
     @Test
     fun allRequestersTest() {
-        val requesters = Requester.allDefaultImplementations()
-//        val word = Word("excel")
-//        val word = Word("grill")
         val word1 = BaseWord("diverse")
         val word2 = BaseWord("escort")
         val word3 = BaseWord("bias")
 
-        requesters.forEach {
-            println(it::class.supertypes)
-        }
+        val cambridge1 = Cambridge.instance
+        val cambridge2 = Cambridge.instance
+        val cambridge3 = Cambridge.instance
+
+        println(measureTimeMillis {
+            runBlocking {
+                launch { cambridge1.requestWord(word3) }
+                launch { cambridge2.requestWord(word2) }
+                launch { cambridge3.requestWord(word1) }
+            }
+        })
 
 //        requesters.forEach {
 //            it.acceptWord(word1)

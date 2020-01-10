@@ -1,13 +1,14 @@
 package worder.database.sqllite
 
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.case
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
-import worder.database.InserterSessionStat
-import worder.database.WordsExtractDb
+import worder.database.*
 import worder.database.sqllite.SqlLiteFile.Companion.WordTable
 
-class SqlLiteFileInserter(fileName: String) : SqlLiteFile(fileName), WordsExtractDb {
+
+class SqlLiteFileExtracter(fileName: String) : SqlLiteFile(fileName), LocalWordsExtractDb {
     private var inserted = 0
     private var reset = 0
 
@@ -18,6 +19,7 @@ class SqlLiteFileInserter(fileName: String) : SqlLiteFile(fileName), WordsExtrac
             inserted = inserted,
             reset = reset
         )
+
 
     override fun containsWord(name: String): Boolean =
         defaultSqlLiteTransaction { WordTable.select((WordTable.name eq name) and (WordTable.dictionaryId eq dictionaryId)).count() } > 0
@@ -38,17 +40,17 @@ class SqlLiteFileInserter(fileName: String) : SqlLiteFile(fileName), WordsExtrac
     }
 
     override fun resetWord(name: String): Boolean {
-        val tagsCase = CaseWhen<String?>(null)
-            .When(WordTable.tags like "%$resetTagId%", WordTable.tags)
-            .When(WordTable.tags like "%#", Concat("", WordTable.tags as Column<String>, stringLiteral("$resetTagId#")))
-            .Else(stringLiteral("#$resetTagId#"))
-
         val updatedRowsCount = defaultSqlLiteTransaction {
             WordTable.update({ (WordTable.name eq name) and (WordTable.dictionaryId eq dictionaryId) })
             {
-                it[tags] = tagsCase
                 it[rate] = 0
                 it[closed] = null
+
+                @Suppress("UNCHECKED_CAST")
+                it[tags] = case()
+                    .When(tags like "%$resetTagId%", tags)
+                    .When(tags like "%#", Concat("", tags as Column<String>, stringLiteral("$resetTagId#")))
+                    .Else(stringLiteral("#$resetTagId#"))
             }
         }
 

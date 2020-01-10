@@ -5,7 +5,7 @@ import worder.UpdatedWord
 import worder.Word
 
 
-interface WordsUpdateDb : WordsDb {
+interface LocalWordsUpdateDb : LocalWordsDb {
     override val sessionStat: UpdaterSessionStat
 
 

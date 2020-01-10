@@ -2,17 +2,20 @@ package worder.database.sqllite
 
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.case
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.neq
 import org.jetbrains.exposed.sql.transactions.transaction
 import worder.database.DbSummary
 import worder.database.DbWorderTrack
-import worder.database.WordsDb
+import worder.database.LocalWordsDb
 import java.io.File
 import java.sql.Connection
 import java.time.Instant
 
-abstract class SqlLiteFile(fileName: String) : WordsDb {
+
+abstract class SqlLiteFile(fileName: String) : LocalWordsDb {
     companion object {
         protected const val UPDATED_TAG = "(W) Updated"
         protected const val INSERTED_TAG = "(W) Inserted"
@@ -66,7 +69,6 @@ abstract class SqlLiteFile(fileName: String) : WordsDb {
         if (!(file.canRead() && file.canWrite()))
             throw IllegalArgumentException("File should be permissible for reading and writing! file_path=${file.absolutePath}")
 
-
         connection = Database.connect("jdbc:sqlite:$fileName", "org.sqlite.JDBC")
         dictionaryId = defaultSqlLiteTransaction {
             DictionaryTable.select { DictionaryTable.langId eq LANG_ID }.firstOrNull()?.get(DictionaryTable.id)
@@ -91,11 +93,11 @@ abstract class SqlLiteFile(fileName: String) : WordsDb {
         get() {
             val total = WordTable.id.count()
             val learned = Sum(
-                CaseWhen<Int>(null).When(WordTable.rate eq 100, intParam(1)).Else(intParam(0)),
+                case().When(WordTable.rate eq 100, intParam(1)).Else(intParam(0)),
                 LongColumnType()
             )
             val unlearned = Sum(
-                CaseWhen<Int>(null).When(WordTable.rate neq 100, intParam(1)).Else(intParam(0)),
+                case().When(WordTable.rate neq 100, intParam(1)).Else(intParam(0)),
                 LongColumnType()
             )
 
@@ -117,12 +119,13 @@ abstract class SqlLiteFile(fileName: String) : WordsDb {
     private fun getTagId(tagName: String) = defaultSqlLiteTransaction {
         TagsTable.select { (TagsTable.name eq tagName) and (TagsTable.dictionaryId eq dictionaryId) }.firstOrNull()?.get(TagsTable.id)
             ?: TagsTable.insert {
-                it[dictionaryId] = this@SqlLiteFile.dictionaryId
+                it[dictionaryId] = dictionaryId
                 it[name] = tagName
             }[TagsTable.id]
     }.value
 
-    private fun getWordsCount(tagId: Int) = defaultSqlLiteTransaction { WordTable.select { WordTable.tags like "%$tagId%" }.count() }
+    private fun getWordsCount(tagId: Int) = defaultSqlLiteTransaction { WordTable.select { (WordTable.tags like "%$tagId%") and (WordTable.dictionaryId eq dictionaryId) }.count() }
+
 
     protected fun <T> defaultSqlLiteTransaction(statement: Transaction.() -> T): T = transaction(
         transactionIsolation = Connection.TRANSACTION_SERIALIZABLE,
@@ -130,4 +133,10 @@ abstract class SqlLiteFile(fileName: String) : WordsDb {
         db = connection,
         statement = statement
     )
+
+    @Suppress("UNCHECKED_CAST")
+    protected fun resolveTagId(tagId: Int) = case()
+        .When(WordTable.tags like "%$tagId%", WordTable.tags)
+        .When(WordTable.tags like "%#", Concat("", WordTable.tags as Column<String>, stringLiteral("$tagId#")))
+        .Else(stringLiteral("#$tagId#"))
 }
