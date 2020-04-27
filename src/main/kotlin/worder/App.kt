@@ -3,13 +3,13 @@
  */
 package worder
 
-class App {
-    val greeting: String
-        get() {
-            return "Hello world."
-        }
-}
+import tornadofx.App
+import tornadofx.View
+import tornadofx.vbox
 
-fun main(args: Array<String>) {
+class MainScene: App(MyView::class)
 
+class MyView: View() {
+    override val root = vbox {
+    }
 }

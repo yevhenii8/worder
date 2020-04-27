@@ -49,7 +49,7 @@ class UpdateModel(
         fun hasNext(): Boolean = waitingForClientResponse == null && readyForClientDelivery != null
 
         private fun getNextWordBlock() : BaseWordBlock? {
-
+            TODO()
         }
     }
 
@@ -68,23 +68,25 @@ class UpdateModel(
                     throw IllegalStateException("This WordBlock has already been committed!")
 
                 if (field == null) {
-                    field = value
-                    readyToCommit.add(this)
-                    database.setSkipped(dbWord)
-
-                    if (readyToCommit.size > pipelineLength)
-                        readyToCommit.remove().command!!.commit()
-
-                    lastBlock = null
+//                    field = value
+//                    readyToCommit.add(this)
+//                    database.setSkipped(dbWord)
+//
+//                    if (readyToCommit.size > pipelineLength)
+//                        readyToCommit.remove().command!!.commit()
+//
+//                    lastBlock = null
                 }
 
                 field = value
             }
 
-        override var isCommitted = false
+        var isCommitted = false
             private set
         override val resolution: String
             get() = command.toString()
+
+        override lateinit var status: worder.update.WordBlock.BlockStatus
 
 
         private fun setResolution(blockCommand: BlockCommand): Boolean {
@@ -153,37 +155,39 @@ class UpdateModel(
     }
 
 
-    fun iterator(): Iterator<WordBlock> = this
+    fun iterator(): Iterator<WordBlock> = TODO() //this
 
     fun hasNext(): Boolean {
-        hasNext = database.hasNextWord() && lastBlock == null
-        return hasNext
+//        hasNext = database.hasNextWord() && lastBlock == null
+//        return hasNext
+        TODO()
     }
 
     fun next(): WordBlock {
-        if (!hasNext)
-            throw IllegalStateException("hasNext() returned false or wasn't called at all!")
-
-        val dbWord = database.getNextWord(selectOrder)
-        //requesters.forEach { it.requestWord(dbWord) }
-
-        val definitions = definitionRequesters.flatMap { it.definitions }.toSet()
-        val examples = (exampleRequesters.flatMap { it.examples } + dbWord.examples).toSet()
-        val translations = (translationRequesters.flatMap { it.translations } + dbWord.translations).toSet()
-        val transcriptions = (transcriptionRequesters.flatMap { it.transcriptions } + setOf(dbWord.transcription)).filterNotNull().toSet()
-
-        lastBlock = BaseWordBlock(
-            dbWord = dbWord,
-            serialNumber = readyToCommit.size + 1,
-            translations = translations,
-            examples = examples,
-            definitions = definitions,
-            transcriptions = transcriptions
-        )
-        hasNext = false
-
-        return lastBlock!!
+//        if (!hasNext)
+//            throw IllegalStateException("hasNext() returned false or wasn't called at all!")
+//
+//        val dbWord = database.getNextWord(selectOrder)
+//        //requesters.forEach { it.requestWord(dbWord) }
+//
+//        val definitions = definitionRequesters.flatMap { it.definitions }.toSet()
+//        val examples = (exampleRequesters.flatMap { it.examples } + dbWord.examples).toSet()
+//        val translations = (translationRequesters.flatMap { it.translations } + dbWord.translations).toSet()
+//        val transcriptions = (transcriptionRequesters.flatMap { it.transcriptions } + setOf(dbWord.transcription)).filterNotNull().toSet()
+//
+//        lastBlock = BaseWordBlock(
+//            dbWord = dbWord,
+//            serialNumber = readyToCommit.size + 1,
+//            translations = translations,
+//            examples = examples,
+//            definitions = definitions,
+//            transcriptions = transcriptions
+//        )
+//        hasNext = false
+//
+//        return lastBlock!!
+        TODO()
     }
 
-    fun exit() = readyToCommit.forEach { it.command!!.commit() }
+    fun exit(): Unit = TODO() //readyToCommit.forEach { it.command!!.commit() }
 }

@@ -109,7 +109,7 @@ abstract class SqlLiteFile(fileName: String) : LocalWordsDb {
 
             return DbSummary(
                 origin = this.javaClass.simpleName,
-                total = resultRow[total],
+                total = resultRow[total].toInt(),
                 learned = resultRow[learned]!!,
                 unlearned = resultRow[unlearned]!!
             )
@@ -124,7 +124,7 @@ abstract class SqlLiteFile(fileName: String) : LocalWordsDb {
             }[TagsTable.id]
     }.value
 
-    private fun getWordsCount(tagId: Int) = defaultSqlLiteTransaction { WordTable.select { (WordTable.tags like "%$tagId%") and (WordTable.dictionaryId eq dictionaryId) }.count() }
+    private fun getWordsCount(tagId: Int) = defaultSqlLiteTransaction { WordTable.select { (WordTable.tags like "%$tagId%") and (WordTable.dictionaryId eq dictionaryId) }.count().toInt() }
 
 
     protected fun <T> defaultSqlLiteTransaction(statement: Transaction.() -> T): T = transaction(
