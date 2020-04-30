@@ -24,7 +24,7 @@ dependencies {
 }
 
 application {
-    mainClassName = "worder.MainScene"
+    mainClassName = "worder.AppEntry"
 }
 
 javafx {
