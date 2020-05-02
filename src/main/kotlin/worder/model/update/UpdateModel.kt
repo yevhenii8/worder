@@ -1,7 +1,7 @@
 package worder.model.extract.update
 
 import worder.*
-import worder.model.database.LocalWordsUpdateDb
+import worder.model.database.WorderUpdateDB
 import worder.model.extract.request.*
 import worder.model.extract.request.implementations.*
 import java.util.*
@@ -9,8 +9,8 @@ import java.util.*
 
 class UpdateModel(
         val pipelineLength: Int,
-        val database: LocalWordsUpdateDb,
-        var selectOrder: LocalWordsUpdateDb.SelectOrder
+        val database: WorderUpdateDB,
+        var selectOrder: WorderUpdateDB.SelectOrder
 ) {
     private val definitionRequesters = mutableSetOf<DefinitionRequester>()
     private val exampleRequesters = mutableSetOf<ExampleRequester>()

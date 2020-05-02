@@ -1,6 +1,6 @@
 package worder.model.extract
 
-import worder.AbstractStat
+import worder.model.AbstractStat
 
 
 sealed class FileExtractStat(fileName: String, totalWords: Int, newWords: Int) : AbstractStat() {

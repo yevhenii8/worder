@@ -1,6 +1,6 @@
 package worder.model.extract.request
 
-import worder.AbstractStat
+import worder.model.AbstractStat
 
 
 sealed class RequesterStat : AbstractStat()

@@ -5,9 +5,12 @@ import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.Concat
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.IntegerColumnType
-import org.jetbrains.exposed.sql.LongColumnType
 import org.jetbrains.exposed.sql.Random
 import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.case
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.neq
 import org.jetbrains.exposed.sql.Sum
 import org.jetbrains.exposed.sql.Transaction
 import org.jetbrains.exposed.sql.and
@@ -22,26 +25,28 @@ import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.stringLiteral
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.case
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.neq
 import worder.BaseDatabaseWord
 import worder.DatabaseWord
 import worder.UpdatedWord
 import worder.Word
+import worder.model.database.DatabaseSummaryStats
 import worder.model.database.DbSummary
 import worder.model.database.DbWorderTrack
 import worder.model.database.InserterSessionStat
 import worder.model.database.UpdaterSessionStat
 import worder.model.database.WorderDB
 import worder.model.database.WorderInsertDB
+import worder.model.database.WorderTrackStats
 import worder.model.database.WorderUpdateDB
+import worder.model.database.WorderUpdateDB.SelectOrder
+import worder.model.database.WorderUpdateDB.SelectOrder.ASC
+import worder.model.database.WorderUpdateDB.SelectOrder.DESC
+import worder.model.database.WorderUpdateDB.SelectOrder.RANDOM
 import java.io.File
 import java.sql.Connection
 import java.time.Instant
 
-class SqlLiteFile(fileName: String, updater: SqlLiteFileUpdater = this.SqlLiteFileUpdater()) : WorderDB, WorderUpdateDB by updater {
+class SqlLiteFile(fileName: String) : WorderDB, WorderUpdateDB, WorderInsertDB {
     private companion object {
         const val UPDATED_TAG = "(W) Updated"
         const val INSERTED_TAG = "(W) Inserted"
@@ -79,12 +84,44 @@ class SqlLiteFile(fileName: String, updater: SqlLiteFileUpdater = this.SqlLiteFi
         }
     }
 
+    private object SqlLiteSummaryStats : DatabaseSummaryStats {
+        override var total: Int = 0
+        override val unlearned: Int
+            get() = TODO("Not yet implemented")
+        override val learned: Int
+            get() = TODO("Not yet implemented")
+        override val origin: String
+            get() = TODO("Not yet implemented")
+
+        override fun subscribe(tracer: DatabaseSummaryStats.() -> Unit) {
+            TODO("Not yet implemented")
+        }
+
+        override fun unsubscribe(tracer: DatabaseSummaryStats.() -> Unit) {
+            TODO("Not yet implemented")
+        }
+
+        fun updateSummaryStats() {
+
+        }
+    }
+
 
     private val connection: Database
     private val dictionaryId: Int
     private val updatedTagId: Int
     private val insertedTagId: Int
     private val resetTagId: Int
+
+    // TODO Stats retrieving and utilizing
+    private var inserted = 0
+    private var reset = 0
+
+    // TODO Stats retrieving and utilizing
+    private var removed = 0
+    private var updated = 0
+    private var skipped = 0
+    private var learned = 0
 
 
     init {
@@ -107,7 +144,8 @@ class SqlLiteFile(fileName: String, updater: SqlLiteFileUpdater = this.SqlLiteFi
     }
 
 
-    override val worderTrack: DbWorderTrack
+    // TODO Stats retrieving and utilizing
+    override val worderTrack: WorderTrackStats
         get() = DbWorderTrack(
                 origin = this.javaClass.simpleName,
                 totalInserted = getWordsCount(tagId = insertedTagId),
@@ -115,7 +153,8 @@ class SqlLiteFile(fileName: String, updater: SqlLiteFileUpdater = this.SqlLiteFi
                 totalUpdated = getWordsCount(tagId = updatedTagId)
         )
 
-    override val summary: DbSummary
+    // TODO Stats retrieving and utilizing
+    override val summaryStat: DatabaseSummaryStats
         get() {
             val total = WordTable.id.count()
             val learned = Sum(
@@ -140,6 +179,26 @@ class SqlLiteFile(fileName: String, updater: SqlLiteFileUpdater = this.SqlLiteFi
                     unlearned = resultRow[unlearned]!!
             )
         }
+
+    // TODO Stats retrieving and utilizing
+    override val inserterSessionStat: InserterSessionStat
+        get() = TODO("Not yet implemented")
+
+    // TODO Stats retrieving and utilizing
+    override val updaterSessionStat: UpdaterSessionStat
+        get() = TODO("Not yet implemented")
+
+
+    private val skippedWords = mutableListOf<String>()
+
+    private val selectQuery = defaultSqlLiteTransaction {
+        WordTable.slice(WordTable.columns.drop(2) + WordTable.name.lowerCase()).select {
+            (WordTable.tags notLike "%$updatedTagId%" or WordTable.tags.isNull()) and
+                    (WordTable.rate less 100) and
+                    (WordTable.name.notInList(skippedWords)) and
+                    (WordTable.dictionaryId eq dictionaryId)
+        }.limit(1)
+    }
 
 
     private fun getTagId(tagName: String) = defaultSqlLiteTransaction {
@@ -169,144 +228,106 @@ class SqlLiteFile(fileName: String, updater: SqlLiteFileUpdater = this.SqlLiteFi
             .When(WordTable.tags like "%#", Concat("", WordTable.tags as Column<String>, stringLiteral("$tagId#")))
             .Else(stringLiteral("#$tagId#"))
 
+    override fun hasNextWord(): Boolean = defaultSqlLiteTransaction { !(selectQuery.empty()) }
 
-    inner class SqlLiteFileInserter : WorderInsertDB {
-        private var inserted = 0
-        private var reset = 0
-
-
-        override val inserterSessionStat: InserterSessionStat
-            get() = InserterSessionStat(
-                    origin = this.javaClass.simpleName,
-                    inserted = inserted,
-                    reset = reset
+    override fun getNextWord(order: SelectOrder): DatabaseWord = defaultSqlLiteTransaction {
+        when (order) {
+            ASC, DESC -> selectQuery.orderBy(WordTable.id, SortOrder.valueOf(order.name))
+            RANDOM -> selectQuery.orderBy(Random())
+        }.firstOrNull()?.let {
+            BaseDatabaseWord(
+                    name = it[WordTable.name.lowerCase()],
+                    transcription = it[WordTable.transcription],
+                    rate = it[WordTable.rate],
+                    register = it[WordTable.register],
+                    lastModification = it[WordTable.lastModification],
+                    lastRateModification = it[WordTable.lastRateModification],
+                    lastTraining = it[WordTable.lastTraining],
+                    examples = it[WordTable.example]?.split("#")?.filter(String::isNotBlank)?.toSet() ?: emptySet(),
+                    translations = run {
+                        val translations = it[WordTable.translation]?.split("#")?.filter(String::isNotBlank)
+                                ?: emptyList()
+                        val translationAdditions = it[WordTable.translationAddition]?.split("#")?.filter(String::isNotBlank)
+                                ?: emptyList()
+                        (translations + translationAdditions).toSet()
+                    }
             )
+        } ?: throw IllegalStateException("Last call of hasNextWord() returned FALSE!")
+    }
 
+    override fun updateWord(word: UpdatedWord) {
+        defaultSqlLiteTransaction {
+            WordTable.update({ (WordTable.name eq word.name) and (WordTable.dictionaryId eq dictionaryId) }) {
+                it[translation] = word.primaryDefinition
+                it[translationAddition] = word.secondaryDefinition
+                it[exampleTranslation] = null
+                it[tags] = resolveTagId(updatedTagId)
 
-        override fun containsWord(name: String): Boolean =
-                defaultSqlLiteTransaction { WordTable.select((WordTable.name eq name) and (WordTable.dictionaryId eq dictionaryId)).count() } > 0
+                it[transcription] = case()
+                        .When(stringLiteral(word.transcription ?: "NULL") eq "NULL", WordTable.transcription)
+                        .Else(stringLiteral(word.transcription ?: "NULL"))
 
-        override fun addWord(name: String): Boolean {
-            if (containsWord(name))
-                return false
-
-            defaultSqlLiteTransaction {
-                WordTable.insert {
-                    it[WordTable.name] = name
-                    it[dictionaryId] = dictionaryId
-                    it[tags] = "#$insertedTagId#"
-                }
+                val exampleStr = stringLiteral(word.examples.joinToString("#"))
+                it[example] = case()
+                        .When(exampleStr eq stringLiteral(""), example)
+                        .Else(exampleStr)
             }
-
-            return true
-        }
-
-        override fun resetWord(name: String): Boolean {
-            val updatedRowsCount = defaultSqlLiteTransaction {
-                WordTable.update({ (WordTable.name eq name) and (WordTable.dictionaryId eq dictionaryId) })
-                {
-                    it[rate] = 0
-                    it[closed] = null
-
-                    @Suppress("UNCHECKED_CAST")
-                    it[tags] = case()
-                            .When(tags like "%$resetTagId%", tags)
-                            .When(tags like "%#", Concat("", tags as Column<String>, stringLiteral("$resetTagId#")))
-                            .Else(stringLiteral("#$resetTagId#"))
-                }
-            }
-
-            return updatedRowsCount > 0
         }
     }
 
-    inner class SqlLiteFileUpdater : WorderUpdateDB {
-        private val skippedWords = mutableListOf<String>()
-        private val selectQuery = defaultSqlLiteTransaction {
-            WordTable.slice(WordTable.columns.drop(2) + WordTable.name.lowerCase()).select {
-                (WordTable.tags notLike "%$updatedTagId%" or WordTable.tags.isNull()) and
-                        (WordTable.rate less 100) and
-                        (WordTable.name.notInList(skippedWords)) and
-                        (WordTable.dictionaryId eq dictionaryId)
-            }.limit(1)
+    override fun removeWord(word: Word): Unit = defaultSqlLiteTransaction {
+        WordTable.deleteWhere { (WordTable.name eq word.name) and (WordTable.dictionaryId eq dictionaryId) }
+    }
+
+    override fun setSkipped(word: Word) = skippedWords.add(skippedWords.size, word.name).also { skipped++ }
+
+    override fun setLearned(word: Word): Unit = defaultSqlLiteTransaction {
+        WordTable.update({ (WordTable.name eq word.name) and (WordTable.dictionaryId eq dictionaryId) })
+        {
+            it[rate] = 100
+            it[closed] = 1
         }
+    }
 
-
-        private var removed = 0
-        private var updated = 0
-        private var skipped = 0
-        private var learned = 0
-
-
-        override val updaterSessionStat: UpdaterSessionStat
-            get() = UpdaterSessionStat(
-                    origin = this.javaClass.simpleName,
-                    removed = removed,
-                    updated = updated,
-                    skipped = skipped,
-                    learned = learned
-            )
-
-
-        override fun hasNextWord() = defaultSqlLiteTransaction { !(selectQuery.empty()) }
-
-        override fun setSkipped(word: Word) = skippedWords.add(skippedWords.size, word.name).also { skipped++ }
-
-        override fun getNextWord(order: WorderUpdateDB.SelectOrder): DatabaseWord = defaultSqlLiteTransaction {
-            when (order) {
-                WorderUpdateDB.SelectOrder.ASC, WorderUpdateDB.SelectOrder.DESC -> selectQuery.orderBy(WordTable.id, SortOrder.valueOf(order.name))
-                WorderUpdateDB.SelectOrder.RANDOM -> selectQuery.orderBy(Random())
-            }.firstOrNull()?.let {
-                BaseDatabaseWord(
-                        name = it[WordTable.name.lowerCase()],
-                        transcription = it[WordTable.transcription],
-                        rate = it[WordTable.rate],
-                        register = it[WordTable.register],
-                        lastModification = it[WordTable.lastModification],
-                        lastRateModification = it[WordTable.lastRateModification],
-                        lastTraining = it[WordTable.lastTraining],
-                        examples = it[WordTable.example]?.split("#")?.filter(String::isNotBlank)?.toSet() ?: emptySet(),
-                        translations = run {
-                            val translations = it[WordTable.translation]?.split("#")?.filter(String::isNotBlank)
-                                    ?: emptyList()
-                            val translationAdditions = it[WordTable.translationAddition]?.split("#")?.filter(String::isNotBlank)
-                                    ?: emptyList()
-                            (translations + translationAdditions).toSet()
-                        }
-                )
-            } ?: throw IllegalStateException("Last call of hasNextWord() returned FALSE!")
-        }
-
-        override fun updateWord(word: UpdatedWord) {
+    override fun containsWord(name: String): Boolean =
             defaultSqlLiteTransaction {
-                WordTable.update({ (WordTable.name eq word.name) and (WordTable.dictionaryId eq dictionaryId) }) {
-                    it[translation] = word.primaryDefinition
-                    it[translationAddition] = word.secondaryDefinition
-                    it[exampleTranslation] = null
-                    it[tags] = resolveTagId(updatedTagId)
+                WordTable.select((WordTable.name eq name) and (WordTable.dictionaryId eq dictionaryId))
+                        .count()
+            } > 0
 
-                    it[transcription] = case()
-                            .When(stringLiteral(word.transcription ?: "NULL") eq "NULL", WordTable.transcription)
-                            .Else(stringLiteral(word.transcription ?: "NULL"))
+    override fun addWord(name: String): Boolean {
+        if (containsWord(name))
+            return false
 
-                    val exampleStr = stringLiteral(word.examples.joinToString("#"))
-                    it[example] = case()
-                            .When(exampleStr eq stringLiteral(""), example)
-                            .Else(exampleStr)
-                }
+        defaultSqlLiteTransaction {
+            WordTable.insert {
+                it[WordTable.name] = name
+                it[dictionaryId] = dictionaryId
+                it[tags] = "#$insertedTagId#"
             }
         }
 
-        override fun removeWord(word: Word): Unit = defaultSqlLiteTransaction {
-            WordTable.deleteWhere { (WordTable.name eq word.name) and (WordTable.dictionaryId eq dictionaryId) }
-        }
+        return true
+    }
 
-        override fun setLearned(word: Word): Unit = defaultSqlLiteTransaction {
-            WordTable.update({ (WordTable.name eq word.name) and (WordTable.dictionaryId eq dictionaryId) })
+    override fun resetWord(name: String): Boolean {
+        val updatedRowsCount = defaultSqlLiteTransaction {
+            WordTable.update({ (WordTable.name eq name) and (WordTable.dictionaryId eq dictionaryId) })
             {
-                it[rate] = 100
-                it[closed] = 1
+                it[rate] = 0
+                it[closed] = null
+
+                @Suppress("UNCHECKED_CAST")
+                it[tags] = case()
+                        .When(tags like "%$resetTagId%", tags)
+                        .When(tags like "%#", Concat("", tags as Column<String>, stringLiteral("$resetTagId#")))
+                        .Else(stringLiteral("#$resetTagId#"))
             }
         }
+
+        // TODO Example of using
+        SqlLiteSummaryStats.updateSummaryStats()
+
+        return updatedRowsCount > 0
     }
 }
