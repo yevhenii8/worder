@@ -1,9 +1,8 @@
 package worder.controllers
 
 import tornadofx.Controller
+import worder.views.DashboardView
 
 class DashboardController : Controller() {
-    class DatabaseSummaryBlock {
-        val blockName = "Database Summary"
-    }
+    val view: DashboardView by inject()
 }

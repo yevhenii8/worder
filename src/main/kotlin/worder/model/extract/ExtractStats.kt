@@ -1,3 +1,4 @@
+/*
 package worder.model.extract
 
 import worder.model.AbstractStat
@@ -33,3 +34,4 @@ class ResolvingFileStat(
 {
     override val map: Map<String, String> = super.map + ("resetWords" to resetWords.toString())
 }
+*/

@@ -1,7 +1,7 @@
 package worder.model.database
 
 interface WorderInsertDB {
-    val inserterSessionStat: InserterSessionStat
+    //val inserterSessionStat: InserterSessionStat
 
 
     fun containsWord(name: String): Boolean

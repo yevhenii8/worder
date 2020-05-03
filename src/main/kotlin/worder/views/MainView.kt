@@ -12,26 +12,12 @@ import tornadofx.row
 import tornadofx.text
 import tornadofx.vbox
 import worder.controllers.MainController
-import worder.model.database.DatabaseSummary
 
 class MainView : View("Worder GUI") {
     val controller: MainController by inject()
-    private val testStat = DatabaseSummary("TestOBJ", 1000, 100, 900)
-
-    init {
-        testStat.subscribe {
-            totalLabel.text = total.toString()
-            unlearnedLabel.text = unlearned.toString()
-            learnedLabel.text = learned.toString()
-        }
-    }
-
-    private lateinit var totalLabel: Label
-    private lateinit var unlearnedLabel: Label
-    private lateinit var learnedLabel: Label
 
     override val root = borderpane {
-        top =
+        top = label("center")
 
         center = drawer {
 
@@ -39,12 +25,10 @@ class MainView : View("Worder GUI") {
                 label("database view")
                 button("total++") {
                     action {
-                        testStat.total++
                     }
                 }
                 button("unlearned--") {
                     action {
-                        testStat.unlearned--
                     }
                 }
             }

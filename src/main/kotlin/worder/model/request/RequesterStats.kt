@@ -1,3 +1,4 @@
+/*
 package worder.model.extract.request
 
 import worder.model.AbstractStat
@@ -40,3 +41,4 @@ class RequestStat(
     ).filterValues { it != "null" }
 
 }
+*/

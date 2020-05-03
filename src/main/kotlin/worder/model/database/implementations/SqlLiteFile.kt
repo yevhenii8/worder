@@ -29,8 +29,6 @@ import worder.BaseDatabaseWord
 import worder.DatabaseWord
 import worder.UpdatedWord
 import worder.Word
-import worder.model.database.InserterSessionStat
-import worder.model.database.UpdaterSessionStat
 import worder.model.database.WorderDB
 import worder.model.database.WorderInsertDB
 import worder.model.database.WorderUpdateDB
@@ -114,13 +112,13 @@ class SqlLiteFile(fileName: String) : WorderDB, WorderUpdateDB, WorderInsertDB {
     }
 
 
-    // TODO Stats retrieving and utilizing
-    override val inserterSessionStat: InserterSessionStat
-        get() = TODO("Not yet implemented")
-
-    // TODO Stats retrieving and utilizing
-    override val updaterSessionStat: UpdaterSessionStat
-        get() = TODO("Not yet implemented")
+//    // TODO Stats retrieving and utilizing
+//    override val inserterSessionStat: InserterSessionStat
+//        get() = TODO("Not yet implemented")
+//
+//    // TODO Stats retrieving and utilizing
+//    override val updaterSessionStat: UpdaterSessionStat
+//        get() = TODO("Not yet implemented")
 
 
     private val skippedWords = mutableListOf<String>()

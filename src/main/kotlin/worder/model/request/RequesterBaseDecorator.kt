@@ -58,25 +58,25 @@ open class RequesterBaseDecorator(private val requester: Requester) : Requester 
     private var lastTranscriptions: Int? = null
 
 
-    override val sessionStat: RequesterSessionStat
-        get() = RequesterSessionStat(
-            origin = requester.javaClass.simpleName,
-            totalRequests = totalRequests,
-            totalDefinitions = totalDefinitions,
-            totalTranslations = totalTranslations,
-            totalExamples = totalExamples,
-            totalTranscriptions = totalTranscriptions
-        )
-
-    override val lastRequestStat: RequestStat
-        get() = if (lastWord != null) RequestStat(
-            origin = requester.javaClass.simpleName,
-            word = lastWord!!,
-            definitions = lastDefinitions,
-            translations = lastTranslations,
-            examples = lastExamples,
-            transcriptions = lastTranscriptions
-        ) else throw IllegalStateException("You should at least once call requestWord()")
+//    override val sessionStat: RequesterSessionStat
+//        get() = RequesterSessionStat(
+//            origin = requester.javaClass.simpleName,
+//            totalRequests = totalRequests,
+//            totalDefinitions = totalDefinitions,
+//            totalTranslations = totalTranslations,
+//            totalExamples = totalExamples,
+//            totalTranscriptions = totalTranscriptions
+//        )
+//
+//    override val lastRequestStat: RequestStat
+//        get() = if (lastWord != null) RequestStat(
+//            origin = requester.javaClass.simpleName,
+//            word = lastWord!!,
+//            definitions = lastDefinitions,
+//            translations = lastTranslations,
+//            examples = lastExamples,
+//            transcriptions = lastTranscriptions
+//        ) else throw IllegalStateException("You should at least once call requestWord()")
 
 
     override suspend fun requestWord(word: Word) {

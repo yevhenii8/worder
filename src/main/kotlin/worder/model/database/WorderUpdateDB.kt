@@ -5,7 +5,7 @@ import worder.UpdatedWord
 import worder.Word
 
 interface WorderUpdateDB {
-    val updaterSessionStat: UpdaterSessionStat
+    //val updaterSessionStat: UpdaterSessionStat
 
 
     fun hasNextWord(): Boolean

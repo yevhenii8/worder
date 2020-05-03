@@ -1,3 +1,4 @@
+/*
 package worder.model.database
 
 import worder.model.AbstractStat
@@ -35,3 +36,4 @@ class InserterSessionStat(override val origin: String, inserted: Int, reset: Int
             "reset" to reset.toString()
     )
 }
+*/
