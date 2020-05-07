@@ -21,25 +21,11 @@ class MainView : View("Worder GUI") {
 
         center = drawer {
 
-            item("Database", expanded = true) {
-                label("database view")
-                button("total++") {
-                    action {
-                    }
-                }
-                button("unlearned--") {
-                    action {
-                    }
-                }
-            }
+            item<DatabaseView>(expanded = true)
 
-            item("Updater") {
-                label("updater view")
-            }
+            item("Updater") { label("updater view") }
 
-            item("Inserter") {
-                label("inserter view")
-            }
+            item("Inserter") { label("inserter view") }
 
         }
 

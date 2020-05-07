@@ -1,12 +1,18 @@
 package worder.views
 
-import javafx.scene.Parent
 import tornadofx.View
+import tornadofx.button
+import tornadofx.hbox
+import tornadofx.vbox
 import worder.controllers.DatabaseController
 
-class DatabaseView : View() {
-    val controller: DatabaseController by inject()
+class DatabaseView : View("Database") {
+    private val controller: DatabaseController by inject()
 
-    override val root: Parent
-        get() = TODO("Not yet implemented")
+    override val root = vbox {
+        hbox {
+            add(find<StatBlockFragment>("stats" to controller.stats))
+        }
+        button("change stats")
+    }
 }

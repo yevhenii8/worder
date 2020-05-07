@@ -1,16 +1,28 @@
 package worder.model
 
-interface Stats<T> {
-    val subscribers: MutableList<T.() -> Unit>
+interface Stats {
+    val asMap: Map<String, Any>
     val origin: String
 
-    fun subscribe(tracer: T.() -> Unit): Boolean
-    fun unsubscribe(tracer: T.() -> Unit): Boolean
+    fun subscribe(property: String, listener: (newValue: String) -> Unit)
 }
 
-abstract class AbstractStats<T> : Stats<T> {
-    override val subscribers: MutableList<T.() -> Unit> = ArrayList()
+abstract class AbstractStats : Stats {
+    private val properties = LinkedHashMap<String, Any>()
+    private val listeners = LinkedHashMap<String, (newValue: String) -> Unit>()
 
-    override fun subscribe(tracer: T.() -> Unit) = subscribers.add(tracer)
-    override fun unsubscribe(tracer: T.() -> Unit) = subscribers.remove(tracer)
+    protected val map: MutableMap<String, Any> = object : MutableMap<String, Any> by properties {
+        override fun put(key: String, value: Any): Any? {
+            val oldValue = properties[key]
+            properties[key] = value
+            listeners[key]?.invoke(value.toString())
+            return oldValue
+        }
+    }
+
+    override val asMap: Map<String, Any> = map
+
+    override fun subscribe(property: String, listener: (newValue: String) -> Unit) {
+        listeners[property] = listener
+    }
 }

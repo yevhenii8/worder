@@ -79,14 +79,14 @@ class SqlLiteFile(fileName: String) : WorderDB, WorderUpdateDB, WorderInsertDB {
     }
 
 
+    override val worderTrack = TODO() //WorderTrack("SqlLiteFile: $fileName", -1, -1, -1)
+    override val summaryStat = TODO() //SummaryStat("SqlLiteFile: $fileName", -1, -1, -1)
+
     private val connection: Database
     private val dictionaryId: Int
     private val updatedTagId: Int
     private val insertedTagId: Int
     private val resetTagId: Int
-
-    override val worderTrack = WorderTrack("SqlLiteFile: $fileName", -1, -1, -1)
-    override val summaryStat = SummaryStat("SqlLiteFile: $fileName", -1, -1, -1)
 
 
     init {
@@ -107,8 +107,8 @@ class SqlLiteFile(fileName: String) : WorderDB, WorderUpdateDB, WorderInsertDB {
         resetTagId = getTagId(RESET_TAG)
         updatedTagId = getTagId(UPDATED_TAG)
 
-        updateSummaryStat()
-        updateWorderTrack()
+//        updateSummaryStat()
+//        updateWorderTrack()
     }
 
 
@@ -156,35 +156,35 @@ class SqlLiteFile(fileName: String) : WorderDB, WorderUpdateDB, WorderInsertDB {
             statement = statement
     )
 
-    private fun updateWorderTrack() = worderTrack.apply {
-        totalInserted = getWordsCount(tagId = insertedTagId)
-        totalReset = getWordsCount(tagId = resetTagId)
-        totalUpdated = getWordsCount(tagId = updatedTagId)
-    }
-
-    private fun updateSummaryStat() {
-        val totalColumn = WordTable.id.count()
-        val learnedColumn = Sum(
-                case().When(WordTable.rate eq 100, intParam(1)).Else(intParam(0)),
-                IntegerColumnType()
-        )
-        val unlearnedColumn = Sum(
-                case().When(WordTable.rate neq 100, intParam(1)).Else(intParam(0)),
-                IntegerColumnType()
-        )
-
-        val resultRow = defaultSqlLiteTransaction {
-            WordTable.slice(totalColumn, learnedColumn, unlearnedColumn)
-                    .selectAll()
-                    .first()
-        }
-
-        summaryStat.apply {
-            total = resultRow[totalColumn].toInt()
-            learned = resultRow[learnedColumn]!!
-            unlearned = resultRow[unlearnedColumn]!!
-        }
-    }
+//    private fun updateWorderTrack() = worderTrack.apply {
+//        totalInserted = getWordsCount(tagId = insertedTagId)
+//        totalReset = getWordsCount(tagId = resetTagId)
+//        totalUpdated = getWordsCount(tagId = updatedTagId)
+//    }
+//
+//    private fun updateSummaryStat() {
+//        val totalColumn = WordTable.id.count()
+//        val learnedColumn = Sum(
+//                case().When(WordTable.rate eq 100, intParam(1)).Else(intParam(0)),
+//                IntegerColumnType()
+//        )
+//        val unlearnedColumn = Sum(
+//                case().When(WordTable.rate neq 100, intParam(1)).Else(intParam(0)),
+//                IntegerColumnType()
+//        )
+//
+//        val resultRow = defaultSqlLiteTransaction {
+//            WordTable.slice(totalColumn, learnedColumn, unlearnedColumn)
+//                    .selectAll()
+//                    .first()
+//        }
+//
+//        summaryStat.apply {
+//            total = resultRow[totalColumn].toInt()
+//            learned = resultRow[learnedColumn]!!
+//            unlearned = resultRow[unlearnedColumn]!!
+//        }
+//    }
 
     @Suppress("UNCHECKED_CAST")
     private fun resolveTagId(tagId: Int) = case()

@@ -30,12 +30,4 @@ class DashboardView : View() {
             }
         }
     }
-
-    class StatsBlock(name: String, properties: Map<String, Int>) : Fragment() {
-        override val root = gridpane {
-            row { text(name) }
-            for ((k, v) in properties)
-                row { text(k) }
-        }
-    }
 }
