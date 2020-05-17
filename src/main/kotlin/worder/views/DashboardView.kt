@@ -15,17 +15,17 @@ class DashboardView : View() {
 
     override val root = vbox {
         gridpane {
-            row { text("Database Summary") }
+            row { label("Database Summary") }
             row {
-                text("Total: ")
+                label("Total: ")
                 //totalLabel = label(testStat.total.toString())
             }
             row {
-                text("Unlearned: ")
+                label("Unlearned: ")
                 //unlearnedLabel = label(testStat.unlearned.toString())
             }
             row {
-                text("Learned: ")
+                label("Learned: ")
                 //learnedLabel = label(testStat.learned.toString())
             }
         }

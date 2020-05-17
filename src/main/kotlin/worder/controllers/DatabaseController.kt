@@ -23,7 +23,4 @@ class DatabaseController : Controller() {
         private set
     var dbConnected: Boolean by SharedStatsBinder.bind(stats, false)
         private set
-
-
-    fun updateSmt() { dbConnected = !dbConnected }
 }

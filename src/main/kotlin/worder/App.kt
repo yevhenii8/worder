@@ -10,11 +10,18 @@ import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
 import tornadofx.App
+import tornadofx.reloadStylesheetsOnFocus
 import worder.views.MainView
+import worder.views.WorderStyle
 import java.awt.desktop.AppEvent
 
 
-class AppEntry : App(MainView::class)
+class AppEntry : App(MainView::class, WorderStyle::class) {
+    override fun start(stage: Stage) {
+        super.start(stage)
+        stage.isMaximized = true
+    }
+}
 
 //class AppEntry : Application() {
 //    companion object {

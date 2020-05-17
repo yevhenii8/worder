@@ -1,25 +1,40 @@
 package worder.views
 
-import javafx.scene.text.Text
+import javafx.geometry.Pos
 import tornadofx.Fragment
-import tornadofx.addChildIfPossible
-import tornadofx.gridpane
-import tornadofx.row
-import tornadofx.text
+import tornadofx.addClass
+import tornadofx.hbox
+import tornadofx.label
+import tornadofx.vbox
 import worder.model.Stats
 
-class StatBlockFragment : Fragment() {
+class StatsBlockFragment : Fragment() {
     private val stats: Stats by param()
+    private val values = vbox(alignment = Pos.BASELINE_LEFT) { }
+    private val names = vbox(alignment = Pos.BASELINE_RIGHT) {
+        addClass(WorderStyle.statBlockNames)
+    }
 
-    override val root = gridpane {
-        row { text(stats.origin) }
+    override val root = vbox {
+        label(stats.origin) {
+            addClass(WorderStyle.statBlockTitle)
+        }
+
+        hbox {
+            add(names)
+            add(values)
+        }
+
+        addClass(WorderStyle.statBlock)
     }
 
     init {
         stats.asMap.forEach { (name, value) ->
-            val uiText = Text(value.toString())
-            root.row(name) { addChildIfPossible(uiText) }
-            stats.subscribe(name) { newValue -> uiText.text = newValue.toString() }
+            names.add(label("$name:"))
+            values.add(
+                    label(value.toString()).also {
+                        stats.subscribe(name) { newValue -> it.text = newValue.toString() }
+                    })
         }
     }
 }
