@@ -2,6 +2,7 @@ package worder.controllers
 
 import tornadofx.Controller
 import worder.model.SharedStats
+import worder.model.SharedStats.SharedStatsBinder
 import worder.model.database.WorderDB
 import worder.model.database.WorderInsertDB
 import worder.model.database.WorderUpdateDB
@@ -10,21 +11,19 @@ import worder.views.DatabaseView
 class DatabaseController : Controller() {
     private val view: DatabaseView by inject()
 
-    var db: WorderDB? = null
-        private set
-
-    var updateDb: WorderUpdateDB? = null
-        private set
-
-    var insertDb: WorderInsertDB? = null
-        private set
-
-    var dbFilePath: String by stats
-        private set
 
     val stats = SharedStats(this.javaClass.simpleName)
-    val map = mutableMapOf<String, Any>()
 
-    var dbConnected: Boolean by stats
-    var dbFileName: String by map
+
+    var db: WorderDB? by SharedStatsBinder.bind(stats, null)
+        private set
+    var updateDb: WorderUpdateDB? by SharedStatsBinder.bind(stats, null)
+        private set
+    var insertDb: WorderInsertDB? by SharedStatsBinder.bind(stats, null)
+        private set
+    var dbConnected: Boolean by SharedStatsBinder.bind(stats, false)
+        private set
+
+
+    fun updateSmt() { dbConnected = !dbConnected }
 }

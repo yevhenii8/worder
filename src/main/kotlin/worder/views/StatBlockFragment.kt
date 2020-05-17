@@ -19,7 +19,7 @@ class StatBlockFragment : Fragment() {
         stats.asMap.forEach { (name, value) ->
             val uiText = Text(value.toString())
             root.row(name) { addChildIfPossible(uiText) }
-            stats.subscribe(name) { newValue -> uiText.text = newValue }
+            stats.subscribe(name) { newValue -> uiText.text = newValue.toString() }
         }
     }
 }

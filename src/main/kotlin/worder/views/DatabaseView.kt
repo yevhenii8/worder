@@ -1,6 +1,7 @@
 package worder.views
 
 import tornadofx.View
+import tornadofx.action
 import tornadofx.button
 import tornadofx.hbox
 import tornadofx.vbox
@@ -13,6 +14,10 @@ class DatabaseView : View("Database") {
         hbox {
             add(find<StatBlockFragment>("stats" to controller.stats))
         }
-        button("change stats")
+        button("change stats") {
+            action {
+                controller.updateSmt()
+            }
+        }
     }
 }
