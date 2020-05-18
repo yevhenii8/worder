@@ -17,7 +17,7 @@ class MainView : View("Worder GUI") {
     val controller: MainController by inject()
 
     override val root = borderpane {
-        top = label("center")
+        top<DashboardView>()
 
         center = drawer {
 

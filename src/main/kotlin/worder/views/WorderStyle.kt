@@ -5,14 +5,17 @@ import javafx.scene.paint.Color
 import javafx.scene.text.TextAlignment.CENTER
 import tornadofx.Stylesheet
 import tornadofx.box
+import tornadofx.c
 import tornadofx.cssclass
 import tornadofx.px
 
 class WorderStyle : Stylesheet() {
     companion object {
         val statBlock by cssclass()
-        val statBlockTitle by cssclass()
-        val statBlockNames by cssclass()
+        val title by cssclass()
+        val names by cssclass()
+
+        val dragDropField by cssclass()
     }
 
     init {
@@ -27,13 +30,18 @@ class WorderStyle : Stylesheet() {
             borderRadius += box(15.px)
             borderColor += box(Color.GRAY)
 
-            statBlockTitle {
+            title {
                 padding = box(0.px, 0.px, 15.px, 0.px)
             }
 
-            statBlockNames {
+            names {
                 padding = box(0.px, 15.px, 0.px, 0.px)
             }
+        }
+
+        dragDropField {
+            alignment = Pos.CENTER
+            backgroundColor += c(Color.GRAY.toString(), 0.1)
         }
     }
 }

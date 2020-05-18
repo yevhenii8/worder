@@ -1,33 +1,14 @@
 package worder.views
 
-import javafx.scene.Parent
-import tornadofx.Fragment
+import javafx.geometry.Pos
 import tornadofx.View
-import tornadofx.gridpane
-import tornadofx.label
-import tornadofx.row
-import tornadofx.text
-import tornadofx.vbox
-import worder.controllers.DashboardController
+import tornadofx.hbox
+import worder.controllers.DatabaseController
 
 class DashboardView : View() {
-    val controller: DashboardController by inject()
+    private val databaseController: DatabaseController by inject()
 
-    override val root = vbox {
-        gridpane {
-            row { label("Database Summary") }
-            row {
-                label("Total: ")
-                //totalLabel = label(testStat.total.toString())
-            }
-            row {
-                label("Unlearned: ")
-                //unlearnedLabel = label(testStat.unlearned.toString())
-            }
-            row {
-                label("Learned: ")
-                //learnedLabel = label(testStat.learned.toString())
-            }
-        }
+    override val root = hbox(alignment = Pos.CENTER) {
+        add(find<StatsBlockFragment>("stats" to databaseController.stats))
     }
 }

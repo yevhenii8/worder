@@ -22,13 +22,13 @@ class SharedStats(override val origin: String) : Stats {
 
 
     @Suppress("UNCHECKED_CAST")
-    operator fun <T> getValue(thisRef: Any?, property: KProperty<*>): T = properties[property.name] as T
-            ?: throw IllegalStateException("Property ${property.name} hasn't been initialized!")
+    operator fun <T: Any?> getValue(thisRef: Any?, property: KProperty<*>): T = properties[property.name] as T
 
     operator fun <T : Any?> setValue(thisRef: Any?, property: KProperty<*>, value: T) {
         properties[property.name] = value
         listeners[property.name]?.invoke(value.toString())
     }
+
 
     object SharedStatsBinder {
         private var _initVal: Any? = null
