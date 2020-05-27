@@ -139,7 +139,7 @@ class UpdateModel(
 
         inner class LearnedCommand : BlockCommand() {
             override fun execute() {
-                database.setLearned(dbWord)
+                database.setAsLearned(dbWord)
             }
 
             override fun toString(): String = "LEARNED"

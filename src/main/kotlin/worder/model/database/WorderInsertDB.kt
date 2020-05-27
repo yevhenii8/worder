@@ -1,12 +1,12 @@
 package worder.model.database
 
 interface WorderInsertDB {
-    //val inserterSessionStat: InserterSessionStat
+    val inserterSessionStats: InserterSessionStats
 
 
     fun containsWord(name: String): Boolean
 
-    fun addWord(name: String): Boolean
+    fun insertWord(name: String): Boolean
 
     fun resetWord(name: String): Boolean
 
@@ -15,7 +15,7 @@ interface WorderInsertDB {
             resetWord(name)
             ResolveRes.RESET
         } else {
-            addWord(name)
+            insertWord(name)
             ResolveRes.INSERTED
         }
     }

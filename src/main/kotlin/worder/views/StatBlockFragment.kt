@@ -9,8 +9,10 @@ import tornadofx.vbox
 import worder.model.Stats
 
 class StatsBlockFragment : Fragment() {
+    private val prettyNames: Map<String, String> by param()
     private val stats: Stats by param()
-    private val values = vbox(alignment = Pos.BASELINE_LEFT) { }
+
+    private val values = vbox(alignment = Pos.BASELINE_LEFT)
     private val names = vbox(alignment = Pos.BASELINE_RIGHT) {
         addClass(WorderStyle.names)
     }
@@ -30,7 +32,7 @@ class StatsBlockFragment : Fragment() {
 
     init {
         stats.asMap.forEach { (name, value) ->
-            names.add(label("$name:"))
+            names.add(label("${prettyNames[name] ?: name}:"))
             values.add(
                     label(value.toString()).also {
                         stats.subscribe(name) { newValue -> it.text = newValue.toString() }

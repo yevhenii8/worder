@@ -1,6 +1,6 @@
 package worder.model.database
 
 interface WorderDB {
-    val worderTrack: WorderTrackStats
-    val summaryStat: DatabaseSummaryStats
+    val trackStats: WorderTrackStats
+    val summaryStats: WorderSummaryStats
 }

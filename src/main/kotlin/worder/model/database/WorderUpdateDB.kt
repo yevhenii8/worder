@@ -5,7 +5,7 @@ import worder.UpdatedWord
 import worder.Word
 
 interface WorderUpdateDB {
-    //val updaterSessionStat: UpdaterSessionStat
+    val updaterSessionStats: UpdaterSessionStats
 
 
     fun hasNextWord(): Boolean
@@ -16,9 +16,9 @@ interface WorderUpdateDB {
 
     fun removeWord(word: Word)
 
-    fun setSkipped(word: Word)
+    fun setAsSkipped(word: Word)
 
-    fun setLearned(word: Word)
+    fun setAsLearned(word: Word)
 
 
     enum class SelectOrder {

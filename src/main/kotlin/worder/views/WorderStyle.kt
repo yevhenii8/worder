@@ -2,7 +2,6 @@ package worder.views
 
 import javafx.geometry.Pos
 import javafx.scene.paint.Color
-import javafx.scene.text.TextAlignment.CENTER
 import tornadofx.Stylesheet
 import tornadofx.box
 import tornadofx.c

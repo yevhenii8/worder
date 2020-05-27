@@ -13,7 +13,6 @@ import tornadofx.button
 import tornadofx.hbox
 import tornadofx.imageview
 import tornadofx.label
-import tornadofx.style
 import tornadofx.vbox
 import worder.controllers.DatabaseController
 
