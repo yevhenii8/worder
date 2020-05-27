@@ -1,4 +1,4 @@
-package worder.views
+package worder.views.fragments
 
 import javafx.geometry.Pos
 import tornadofx.Fragment
@@ -7,6 +7,7 @@ import tornadofx.hbox
 import tornadofx.label
 import tornadofx.vbox
 import worder.model.Stats
+import worder.views.styles.WorderStyle
 
 class StatsBlockFragment : Fragment() {
     private val prettyNames: Map<String, String> by param()

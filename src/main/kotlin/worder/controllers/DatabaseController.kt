@@ -7,12 +7,10 @@ import worder.model.database.WorderDB
 import worder.model.database.WorderInsertDB
 import worder.model.database.WorderUpdateDB
 import worder.model.database.implementations.SqlLiteFile
-import worder.views.ConnectionView
-import worder.views.DisconnectionView
+import worder.views.DatabaseView
 
 class DatabaseController : Controller() {
-    private val connectionView: ConnectionView by inject()
-    private val disconnectionView: DisconnectionView by inject()
+    private val databaseView: DatabaseView by inject()
 
 
     val stats = SharedStats("Database Stats")
@@ -34,8 +32,7 @@ class DatabaseController : Controller() {
             insertDb = it
         }
 
-        isConnected = true
-        connectionView.replaceWith<DisconnectionView>()
+        connect()
     }
 
     fun disconnect() {
@@ -44,6 +41,12 @@ class DatabaseController : Controller() {
         insertDb = null
 
         isConnected = false
-        disconnectionView.replaceWith<ConnectionView>()
+        databaseView.onDisconnect()
+    }
+
+
+    private fun connect() {
+        isConnected = true
+        databaseView.onConnect()
     }
 }

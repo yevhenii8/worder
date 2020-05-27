@@ -13,11 +13,64 @@ import tornadofx.button
 import tornadofx.hbox
 import tornadofx.imageview
 import tornadofx.label
+import tornadofx.plusAssign
 import tornadofx.vbox
 import worder.controllers.DatabaseController
+import worder.views.fragments.StatsBlockFragment
+import worder.views.styles.WorderStyle
 
 class DatabaseView : View("Database") {
+    private val databaseController: DatabaseController by inject()
+    private val dashboardView: DashboardView by inject()
+
+
     override val root: Parent = find<ConnectionView>().root
+
+
+    fun onConnect() {
+        find<ConnectionView>().replaceWith<DisconnectionView>()
+
+        dashboardView.apply {
+            this += find<StatsBlockFragment>("stats" to databaseController.stats, "prettyNames" to mapOf(
+                    "db" to "Worder Database",
+                    "updateDb" to "Update Database",
+                    "insertDb" to "Insert Database",
+                    "isConnected" to "Connected"
+            ))
+
+            this += find<StatsBlockFragment>("stats" to databaseController.db!!.summaryStats, "prettyNames" to mapOf(
+                    "totalAmount" to "Total amount",
+                    "unlearned" to "Unlearned",
+                    "learned" to "Learned"
+            ))
+
+            this += find<StatsBlockFragment>("stats" to databaseController.db!!.trackStats, "prettyNames" to mapOf(
+                    "totalAffected" to "Total affected",
+                    "totalInserted" to "Total inserted",
+                    "totalReset" to "Total reset",
+                    "totalUpdated" to "Total updated"
+            ))
+
+            this += find<StatsBlockFragment>("stats" to databaseController.insertDb!!.inserterSessionStats, "prettyNames" to mapOf(
+                    "totalProcessed" to "Total processed",
+                    "inserted" to "Inserted",
+                    "reset" to "Reset"
+            ))
+
+            this += find<StatsBlockFragment>("stats" to databaseController.updateDb!!.updaterSessionStats, "prettyNames" to mapOf(
+                    "totalProcessed" to "Total processed",
+                    "removed" to "Removed",
+                    "updated" to "Updated",
+                    "skipped" to "Skipped",
+                    "learned" to "Learned"
+            ))
+        }
+    }
+
+    fun onDisconnect() {
+        find<DisconnectionView>().replaceWith<ConnectionView>()
+        dashboardView.root.children.clear()
+    }
 }
 
 class ConnectionView : View() {

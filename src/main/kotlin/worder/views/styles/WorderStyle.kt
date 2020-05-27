@@ -1,4 +1,4 @@
-package worder.views
+package worder.views.styles
 
 import javafx.geometry.Pos
 import javafx.scene.paint.Color
@@ -15,6 +15,7 @@ class WorderStyle : Stylesheet() {
         val names by cssclass()
 
         val dragDropField by cssclass()
+        val dashboard by cssclass()
     }
 
     init {
@@ -23,7 +24,7 @@ class WorderStyle : Stylesheet() {
         }
 
         statBlock {
-            alignment = Pos.CENTER
+            alignment = Pos.TOP_CENTER
             padding = box(15.px)
             borderInsets += box(15.px)
             borderRadius += box(15.px)
@@ -41,6 +42,10 @@ class WorderStyle : Stylesheet() {
         dragDropField {
             alignment = Pos.CENTER
             backgroundColor += c(Color.GRAY.toString(), 0.1)
+        }
+
+        dashboard {
+            alignment = Pos.TOP_CENTER
         }
     }
 }
