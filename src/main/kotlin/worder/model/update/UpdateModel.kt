@@ -1,9 +1,9 @@
-package worder.model.extract.update
+package worder.model.insert.update
 
 import worder.*
 import worder.model.database.WorderUpdateDB
-import worder.model.extract.request.*
-import worder.model.extract.request.implementations.*
+import worder.model.insert.request.*
+import worder.model.insert.request.implementations.*
 import java.util.*
 
 
@@ -86,7 +86,7 @@ class UpdateModel(
         override val resolution: String
             get() = command.toString()
 
-        override lateinit var status: worder.model.extract.update.WordBlock.BlockStatus
+        override lateinit var status: worder.model.insert.update.WordBlock.BlockStatus
 
 
         private fun setResolution(blockCommand: BlockCommand): Boolean {

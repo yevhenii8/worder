@@ -1,4 +1,4 @@
-package worder.model.extract.update
+package worder.model.insert.update
 
 import worder.DatabaseWord
 

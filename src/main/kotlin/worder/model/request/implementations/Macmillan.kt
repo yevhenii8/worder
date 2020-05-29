@@ -1,8 +1,8 @@
-package worder.model.extract.request.implementations
+package worder.model.insert.request.implementations
 
 import worder.Word
-import worder.model.extract.request.*
-import worder.model.extract.request.RequesterBaseDecorator.Companion.sendGetRequest
+import worder.model.insert.request.*
+import worder.model.insert.request.RequesterBaseDecorator.Companion.sendGetRequest
 
 
 class Macmillan private constructor() : DefinitionRequester, ExampleRequester, TranscriptionRequester {

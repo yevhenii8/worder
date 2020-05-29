@@ -1,4 +1,4 @@
-package worder.model.extract.request
+package worder.model.insert.request
 
 import worder.Word
 

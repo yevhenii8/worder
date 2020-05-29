@@ -2,6 +2,7 @@ package worder.views.styles
 
 import javafx.geometry.Pos
 import javafx.scene.paint.Color
+import tornadofx.FXVisibility.HIDDEN
 import tornadofx.Stylesheet
 import tornadofx.box
 import tornadofx.c
@@ -13,6 +14,10 @@ class WorderStyle : Stylesheet() {
         val statBlock by cssclass()
         val title by cssclass()
         val names by cssclass()
+
+        val insertBlock by cssclass()
+        val icon by cssclass()
+        val diagram by cssclass()
 
         val dragDropField by cssclass()
         val dashboard by cssclass()
@@ -36,6 +41,35 @@ class WorderStyle : Stylesheet() {
 
             names {
                 padding = box(0.px, 15.px, 0.px, 0.px)
+            }
+        }
+
+        insertBlock {
+            padding = box(15.px)
+            borderInsets += box(15.px)
+            borderColor += box(Color.GRAY)
+
+            icon {
+                alignment = Pos.CENTER
+                padding = box(0.px, 10.px, 0.px, 0.px)
+            }
+
+            title {
+                padding = box(0.px, 0.px, 10.px, 0.px)
+            }
+
+            diagram {
+                padding = box(0.px)
+                labelPadding = box(0.px)
+
+                borderImageInsets += box(0.px)
+                borderInsets += box(0.px)
+                backgroundInsets += box(0.px)
+
+                maxWidth = 25.px
+                maxHeight = 25.px
+                labelLineLength = 0.px
+                borderColor += box(Color.GREEN)
             }
         }
 

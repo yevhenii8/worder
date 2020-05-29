@@ -7,7 +7,6 @@ import worder.controllers.DatabaseController
 import worder.views.MainView
 import worder.views.styles.WorderStyle
 
-
 class AppEntry : App(MainView::class, WorderStyle::class) {
     override fun start(stage: Stage) {
         stage.apply {
