@@ -59,7 +59,7 @@ class WorderStyle : Stylesheet() {
             }
 
             diagram {
-                padding = box(0.px)
+                padding = box((-10).px)
                 labelPadding = box(0.px)
 
                 borderImageInsets += box(0.px)

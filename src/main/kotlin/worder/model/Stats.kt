@@ -6,18 +6,29 @@ interface Stats {
     val asMap: Map<String, Any?>
     val origin: String
 
+    // Well, Okay. As for now only one subscriber-slot is available for property subscribing
     fun subscribe(property: String, listener: (newValue: Any?) -> Unit)
+
+    // And unlimited slots are available for classic subscribing
+    fun <T : Stats> subscribe(listener: (updatedStats: T) -> Unit)
 }
 
 open class SharedStats(override val origin: String) : Stats {
     private val properties = LinkedHashMap<String, Any?>()
-    private val listeners = LinkedHashMap<String, (newValue: Any?) -> Unit>()
+    private val propertyListeners = LinkedHashMap<String, (newValue: Any?) -> Unit>()
+    private val listeners = mutableListOf<(updatedStats: Stats) -> Unit>()
 
 
     override val asMap: Map<String, Any?> = properties
+
     override fun subscribe(property: String, listener: (newValue: Any?) -> Unit) {
         if (properties.containsKey(property))
-            listeners[property] = listener
+            propertyListeners[property] = listener
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : Stats> subscribe(listener: (updatedStats: T) -> Unit) {
+        listeners.add(listener as (Stats) -> Unit)
     }
 
 
@@ -27,8 +38,11 @@ open class SharedStats(override val origin: String) : Stats {
             else throw IllegalStateException("There's no such property under stats object!")
 
     operator fun <T : Any?> setValue(thisRef: Any?, property: KProperty<*>, value: T) {
-        properties[property.name] = value
-        listeners[property.name]?.invoke(value.toString())
+        if (properties.containsKey(property.name)) {
+            properties[property.name] = value
+            listeners.forEach { it.invoke(this) }
+            propertyListeners[property.name]?.invoke(value.toString())
+        }
     }
 
 
