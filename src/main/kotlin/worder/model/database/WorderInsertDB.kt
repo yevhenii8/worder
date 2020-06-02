@@ -4,13 +4,13 @@ interface WorderInsertDB {
     val inserterSessionStats: InserterSessionStats
 
 
-    fun containsWord(name: String): Boolean
+    suspend fun containsWord(name: String): Boolean
 
-    fun insertWord(name: String): Boolean
+    suspend fun insertWord(name: String): Boolean
 
-    fun resetWord(name: String): Boolean
+    suspend fun resetWord(name: String): Boolean
 
-    fun resolveWord(name: String): ResolveRes {
+    suspend fun resolveWord(name: String): ResolveRes {
         return if (containsWord(name)) {
             resetWord(name)
             ResolveRes.RESET

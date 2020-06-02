@@ -8,17 +8,17 @@ interface WorderUpdateDB {
     val updaterSessionStats: UpdaterSessionStats
 
 
-    fun hasNextWord(): Boolean
+    suspend fun hasNextWord(): Boolean
 
-    fun getNextWord(order: SelectOrder): DatabaseWord
+    suspend fun getNextWord(order: SelectOrder): DatabaseWord
 
-    fun updateWord(word: UpdatedWord)
+    suspend fun updateWord(word: UpdatedWord)
 
-    fun removeWord(word: Word)
+    suspend fun removeWord(word: Word)
 
-    fun setAsSkipped(word: Word)
+    suspend fun setAsSkipped(word: Word)
 
-    fun setAsLearned(word: Word)
+    suspend fun setAsLearned(word: Word)
 
 
     enum class SelectOrder {

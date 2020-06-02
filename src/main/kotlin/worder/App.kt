@@ -10,7 +10,7 @@ import worder.views.styles.WorderStyle
 class AppEntry : App(MainView::class, WorderStyle::class) {
     override fun start(stage: Stage) {
         stage.apply {
-            icons += resources.image("/book.png")
+            icons += resources.image("/worder-icon_512x512.png")
             isMaximized = true
         }
         super.start(stage)

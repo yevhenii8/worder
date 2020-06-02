@@ -6,6 +6,9 @@ import javafx.scene.Parent
 import javafx.scene.input.TransferMode
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import tornadofx.View
 import tornadofx.action
 import tornadofx.addClass
@@ -32,10 +35,11 @@ class DatabaseView : View("Database") {
 
         dashboardView.apply {
             this += find<StatsBlockFragment>("stats" to databaseController.stats, "prettyNames" to mapOf(
-                    "db" to "Worder Database",
+                    "db" to "Data source",
                     "updateDb" to "Update Database",
                     "insertDb" to "Insert Database",
-                    "isConnected" to "Connected"
+                    "isConnected" to "Connected",
+                    "timerValue" to "Session duration"
             ))
 
             this += find<StatsBlockFragment>("stats" to databaseController.db!!.summaryStats, "prettyNames" to mapOf(
@@ -51,13 +55,13 @@ class DatabaseView : View("Database") {
                     "totalUpdated" to "Total updated"
             ))
 
-            this += find<StatsBlockFragment>("stats" to databaseController.insertDb!!.inserterSessionStats, "prettyNames" to mapOf(
+            this += find<StatsBlockFragment>("stats" to databaseController.db!!.inserter.inserterSessionStats, "prettyNames" to mapOf(
                     "totalProcessed" to "Total processed",
                     "inserted" to "Inserted",
                     "reset" to "Reset"
             ))
 
-            this += find<StatsBlockFragment>("stats" to databaseController.updateDb!!.updaterSessionStats, "prettyNames" to mapOf(
+            this += find<StatsBlockFragment>("stats" to databaseController.db!!.updater.updaterSessionStats, "prettyNames" to mapOf(
                     "totalProcessed" to "Total processed",
                     "removed" to "Removed",
                     "updated" to "Updated",
@@ -79,7 +83,7 @@ class ConnectionView : View() {
     override val root = vbox {
         label("Please drag & drop here a MyDictionary backup file...")
 
-        imageview(resources.image("/files-lg.png")) {
+        imageview(resources.image("/files-image.png")) {
             VBox.setMargin(this, Insets(20.0, 0.0, 0.0, 0.0))
         }
 
@@ -107,7 +111,7 @@ class DisconnectionView : View() {
         hbox(alignment = CENTER) {
             add(label)
 
-            imageview(resources.image("/done-icon.png")) {
+            imageview(resources.image("/blue-done-icon_24x24.png")) {
                 HBox.setMargin(this, Insets(0.0, 0.0, 0.0, 10.0))
             }
         }

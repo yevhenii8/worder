@@ -126,7 +126,7 @@ class UpdateModel(
 
         inner class RemoveCommand : BlockCommand() {
             override fun execute() {
-                database.removeWord(dbWord)
+//                database.removeWord(dbWord)
             }
 
             override fun toString(): String = "REMOVED"
@@ -139,7 +139,7 @@ class UpdateModel(
 
         inner class LearnedCommand : BlockCommand() {
             override fun execute() {
-                database.setAsLearned(dbWord)
+//                database.setAsLearned(dbWord)
             }
 
             override fun toString(): String = "LEARNED"
@@ -147,7 +147,7 @@ class UpdateModel(
 
         inner class UpdateCommand(private val updatedWord: UpdatedWord) : BlockCommand() {
             override fun execute() {
-                database.updateWord(updatedWord)
+//                database.updateWord(updatedWord)
             }
 
             override fun toString(): String = "UPDATED"

@@ -1,8 +1,11 @@
 package worder.views.styles
 
 import javafx.geometry.Pos
+import javafx.scene.layout.BackgroundPosition
+import javafx.scene.layout.BackgroundRepeat
 import javafx.scene.paint.Color
-import tornadofx.FXVisibility.HIDDEN
+import tornadofx.DrawerStyles.Companion.drawer
+import tornadofx.DrawerStyles.Companion.drawerItem
 import tornadofx.Stylesheet
 import tornadofx.box
 import tornadofx.c
@@ -21,6 +24,7 @@ class WorderStyle : Stylesheet() {
 
         val dragDropField by cssclass()
         val dashboard by cssclass()
+        val statusBar by cssclass()
     }
 
     init {
@@ -80,6 +84,22 @@ class WorderStyle : Stylesheet() {
 
         dashboard {
             alignment = Pos.TOP_CENTER
+        }
+
+        drawer {
+            backgroundImage += javaClass.getResource("/motivation-image.png").toURI()!!
+            backgroundRepeat += BackgroundRepeat.NO_REPEAT to BackgroundRepeat.NO_REPEAT
+            backgroundPosition += BackgroundPosition(null, 700.0, false, null, 50.0, false)
+
+            drawerItem {
+                backgroundColor += c("#f4f4f4")
+            }
+        }
+
+        statusBar {
+            text {
+                fontSize = 15.px
+            }
         }
     }
 }

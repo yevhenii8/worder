@@ -15,8 +15,9 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("no.tornado:tornadofx:2.0.0-SNAPSHOT")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.3.5")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:1.3.7")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.7")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.3.7")
 
     implementation("org.xerial:sqlite-jdbc:3.30.1")
     implementation("org.jetbrains.exposed:exposed-core:0.23.1")

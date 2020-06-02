@@ -1,11 +1,19 @@
 package worder.views
 
+import javafx.geometry.Pos
+import javafx.scene.layout.Background
 import tornadofx.View
+import tornadofx.addClass
 import tornadofx.borderpane
 import tornadofx.drawer
+import tornadofx.hbox
+import tornadofx.hyperlink
+import tornadofx.imageview
 import tornadofx.label
-import worder.model.insert.InsertBlock
-import worder.views.fragments.InsertBlockFragment
+import tornadofx.onRightClick
+import tornadofx.text
+import tornadofx.vbox
+import worder.views.styles.WorderStyle
 
 class MainView : View("Worder GUI") {
     override val root = borderpane {
@@ -41,6 +49,14 @@ class MainView : View("Worder GUI") {
 //            }
 //        }
 
-        bottom = label("network working / session timer / trademark / something else")
+        bottom = hbox(alignment = Pos.CENTER) {
+            addClass(WorderStyle.statusBar)
+
+            hyperlink("Copyright yevhenii8 ® 2020") {
+                setOnAction {
+                    hostServices.showDocument("https://github.com/yevhenii8/worder")
+                }
+            }
+        }
     }
 }
