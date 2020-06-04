@@ -1,30 +1,28 @@
 package worder.model.insert
 
 import worder.model.Stats
+import worder.model.insert.InsertBatch.InsertBatchStatus
+import worder.model.insert.InsertUnit.InsertUnitStatus
 
 interface InsertBatchStats : Stats {
-    val batchStatus: InsertBatchStatus
+    val id: String
+    val status: InsertBatchStatus
 
+    val committedUnits: Int
     val totalProcessed: Int
     val validProcessed: Int
     val invalidProcessed: Int
     val reset: Int
     val inserted: Int
-
-    val spentTime: String
-    val progressBar: String
-
-    enum class InsertBatchStatus {
-        READY_TO_PROCESS, PARTIALLY_COMMITTED, COMMITTED
-    }
 }
 
 interface InsertUnitStats : Stats {
-    val fileName: String
-    val fileSize: Long
+    val id: String
     val status: InsertUnitStatus
 
-    enum class InsertUnitStatus {
-        READY_TO_PROCESS, PROCESSING, COMMITTED, EXCLUDED_FROM_BATCH
-    }
+    val fileName: String
+    val fileSize: Long
+
+    val invalidWords: Int
+    val validWords: Int
 }

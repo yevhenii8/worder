@@ -3,9 +3,11 @@ package worder.views.styles
 import javafx.geometry.Pos
 import javafx.scene.layout.BackgroundPosition
 import javafx.scene.layout.BackgroundRepeat
+import javafx.scene.layout.BackgroundSize
 import javafx.scene.paint.Color
 import tornadofx.DrawerStyles.Companion.drawer
 import tornadofx.DrawerStyles.Companion.drawerItem
+import tornadofx.MultiValue
 import tornadofx.Stylesheet
 import tornadofx.box
 import tornadofx.c
@@ -87,9 +89,9 @@ class WorderStyle : Stylesheet() {
         }
 
         drawer {
-            backgroundImage += javaClass.getResource("/motivation-image.png").toURI()!!
+            backgroundImage += javaClass.getResource("/airplane-image.png").toURI()!!
             backgroundRepeat += BackgroundRepeat.NO_REPEAT to BackgroundRepeat.NO_REPEAT
-            backgroundPosition += BackgroundPosition(null, 700.0, false, null, 50.0, false)
+            backgroundPosition += BackgroundPosition(null, 600.0, false, null, 50.0, false)
 
             drawerItem {
                 backgroundColor += c("#f4f4f4")

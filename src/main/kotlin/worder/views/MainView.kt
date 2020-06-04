@@ -1,7 +1,10 @@
 package worder.views
 
 import javafx.geometry.Pos
+import javafx.scene.image.Image
 import javafx.scene.layout.Background
+import javafx.scene.layout.BackgroundImage
+import javafx.scene.layout.BackgroundRepeat.NO_REPEAT
 import tornadofx.View
 import tornadofx.addClass
 import tornadofx.borderpane
@@ -12,7 +15,9 @@ import tornadofx.imageview
 import tornadofx.label
 import tornadofx.onRightClick
 import tornadofx.text
+import tornadofx.tooltip
 import tornadofx.vbox
+import worder.model.database.implementations.SqlLiteFile
 import worder.views.styles.WorderStyle
 
 class MainView : View("Worder GUI") {
