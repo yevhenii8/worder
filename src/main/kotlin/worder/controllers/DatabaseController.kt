@@ -9,13 +9,13 @@ import worder.model.SharedStats
 import worder.model.SharedStats.SharedStatsBinder
 import worder.model.database.WorderDB
 import worder.model.database.implementations.SqlLiteFile
-import worder.views.DatabaseView
+import java.io.File
 
 class DatabaseController : Controller() {
     val stats = SharedStats("Database Controller")
 
 
-    private val databaseView: DatabaseView by inject()
+    private val listeners = mutableListOf<DatabaseListener>()
     private var timerValue: String by SharedStatsBinder.bind(stats, "00:00:00")
     private var timerJob: Job? = null
 
@@ -31,17 +31,20 @@ class DatabaseController : Controller() {
     Public Controller's API
      */
 
-    fun connectToSqlLiteFile(filePath: String) {
-        db = SqlLiteFile.createInstance(filePath.removeSurrounding("[", "]"))
+    fun connectToSqlLiteFile(file: File) {
+        db = SqlLiteFile.createInstance(file)
         connect()
     }
 
     fun disconnect() {
         db = null
         isConnected = false
-        databaseView.onDisconnect()
         timerJob?.cancel()
+        listeners.forEach { it.onDatabaseDisconnection() }
+    }
 
+    fun subscribe(listener: DatabaseListener) {
+        listeners.add(listener)
     }
 
 
@@ -51,8 +54,8 @@ class DatabaseController : Controller() {
 
     private fun connect() {
         isConnected = true
-        databaseView.onConnect()
         timerJob = MainScope().launch { clockUpdater() }
+        listeners.forEach { it.onDatabaseConnection() }
     }
 
     private suspend fun clockUpdater() {

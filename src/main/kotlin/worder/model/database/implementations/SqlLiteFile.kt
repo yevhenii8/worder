@@ -44,7 +44,7 @@ import java.io.File
 import java.sql.Connection
 import java.time.Instant
 
-class SqlLiteFile private constructor(fileName: String) : WorderDB, WorderUpdateDB, WorderInsertDB {
+class SqlLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, WorderInsertDB {
     companion object {
         private const val UPDATED_TAG = "(W) Updated"
         private const val INSERTED_TAG = "(W) Inserted"
@@ -52,7 +52,7 @@ class SqlLiteFile private constructor(fileName: String) : WorderDB, WorderUpdate
         private const val LANG_ID = 2
 
 
-        fun createInstance(fileName: String): WorderDB = SqlLiteFile(fileName)
+        fun createInstance(file: File): WorderDB = SqlLiteFile(file)
 
 
         private object DictionaryTable : IntIdTable("Dictionary") {
@@ -93,7 +93,7 @@ class SqlLiteFile private constructor(fileName: String) : WorderDB, WorderUpdate
 
 
     init {
-        File(fileName).run {
+        file.run {
             if (!exists())
                 throw IllegalArgumentException("File not found! file_path=${absolutePath}")
             if (!(canRead() && canWrite()))
@@ -107,7 +107,7 @@ class SqlLiteFile private constructor(fileName: String) : WorderDB, WorderUpdate
         transactionMode = IMMEDIATE
     }
     private val connection: Database = Database.connect({
-        sqlLiteCfg.createConnection("jdbc:sqlite:$fileName")
+        sqlLiteCfg.createConnection("jdbc:sqlite:${file.name}")
     })
     private val dictionaryId: Int = defaultSqlLiteTransaction {
         DictionaryTable.select { DictionaryTable.langId eq LANG_ID }.firstOrNull()?.get(DictionaryTable.id)

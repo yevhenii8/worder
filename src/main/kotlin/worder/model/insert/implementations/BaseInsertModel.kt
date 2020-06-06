@@ -32,6 +32,9 @@ class BaseInsertModel private constructor(private val database: WorderInsertDB) 
 
 
     override fun prepareBatch(files: List<File>): InsertBatch {
+        if (files.isEmpty())
+            throw IllegalArgumentException("Please provide at least one file!")
+
         files.forEach {
             if (!(it.isFile && it.canRead()))
                 throw IllegalArgumentException("Please provide correct readable file!")

@@ -3,11 +3,9 @@ package worder.views.styles
 import javafx.geometry.Pos
 import javafx.scene.layout.BackgroundPosition
 import javafx.scene.layout.BackgroundRepeat
-import javafx.scene.layout.BackgroundSize
 import javafx.scene.paint.Color
 import tornadofx.DrawerStyles.Companion.drawer
 import tornadofx.DrawerStyles.Companion.drawerItem
-import tornadofx.MultiValue
 import tornadofx.Stylesheet
 import tornadofx.box
 import tornadofx.c
@@ -80,7 +78,6 @@ class WorderStyle : Stylesheet() {
         }
 
         dragDropField {
-            alignment = Pos.CENTER
             backgroundColor += c(Color.GRAY.toString(), 0.1)
         }
 
@@ -89,7 +86,7 @@ class WorderStyle : Stylesheet() {
         }
 
         drawer {
-            backgroundImage += javaClass.getResource("/airplane-image.png").toURI()!!
+            backgroundImage += javaClass.getResource("/images/airplane-image.png").toURI()!!
             backgroundRepeat += BackgroundRepeat.NO_REPEAT to BackgroundRepeat.NO_REPEAT
             backgroundPosition += BackgroundPosition(null, 600.0, false, null, 50.0, false)
 

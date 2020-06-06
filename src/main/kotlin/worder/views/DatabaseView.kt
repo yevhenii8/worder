@@ -3,107 +3,52 @@ package worder.views
 import javafx.geometry.Insets
 import javafx.geometry.Pos.CENTER
 import javafx.scene.Parent
-import javafx.scene.input.TransferMode
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
+import javafx.stage.FileChooser.ExtensionFilter
 import tornadofx.View
 import tornadofx.action
-import tornadofx.addClass
 import tornadofx.button
 import tornadofx.hbox
 import tornadofx.imageview
 import tornadofx.label
-import tornadofx.plusAssign
+import tornadofx.replaceChildren
+import tornadofx.stackpane
 import tornadofx.vbox
 import worder.controllers.DatabaseController
-import worder.views.fragments.StatsBlockFragment
-import worder.views.styles.WorderStyle
+import worder.controllers.DatabaseListener
+import worder.views.fragments.DragAndDropFragment
+import java.io.File
 
-class DatabaseView : View("Database") {
-    private val databaseController: DatabaseController by inject()
-    private val dashboardView: DashboardView by inject()
+class DatabaseView : View("Database"), DatabaseListener {
+    private val databaseDisconnectedFragment = find<DragAndDropFragment>(
+            "text" to "Drag MyDictionary backup file here to connect to it",
+            "windowTitle" to "MyDictionary Backup File Selection",
+            "extensionFilter" to ExtensionFilter("Backup File (*.bck)", "*.bck"),
+            "action" to { files: List<File> -> find<DatabaseController>().connectToSqlLiteFile(files.first()) }
+    ).root
 
 
-    override val root: Parent = find<ConnectionView>().root
-
-
-    fun onConnect() {
-        find<ConnectionView>().replaceWith<DisconnectionView>()
-
-        dashboardView.apply {
-            this += find<StatsBlockFragment>("stats" to databaseController.stats, "prettyNames" to mapOf(
-                    "db" to "Data source",
-                    "updateDb" to "Update Database",
-                    "insertDb" to "Insert Database",
-                    "isConnected" to "Connected",
-                    "timerValue" to "Session duration"
-            ))
-
-            this += find<StatsBlockFragment>("stats" to databaseController.db!!.summaryStats, "prettyNames" to mapOf(
-                    "totalAmount" to "Total amount",
-                    "unlearned" to "Unlearned",
-                    "learned" to "Learned"
-            ))
-
-            this += find<StatsBlockFragment>("stats" to databaseController.db!!.trackStats, "prettyNames" to mapOf(
-                    "totalAffected" to "Total affected",
-                    "totalInserted" to "Total inserted",
-                    "totalReset" to "Total reset",
-                    "totalUpdated" to "Total updated"
-            ))
-
-            this += find<StatsBlockFragment>("stats" to databaseController.db!!.inserter.inserterSessionStats, "prettyNames" to mapOf(
-                    "totalProcessed" to "Total processed",
-                    "inserted" to "Inserted",
-                    "reset" to "Reset"
-            ))
-
-            this += find<StatsBlockFragment>("stats" to databaseController.db!!.updater.updaterSessionStats, "prettyNames" to mapOf(
-                    "totalProcessed" to "Total processed",
-                    "removed" to "Removed",
-                    "updated" to "Updated",
-                    "skipped" to "Skipped",
-                    "learned" to "Learned"
-            ))
-        }
+    init {
+        find<DatabaseController>().subscribe(this)
     }
 
-    fun onDisconnect() {
-        find<DisconnectionView>().replaceWith<ConnectionView>()
-        dashboardView.root.children.clear()
+
+    override val root: Parent = stackpane {
+        add(databaseDisconnectedFragment)
+    }
+
+
+    override fun onDatabaseConnection() {
+        root.replaceChildren(find<DatabaseConnectedView>().root)
+    }
+
+    override fun onDatabaseDisconnection() {
+        root.replaceChildren(databaseDisconnectedFragment)
     }
 }
 
-class ConnectionView : View() {
-    private val databaseController: DatabaseController by inject()
-
-    override val root = vbox {
-        label("Please drag & drop here a MyDictionary backup file...")
-
-        imageview(resources.image("/files-image.png")) {
-            VBox.setMargin(this, Insets(20.0, 0.0, 0.0, 0.0))
-        }
-
-        setOnDragOver {
-            if (it.gestureSource !== this && it.dragboard.hasFiles())
-                it.acceptTransferModes(*TransferMode.COPY_OR_MOVE)
-            it.consume()
-        }
-
-        setOnDragDropped {
-            if (it.dragboard.hasFiles())
-                databaseController.connectToSqlLiteFile(it.dragboard.files.toString())
-            it.consume()
-        }
-
-        addClass(WorderStyle.dragDropField)
-    }
-}
-
-class DisconnectionView : View() {
+class DatabaseConnectedView : View() {
     private val databaseController: DatabaseController by inject()
     private val label = label()
 
@@ -111,13 +56,13 @@ class DisconnectionView : View() {
         hbox(alignment = CENTER) {
             add(label)
 
-            imageview(resources.image("/blue-done-icon_24x24.png")) {
+            imageview("/icons/blue-done-icon_24x24.png") {
                 HBox.setMargin(this, Insets(0.0, 0.0, 0.0, 10.0))
             }
         }
 
         button("Disconnect") {
-            VBox.setMargin(this, Insets(15.0, 0.0, 0.0, 0.0))
+            VBox.setMargin(this, Insets(15.0))
 
             action {
                 databaseController.disconnect()
@@ -128,7 +73,6 @@ class DisconnectionView : View() {
     }
 
     override fun onDock() {
-        super.onDock()
         label.text = "Connected to ${databaseController.db}"
     }
 }

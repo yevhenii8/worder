@@ -1,15 +1,8 @@
 package worder.views.fragments
 
-import javafx.geometry.Insets
 import tornadofx.Fragment
 import tornadofx.addClass
-import tornadofx.data
 import tornadofx.hbox
-import tornadofx.imageview
-import tornadofx.label
-import tornadofx.paddingAll
-import tornadofx.piechart
-import tornadofx.vbox
 import worder.views.styles.WorderStyle
 
 class InsertBlockFragment : Fragment() {

@@ -1,58 +1,27 @@
 package worder.views
 
 import javafx.geometry.Pos
-import javafx.scene.image.Image
-import javafx.scene.layout.Background
-import javafx.scene.layout.BackgroundImage
-import javafx.scene.layout.BackgroundRepeat.NO_REPEAT
+import tornadofx.Drawer
+import tornadofx.DrawerItem
 import tornadofx.View
 import tornadofx.addClass
 import tornadofx.borderpane
 import tornadofx.drawer
 import tornadofx.hbox
 import tornadofx.hyperlink
-import tornadofx.imageview
-import tornadofx.label
-import tornadofx.onRightClick
-import tornadofx.text
-import tornadofx.tooltip
-import tornadofx.vbox
-import worder.model.database.implementations.SqlLiteFile
 import worder.views.styles.WorderStyle
 
 class MainView : View("Worder GUI") {
+    private val drawer: Drawer = drawer { }
+    private val databaseTab: DrawerItem = drawer.item<DatabaseView>().apply { expanded = true }
+    private val updaterTab: DrawerItem = drawer.item<UpdaterView>()
+    private val inserterTab: DrawerItem = drawer.item<InserterView>()
+
+
     override val root = borderpane {
         top<DashboardView>()
 
-        center = drawer {
-            item<DatabaseView>()
-
-            item("Updater") {
-                label("updater view")
-            }
-
-            item<InserterView>(expanded = true)
-        }
-
-//        center = tabpane {
-//            addClass(DrawerStyles.drawerItem)
-//            tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
-//            side = LEFT
-//
-//            tab<DatabaseView>() {
-//                addClass(DrawerStyles.drawerItem)
-//            }
-//
-//            tab("Updater") {
-//                addClass(DrawerStyles.drawerItem)
-//                label("updater view")
-//            }
-//
-//            tab("Inserter") {
-//                addClass(DrawerStyles.drawerItem)
-//                label("inserter view")
-//            }
-//        }
+        center = drawer
 
         bottom = hbox(alignment = Pos.CENTER) {
             addClass(WorderStyle.statusBar)
@@ -63,5 +32,10 @@ class MainView : View("Worder GUI") {
                 }
             }
         }
+    }
+
+
+    fun switchToDatabaseTab() {
+        databaseTab.expanded = true
     }
 }
