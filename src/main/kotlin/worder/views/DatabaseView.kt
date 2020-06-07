@@ -16,11 +16,11 @@ import tornadofx.replaceChildren
 import tornadofx.stackpane
 import tornadofx.vbox
 import worder.controllers.DatabaseController
-import worder.controllers.DatabaseListener
+import worder.controllers.DatabaseChangeListener
 import worder.views.fragments.DragAndDropFragment
 import java.io.File
 
-class DatabaseView : View("Database"), DatabaseListener {
+class DatabaseView : View("Database"), DatabaseChangeListener {
     private val databaseDisconnectedFragment = find<DragAndDropFragment>(
             "text" to "Drag MyDictionary backup file here to connect to it",
             "windowTitle" to "MyDictionary Backup File Selection",

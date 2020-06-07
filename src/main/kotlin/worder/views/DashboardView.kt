@@ -4,21 +4,24 @@ import tornadofx.View
 import tornadofx.addClass
 import tornadofx.hbox
 import tornadofx.plusAssign
+import worder.controllers.DatabaseChangeListener
 import worder.controllers.DatabaseController
-import worder.controllers.DatabaseListener
 import worder.views.fragments.StatsBlockFragment
 import worder.views.styles.WorderStyle
 
-class DashboardView : View(), DatabaseListener {
+class DashboardView : View(), DatabaseChangeListener {
     private val databaseController: DatabaseController by inject()
+
 
     init {
         databaseController.subscribe(this)
     }
 
+
     override val root = hbox {
         addClass(WorderStyle.dashboard)
     }
+
 
     override fun onDatabaseConnection() {
         val database = databaseController.db!!

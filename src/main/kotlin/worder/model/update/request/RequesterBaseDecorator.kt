@@ -3,7 +3,7 @@ package worder.model.insert.request
 import kotlinx.coroutines.*
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.sync.*
-import worder.Word
+import worder.model.Word
 import java.io.IOException
 import java.net.URI
 import java.net.http.*

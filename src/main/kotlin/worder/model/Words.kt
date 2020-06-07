@@ -1,26 +1,17 @@
-package worder
+package worder.model
 
+import java.util.*
 
-interface Word {
-    val name: String
-    val transcription: String?
+open class BareWord(val name: String) {
+    override fun toString(): String = "BareWord(name=$name)"
+    override fun hashCode(): Int = name.hashCode()
+    override fun equals(other: Any?): Boolean =
+            if (other is BareWord) other.name == name else false
 }
 
-
-interface DatabaseWord : Word {
-    val rate: Int
-
-    val register: Long
-    val lastModification: Long
-    val lastRateModification: Long
-    val lastTraining: Int
-
-    val translations: Set<String>
-    val examples: Set<String>
-}
-
-interface UpdatedWord : Word {
-    val primaryDefinition: String
-    val secondaryDefinition: String?
-    val examples: Set<String>
+open class Word(name: String, val transcription: String?) : BareWord(name) {
+    override fun toString(): String = "Word(name=$name, transcription=$transcription)"
+    override fun hashCode(): Int = Objects.hash(name, transcription)
+    override fun equals(other: Any?): Boolean =
+            if (other is Word) other.name == name && other.transcription == transcription else false
 }

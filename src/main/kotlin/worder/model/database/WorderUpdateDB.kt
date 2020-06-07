@@ -1,8 +1,6 @@
 package worder.model.database
 
-import worder.DatabaseWord
-import worder.UpdatedWord
-import worder.Word
+import worder.model.BareWord
 
 interface WorderUpdateDB {
     val updaterSessionStats: UpdaterSessionStats
@@ -12,13 +10,13 @@ interface WorderUpdateDB {
 
     suspend fun getNextWord(order: SelectOrder): DatabaseWord
 
-    suspend fun updateWord(word: UpdatedWord)
+    suspend fun updateWord(updatedWord: UpdatedWord)
 
-    suspend fun removeWord(word: Word)
+    suspend fun removeWord(word: BareWord)
 
-    suspend fun setAsSkipped(word: Word)
+    suspend fun setAsSkipped(word: BareWord)
 
-    suspend fun setAsLearned(word: Word)
+    suspend fun setAsLearned(word: BareWord)
 
 
     enum class SelectOrder {

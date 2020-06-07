@@ -1,6 +1,6 @@
 package worder.model.insert.update
 
-import worder.DatabaseWord
+import worder.model.DatabaseWord
 
 interface WordBlock {
     val dbWord: DatabaseWord

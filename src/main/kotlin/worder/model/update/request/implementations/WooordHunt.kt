@@ -1,6 +1,6 @@
 package worder.model.insert.request.implementations
 
-import worder.Word
+import worder.model.Word
 import worder.model.insert.request.*
 import worder.model.insert.request.RequesterBaseDecorator.Companion.sendGetRequest
 

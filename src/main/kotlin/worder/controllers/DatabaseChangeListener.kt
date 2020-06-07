@@ -1,6 +1,6 @@
 package worder.controllers
 
-interface DatabaseListener {
+interface DatabaseChangeListener {
     fun onDatabaseConnection()
     fun onDatabaseDisconnection()
 }

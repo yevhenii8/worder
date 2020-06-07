@@ -15,7 +15,7 @@ class DatabaseController : Controller() {
     val stats = SharedStats("Database Controller")
 
 
-    private val listeners = mutableListOf<DatabaseListener>()
+    private val listeners = mutableListOf<DatabaseChangeListener>()
     private var timerValue: String by SharedStatsBinder.bind(stats, "00:00:00")
     private var timerJob: Job? = null
 
@@ -43,8 +43,8 @@ class DatabaseController : Controller() {
         listeners.forEach { it.onDatabaseDisconnection() }
     }
 
-    fun subscribe(listener: DatabaseListener) {
-        listeners.add(listener)
+    fun subscribe(changeListener: DatabaseChangeListener) {
+        listeners.add(changeListener)
     }
 
 

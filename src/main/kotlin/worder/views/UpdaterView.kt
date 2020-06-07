@@ -5,11 +5,11 @@ import tornadofx.View
 import tornadofx.label
 import tornadofx.replaceChildren
 import tornadofx.stackpane
+import worder.controllers.DatabaseChangeListener
 import worder.controllers.DatabaseController
-import worder.controllers.DatabaseListener
 import worder.views.fragments.NoConnectionFragment
 
-class UpdaterView : View("Updater"), DatabaseListener {
+class UpdaterView : View("Updater"), DatabaseChangeListener {
     private val noConnectionFragment = find<NoConnectionFragment>().root
 
 

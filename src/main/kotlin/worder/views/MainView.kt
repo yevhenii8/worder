@@ -38,4 +38,8 @@ class MainView : View("Worder GUI") {
     fun switchToDatabaseTab() {
         databaseTab.expanded = true
     }
+
+    fun switchToInserterTab() {
+        inserterTab.expanded = true
+    }
 }

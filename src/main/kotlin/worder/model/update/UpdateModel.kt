@@ -1,6 +1,8 @@
 package worder.model.insert.update
 
-import worder.*
+import worder.model.BaseUpdatedWord
+import worder.model.DatabaseWord
+import worder.model.UpdatedWord
 import worder.model.database.WorderUpdateDB
 import worder.model.insert.request.*
 import worder.model.insert.request.implementations.*
@@ -54,13 +56,13 @@ class UpdateModel(
     }
 
     private inner class BaseWordBlock(
-        override val dbWord: DatabaseWord,
-        override val serialNumber: Int,
+            override val dbWord: DatabaseWord,
+            override val serialNumber: Int,
 
-        override val translations: Set<String>,
-        override val examples: Set<String>,
-        override val definitions: Set<String>,
-        override val transcriptions: Set<String>
+            override val translations: Set<String>,
+            override val examples: Set<String>,
+            override val definitions: Set<String>,
+            override val transcriptions: Set<String>
     ) : WordBlock {
         var command: BlockCommand? = null
             private set(value) {

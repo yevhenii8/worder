@@ -18,7 +18,8 @@ class WorderStyle : Stylesheet() {
         val title by cssclass()
         val names by cssclass()
 
-        val insertBlock by cssclass()
+        val insertUnit by cssclass()
+        val insertUnits by cssclass()
         val icon by cssclass()
         val diagram by cssclass()
 
@@ -48,33 +49,14 @@ class WorderStyle : Stylesheet() {
             }
         }
 
-        insertBlock {
+        insertUnit {
             padding = box(15.px)
             borderInsets += box(15.px)
             borderColor += box(Color.GRAY)
+        }
 
-            icon {
-                alignment = Pos.CENTER
-                padding = box(0.px, 10.px, 0.px, 0.px)
-            }
-
-            title {
-                padding = box(0.px, 0.px, 10.px, 0.px)
-            }
-
-            diagram {
-                padding = box((-10).px)
-                labelPadding = box(0.px)
-
-                borderImageInsets += box(0.px)
-                borderInsets += box(0.px)
-                backgroundInsets += box(0.px)
-
-                maxWidth = 25.px
-                maxHeight = 25.px
-                labelLineLength = 0.px
-                borderColor += box(Color.GREEN)
-            }
+        insertUnits {
+            backgroundColor += Color.TRANSPARENT
         }
 
         dragDropField {

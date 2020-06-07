@@ -1,6 +1,6 @@
 package worder.model.insert.request
 
-import worder.Word
+import worder.model.Word
 
 
 interface Requester {

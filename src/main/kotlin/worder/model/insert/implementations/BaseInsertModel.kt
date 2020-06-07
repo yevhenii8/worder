@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
+import worder.model.BareWord
 import worder.model.SharedStats.SharedStatsBinder
 import worder.model.database.WorderInsertDB
 import worder.model.database.WorderInsertDB.ResolveRes.INSERTED
@@ -17,6 +18,7 @@ import worder.model.insert.InsertUnit
 import worder.model.insert.InsertUnit.InsertUnitStatus
 import worder.model.insert.InsertUnit.InsertUnitStatus.EXCLUDED_FROM_BATCH
 import worder.model.insert.InsertUnit.InsertUnitStatus.READY_TO_COMMIT
+import worder.model.insert.InvalidWord
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -44,8 +46,11 @@ class BaseInsertModel private constructor(private val database: WorderInsertDB) 
     }
 
 
+    /*
+    BATCH INNER CLASS STARTED
+     */
     private inner class BaseInsertBatch(files: List<File>) : InsertBatch, CoroutineScope {
-        override val id: String = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
+        override val id: String = LocalDateTime.now().withNano(0).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
         override val units: MutableList<InsertUnit> = files.mapIndexed { index, file -> BaseInsertUnit("${id}_$index", file) }.toMutableList()
         override var batchStats: BaseInsertBatchStats = BaseInsertBatchStats(id = id)
         override var status: InsertBatchStatus by SharedStatsBinder.bind(batchStats, InsertBatchStatus.READY_TO_COMMIT)
@@ -63,11 +68,16 @@ class BaseInsertModel private constructor(private val database: WorderInsertDB) 
             status = COMMITTED
         }
 
+        override fun toString(): String = "InsertBatch(id=$id, status=$status, units=${units.size})"
 
+
+        /*
+        UNIT INNER CLASS STARTED
+         */
         private inner class BaseInsertUnit(override val id: String, file: File) : InsertUnit {
-            override var isIncluded: Boolean = true
-            override val invalidWords: Set<String> = file.readLines().filterNot(wordValidator).toSet()
-            override val validWords: Set<String> = file.readLines().filter(wordValidator).toSet()
+            override val invalidWords: MutableSet<InvalidWord> = file.readLines().filterNot(wordValidator).map { BaseInvalidWord(it) }.toMutableSet()
+            override val validWords: MutableSet<BareWord> = file.readLines().filter(wordValidator).map { BareWord(it) }.toMutableSet()
+            override var isIncluded: Boolean = invalidWords.isEmpty()
             override val unitStats = BaseInsertUnitStats(
                     id = id,
                     fileName = file.name,
@@ -87,6 +97,7 @@ class BaseInsertModel private constructor(private val database: WorderInsertDB) 
                     status = InsertUnitStatus.COMMITTING
 
                     val res = validWords
+                            .shuffled()
                             .map { database.resolveWord(it) }
                             .partition { it == INSERTED }
 
@@ -108,7 +119,6 @@ class BaseInsertModel private constructor(private val database: WorderInsertDB) 
                     this@BaseInsertBatch.status = PARTIALLY_COMMITTED
             }
 
-
             override fun excludeFromBatch() {
                 if (status != InsertUnitStatus.COMMITTED) {
                     isIncluded = false
@@ -120,6 +130,29 @@ class BaseInsertModel private constructor(private val database: WorderInsertDB) 
                 if (status != InsertUnitStatus.COMMITTED) {
                     isIncluded = true
                     status = READY_TO_COMMIT
+                }
+            }
+
+            override fun toString(): String = "InsertUnit(id=$id, status=$status, fileName=${unitStats.fileName})"
+
+
+            /*
+            INVALID WORD INNER CLASS STARTED
+             */
+            inner class BaseInvalidWord(override val value: String) : InvalidWord {
+                override fun reject() {
+                    invalidWords.remove(this)
+                    isIncluded = invalidWords.isEmpty()
+                }
+
+                override fun substitute(substitution: String): Boolean {
+                    return if (wordValidator.invoke(substitution)) {
+                        validWords.add(BareWord(substitution))
+                        isIncluded = invalidWords.isEmpty()
+                        true
+                    } else {
+                        false
+                    }
                 }
             }
         }
