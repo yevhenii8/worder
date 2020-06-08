@@ -6,18 +6,18 @@ interface WorderInsertDB {
     val inserterSessionStats: InserterSessionStats
 
 
-    suspend fun containsWord(word: BareWord): Boolean
+    suspend fun containsWord(bareWord: BareWord): Boolean
 
-    suspend fun insertWord(word: BareWord): Boolean
+    suspend fun insertWord(bareWord: BareWord): Boolean
 
-    suspend fun resetWord(word: BareWord): Boolean
+    suspend fun resetWord(bareWord: BareWord): Boolean
 
-    suspend fun resolveWord(word: BareWord): ResolveRes {
-        return if (containsWord(word)) {
-            resetWord(word)
+    suspend fun resolveWord(bareWord: BareWord): ResolveRes {
+        return if (containsWord(bareWord)) {
+            resetWord(bareWord)
             ResolveRes.RESET
         } else {
-            insertWord(word)
+            insertWord(bareWord)
             ResolveRes.INSERTED
         }
     }

@@ -3,6 +3,18 @@ package worder.model
 import java.util.*
 
 open class BareWord(val name: String) {
+    companion object {
+        private val wordPattern = "([a-z\\-']+)|(([a-z\\-']+ [a-z\\-']+)+( [a-z\\-']+)?)".toRegex()
+        val wordValidator: (word: String) -> Boolean = { word -> word.matches(wordPattern) }
+    }
+
+
+    init {
+        if (!wordValidator.invoke(name))
+            throw IllegalArgumentException("Passed word's name is invalid: $name")
+    }
+
+
     override fun toString(): String = "BareWord(name=$name)"
     override fun hashCode(): Int = name.hashCode()
     override fun equals(other: Any?): Boolean =

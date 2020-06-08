@@ -1,17 +1,18 @@
 package worder.model.insert
 
 import worder.model.Stats
-import worder.model.insert.InsertBatch.InsertBatchStatus
+import worder.model.insert.InsertModel.InsertModelStatus
 import worder.model.insert.InsertUnit.InsertUnitStatus
 
-interface InsertBatchStats : Stats {
-    val id: String
-    val status: InsertBatchStatus
+interface InsertModelStats : Stats {
+    val status: InsertModelStatus
 
+    val generatedUnits: Int
     val committedUnits: Int
-    val totalProcessed: Int
-    val validProcessed: Int
-    val invalidProcessed: Int
+
+    val totalValidWords: Int
+    val totalInvalidWords: Int
+
     val reset: Int
     val inserted: Int
 }
@@ -19,9 +20,7 @@ interface InsertBatchStats : Stats {
 interface InsertUnitStats : Stats {
     val id: String
     val status: InsertUnitStatus
-
-    val fileName: String
-    val fileSize: Long
+    val source: String
 
     val invalidWords: Int
     val validWords: Int

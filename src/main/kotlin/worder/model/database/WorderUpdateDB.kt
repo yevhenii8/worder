@@ -12,11 +12,11 @@ interface WorderUpdateDB {
 
     suspend fun updateWord(updatedWord: UpdatedWord)
 
-    suspend fun removeWord(word: BareWord)
+    suspend fun removeWord(bareWord: BareWord)
 
-    suspend fun setAsSkipped(word: BareWord)
+    suspend fun setAsSkipped(bareWord: BareWord)
 
-    suspend fun setAsLearned(word: BareWord)
+    suspend fun setAsLearned(bareWord: BareWord)
 
 
     enum class SelectOrder {

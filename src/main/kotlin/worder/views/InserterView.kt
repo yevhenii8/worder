@@ -5,7 +5,6 @@ import javafx.geometry.Pos
 import javafx.scene.Parent
 import javafx.scene.control.ScrollBar
 import javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER
-import javafx.scene.layout.HBox
 import javafx.stage.FileChooser.ExtensionFilter
 import tornadofx.View
 import tornadofx.addClass
@@ -19,7 +18,6 @@ import tornadofx.vbox
 import worder.controllers.DatabaseChangeListener
 import worder.controllers.DatabaseController
 import worder.controllers.InserterController
-import worder.model.insert.InsertBatch
 import worder.views.fragments.DragAndDropFragment
 import worder.views.fragments.InsertUnitFragment
 import worder.views.fragments.NoConnectionFragment
@@ -62,7 +60,7 @@ class InserterView : View("Inserter"), DatabaseChangeListener {
 }
 
 class InserterProcessedView : View() {
-    private lateinit var insertBatch: InsertBatch
+//    private lateinit var insertBatch: InsertBatch
     private var insertUnitFragments = vbox { }
     private val vScrollBar = ScrollBar().apply { orientation = VERTICAL }
     private val scrollPane = scrollpane {
@@ -93,11 +91,11 @@ class InserterProcessedView : View() {
 
 
     override fun onDock() {
-        insertBatch = find<InserterController>().insertBatch
-
-        insertUnitFragments.clear()
-        insertBatch.units
-                .map { find<InsertUnitFragment>("insertUnit" to it) }
-                .forEach { insertUnitFragments.add(it) }
+//        insertBatch = find<InserterController>().insertBatch
+//
+//        insertUnitFragments.clear()
+//        insertBatch.units
+//                .map { find<InsertUnitFragment>("insertUnit" to it) }
+//                .forEach { insertUnitFragments.add(it) }
     }
 }

@@ -262,9 +262,9 @@ class SqlLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wo
         }
     }
 
-    override suspend fun removeWord(word: BareWord) {
+    override suspend fun removeWord(bareWord: BareWord) {
         suspendedSqlLiteTransaction {
-            WordTable.deleteWhere { (WordTable.name eq word.name) and (WordTable.dictionaryId eq dictionaryId) }
+            WordTable.deleteWhere { (WordTable.name eq bareWord.name) and (WordTable.dictionaryId eq dictionaryId) }
         }
 
         summaryStats.apply {
@@ -278,8 +278,8 @@ class SqlLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wo
         }
     }
 
-    override suspend fun setAsSkipped(word: BareWord) {
-        skippedWords.add(skippedWords.size, word.name)
+    override suspend fun setAsSkipped(bareWord: BareWord) {
+        skippedWords.add(skippedWords.size, bareWord.name)
 
         updaterSessionStats.apply {
             totalProcessed++
@@ -287,9 +287,9 @@ class SqlLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wo
         }
     }
 
-    override suspend fun setAsLearned(word: BareWord) {
+    override suspend fun setAsLearned(bareWord: BareWord) {
         suspendedSqlLiteTransaction {
-            WordTable.update({ (WordTable.name eq word.name) and (WordTable.dictionaryId eq dictionaryId) })
+            WordTable.update({ (WordTable.name eq bareWord.name) and (WordTable.dictionaryId eq dictionaryId) })
             {
                 it[rate] = 100
                 it[closed] = 1
@@ -312,18 +312,18 @@ class SqlLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wo
     WorderInserterDB's Methods Implementation
      */
 
-    override suspend fun containsWord(word: BareWord): Boolean = suspendedSqlLiteTransaction {
-        WordTable.select((WordTable.name eq word.name) and (WordTable.dictionaryId eq dictionaryId))
+    override suspend fun containsWord(bareWord: BareWord): Boolean = suspendedSqlLiteTransaction {
+        WordTable.select((WordTable.name eq bareWord.name) and (WordTable.dictionaryId eq dictionaryId))
                 .count()
     } > 0
 
-    override suspend fun insertWord(word: BareWord): Boolean {
-        if (containsWord(word))
+    override suspend fun insertWord(bareWord: BareWord): Boolean {
+        if (containsWord(bareWord))
             return false
 
         suspendedSqlLiteTransaction {
             WordTable.insert {
-                it[name] = word.name
+                it[name] = bareWord.name
                 it[dictionaryId] = dictionaryId
                 it[tags] = "#$insertedTagId#"
             }
@@ -347,9 +347,9 @@ class SqlLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wo
         return true
     }
 
-    override suspend fun resetWord(word: BareWord): Boolean {
+    override suspend fun resetWord(bareWord: BareWord): Boolean {
         val updatedRowsCount = suspendedSqlLiteTransaction {
-            WordTable.update({ (WordTable.name eq word.name) and (WordTable.dictionaryId eq dictionaryId) })
+            WordTable.update({ (WordTable.name eq bareWord.name) and (WordTable.dictionaryId eq dictionaryId) })
             {
                 it[rate] = 0
                 it[closed] = null
