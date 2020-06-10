@@ -11,11 +11,11 @@ import worder.model.database.WorderDB
 import worder.model.database.implementations.SqlLiteFile
 import java.io.File
 
-class DatabaseController : Controller() {
+class DatabaseController : Controller(), DatabaseEventProducer {
     val stats = SharedStats("Database Controller")
 
 
-    private val listeners = mutableListOf<DatabaseChangeListener>()
+    private val listeners = mutableListOf<DatabaseEventListener>()
     private var timerValue: String by SharedStatsBinder.bind(stats, "00:00:00")
     private var timerJob: Job? = null
 
@@ -40,11 +40,20 @@ class DatabaseController : Controller() {
         db = null
         isConnected = false
         timerJob?.cancel()
-        listeners.forEach { it.onDatabaseDisconnection() }
+        notifyDisconnected()
     }
 
-    fun subscribe(changeListener: DatabaseChangeListener) {
-        listeners.add(changeListener)
+    override fun subscribe(eventListener: DatabaseEventListener) {
+        listeners.add(eventListener)
+    }
+
+    override fun subscribeAndRaise(eventListener: DatabaseEventListener) {
+        subscribe(eventListener)
+
+        if (isConnected)
+            notifyConnected()
+        else
+            notifyDisconnected()
     }
 
 
@@ -55,8 +64,12 @@ class DatabaseController : Controller() {
     private fun connect() {
         isConnected = true
         timerJob = MainScope().launch { clockUpdater() }
-        listeners.forEach { it.onDatabaseConnection() }
+        notifyConnected()
     }
+
+    private fun notifyConnected() = listeners.forEach { it.onDatabaseConnection(db!!) }
+
+    private fun notifyDisconnected() = listeners.forEach { it.onDatabaseDisconnection() }
 
     private suspend fun clockUpdater() {
         var seconds = 0

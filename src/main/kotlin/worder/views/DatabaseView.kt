@@ -16,30 +16,31 @@ import tornadofx.replaceChildren
 import tornadofx.stackpane
 import tornadofx.vbox
 import worder.controllers.DatabaseController
-import worder.controllers.DatabaseChangeListener
+import worder.controllers.DatabaseEventListener
+import worder.model.database.WorderDB
 import worder.views.fragments.DragAndDropFragment
 import java.io.File
 
-class DatabaseView : View("Database"), DatabaseChangeListener {
+class DatabaseView : View("Database"), DatabaseEventListener {
+    private val databaseController: DatabaseController by inject()
     private val databaseDisconnectedFragment = find<DragAndDropFragment>(
             "text" to "Drag MyDictionary backup file here to connect to it",
             "windowTitle" to "MyDictionary Backup File Selection",
             "extensionFilter" to ExtensionFilter("Backup File (*.bck)", "*.bck"),
-            "action" to { files: List<File> -> find<DatabaseController>().connectToSqlLiteFile(files.first()) }
+            "action" to { files: List<File> -> databaseController.connectToSqlLiteFile(files.first()) }
     ).root
-
-
-    init {
-        find<DatabaseController>().subscribe(this)
-    }
-
 
     override val root: Parent = stackpane {
         add(databaseDisconnectedFragment)
     }
 
 
-    override fun onDatabaseConnection() {
+    init {
+        databaseController.subscribe(this)
+    }
+
+
+    override fun onDatabaseConnection(db: WorderDB) {
         root.replaceChildren(find<DatabaseConnectedView>().root)
     }
 

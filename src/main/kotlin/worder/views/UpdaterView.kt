@@ -5,11 +5,12 @@ import tornadofx.View
 import tornadofx.label
 import tornadofx.replaceChildren
 import tornadofx.stackpane
-import worder.controllers.DatabaseChangeListener
+import worder.controllers.DatabaseEventListener
 import worder.controllers.DatabaseController
+import worder.model.database.WorderDB
 import worder.views.fragments.NoConnectionFragment
 
-class UpdaterView : View("Updater"), DatabaseChangeListener {
+class UpdaterView : View("Updater"), DatabaseEventListener {
     private val noConnectionFragment = find<NoConnectionFragment>().root
 
 
@@ -23,8 +24,8 @@ class UpdaterView : View("Updater"), DatabaseChangeListener {
     }
 
 
-    override fun onDatabaseConnection() {
-        root.replaceChildren(label("Connected!"))
+    override fun onDatabaseConnection(db: WorderDB) {
+        root.replaceChildren(label("Connected to $db!"))
     }
 
     override fun onDatabaseDisconnection() {

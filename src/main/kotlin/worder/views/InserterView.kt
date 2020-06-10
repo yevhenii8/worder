@@ -5,46 +5,46 @@ import javafx.geometry.Pos
 import javafx.scene.Parent
 import javafx.scene.control.ScrollBar
 import javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER
+import javafx.scene.layout.VBox
 import javafx.stage.FileChooser.ExtensionFilter
 import tornadofx.View
 import tornadofx.addClass
-import tornadofx.clear
+import tornadofx.bindComponents
 import tornadofx.hbox
 import tornadofx.insets
 import tornadofx.replaceChildren
 import tornadofx.scrollpane
 import tornadofx.stackpane
 import tornadofx.vbox
-import worder.controllers.DatabaseChangeListener
 import worder.controllers.DatabaseController
+import worder.controllers.DatabaseEventListener
 import worder.controllers.InserterController
+import worder.model.database.WorderDB
+import worder.model.insert.InsertModel
 import worder.views.fragments.DragAndDropFragment
 import worder.views.fragments.InsertUnitFragment
 import worder.views.fragments.NoConnectionFragment
 import worder.views.styles.WorderStyle
 import java.io.File
 
-class InserterView : View("Inserter"), DatabaseChangeListener {
+class InserterView : View("Inserter"), DatabaseEventListener {
     private val inserterController: InserterController by inject()
     private val noConnectionFragment = find<NoConnectionFragment>().root
 
+    override val root: Parent = stackpane()
+
 
     init {
-        find<DatabaseController>().subscribe(this)
+        find<DatabaseController>().subscribeAndRaise(this)
     }
 
 
-    override var root: Parent = stackpane {
-        add(noConnectionFragment)
-    }
-
-
-    override fun onDatabaseConnection() {
+    override fun onDatabaseConnection(db: WorderDB) {
         val fragment = find<DragAndDropFragment>(
                 "text" to "Drag one or more plain files here to process them",
                 "windowTitle" to "Inserter Files Selection",
                 "extensionFilter" to ExtensionFilter("Text Files (*.txt)", "*.txt"),
-                "action" to { files: List<File> -> inserterController.processFiles(files) }
+                "action" to { files: List<File> -> inserterController.uploadFiles(files) }
         )
 
         root.replaceChildren(fragment.root)
@@ -54,32 +54,31 @@ class InserterView : View("Inserter"), DatabaseChangeListener {
         root.replaceChildren(noConnectionFragment)
     }
 
-    fun displayBatch() {
-        root.replaceChildren(find<InserterProcessedView>().root)
+    fun showUploadedView() {
+        root.replaceChildren(find<InserterUploadedView>().root)
     }
 }
 
-class InserterProcessedView : View() {
-//    private lateinit var insertBatch: InsertBatch
-    private var insertUnitFragments = vbox { }
+class InserterUploadedView : View() {
+    private lateinit var insertModel: InsertModel
+    private val inserterController: InserterController by inject()
     private val vScrollBar = ScrollBar().apply { orientation = VERTICAL }
     private val scrollPane = scrollpane {
         vbarPolicy = NEVER
         hbarPolicy = NEVER
 
+        add(vbox())
+        addClass(WorderStyle.insertUnits)
+
         vScrollBar.minProperty().bind(vminProperty())
         vScrollBar.maxProperty().bind(vmaxProperty())
-        vScrollBar.visibleAmountProperty().bind(heightProperty().divide(insertUnitFragments.heightProperty()))
+        vScrollBar.visibleAmountProperty().bind(heightProperty().divide((content as VBox).heightProperty()))
         vvalueProperty().bindBidirectional(vScrollBar.valueProperty())
-
-        add(insertUnitFragments)
-        addClass(WorderStyle.insertUnits)
 
         content.setOnScroll {
             vvalue -= it.deltaY * 0.01
         }
     }
-
 
     override val root: Parent = hbox(alignment = Pos.CENTER) {
         hbox {
@@ -91,11 +90,12 @@ class InserterProcessedView : View() {
 
 
     override fun onDock() {
-//        insertBatch = find<InserterController>().insertBatch
-//
-//        insertUnitFragments.clear()
-//        insertBatch.units
-//                .map { find<InsertUnitFragment>("insertUnit" to it) }
-//                .forEach { insertUnitFragments.add(it) }
+        insertModel = inserterController.insertModel!!
+
+        scrollPane.content.apply {
+            bindComponents(insertModel.uncommittedUnitsProperty) {
+                find<InsertUnitFragment>("unit" to it)
+            }
+        }
     }
 }

@@ -1,14 +1,25 @@
 package worder.model.insert
 
+import javafx.beans.property.ReadOnlyListProperty
+import javafx.beans.property.ReadOnlyProperty
+import javafx.beans.property.ReadOnlyStringProperty
 import worder.model.BareWord
 
 interface InsertUnit {
+    val idProperty: ReadOnlyStringProperty
     val id: String
-    val status: InsertUnitStatus
-    val stats: InsertUnitStats
 
-    val invalidWords: Set<InvalidWord>
-    val validWords: Set<BareWord>
+    val statusProperty: ReadOnlyProperty<InsertUnitStatus>
+    val status: InsertUnitStatus
+
+    val sourceProperty: ReadOnlyStringProperty
+    val source: String
+
+    val validWordsProperty: ReadOnlyListProperty<BareWord>
+    val validWords: List<BareWord>
+
+    val invalidWordsProperty: ReadOnlyListProperty<InvalidWord>
+    val invalidWords: List<InvalidWord>
 
 
     suspend fun commit()
@@ -24,6 +35,7 @@ interface InsertUnit {
         fun reject()
         fun substitute(substitution: String): Boolean
     }
+
 
     enum class InsertUnitStatus(val description: String) {
         READY_TO_COMMIT("Unit can be committed either by model or by itself"),

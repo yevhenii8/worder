@@ -28,6 +28,7 @@ dependencies {
 
 application {
     mainClassName = "worder.AppEntry"
+    applicationDefaultJvmArgs = listOf("--add-opens=javafx.graphics/javafx.scene=ALL-UNNAMED")
 }
 
 javafx {
