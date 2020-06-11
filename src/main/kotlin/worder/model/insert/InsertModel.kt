@@ -2,19 +2,16 @@ package worder.model.insert
 
 import javafx.beans.property.ReadOnlyListProperty
 import javafx.beans.property.ReadOnlyProperty
-import java.io.File
 
 interface InsertModel {
     val statusProperty: ReadOnlyProperty<InsertModelStatus>
     val status: InsertModelStatus
 
-    val stats: InsertModelStats
+//    val stats: InsertModelStats
 
     val uncommittedUnitsProperty: ReadOnlyListProperty<InsertUnit>
     val uncommittedUnits: List<InsertUnit>
 
-
-    fun generateUnits(files: List<File>): List<InsertUnit>
 
     suspend fun commitAllUnits()
 

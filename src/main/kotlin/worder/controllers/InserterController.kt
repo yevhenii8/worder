@@ -18,9 +18,7 @@ class InserterController : Controller() {
             throw IllegalStateException("No database connection established!")
 
         databaseController.db?.let {
-            insertModel = SimpleInsertModel.createInstance(it.inserter)
-            insertModel!!.generateUnits(files)
-
+            insertModel = SimpleInsertModel.createInstance(it.inserter, files)
             inserterView.showUploadedView()
         }
     }

@@ -2,8 +2,6 @@ package worder.model.insert.implementations
 
 import javafx.beans.property.ListProperty
 import javafx.beans.property.ObjectProperty
-import javafx.beans.property.ReadOnlyListProperty
-import javafx.beans.property.ReadOnlyProperty
 import javafx.beans.property.ReadOnlyStringProperty
 import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -15,7 +13,6 @@ import tornadofx.observableListOf
 import tornadofx.setValue
 import tornadofx.toObservable
 import worder.model.BareWord
-import worder.model.SharedStats.SharedStatsBinder
 import worder.model.database.WorderInsertDB
 import worder.model.insert.InsertModel
 import worder.model.insert.InsertModel.InsertModelStatus
@@ -24,9 +21,9 @@ import worder.model.insert.InsertUnit.InsertUnitStatus
 import worder.model.insert.InsertUnit.InvalidWord
 import java.io.File
 
-class SimpleInsertModel private constructor(private val database: WorderInsertDB) : InsertModel {
+class SimpleInsertModel private constructor(private val database: WorderInsertDB, files: List<File>) : InsertModel {
     companion object {
-        fun createInstance(database: WorderInsertDB): InsertModel = SimpleInsertModel(database)
+        fun createInstance(database: WorderInsertDB, files: List<File>): InsertModel = SimpleInsertModel(database, files)
     }
 
 
@@ -35,13 +32,13 @@ class SimpleInsertModel private constructor(private val database: WorderInsertDB
     override val statusProperty: ObjectProperty<InsertModelStatus> = SimpleObjectProperty(InsertModelStatus.CREATED)
     override var status: InsertModelStatus by statusProperty
 
-    override val stats: BaseInsertModelStats = BaseInsertModelStats()
+//    override val stats: BaseInsertModelStats = BaseInsertModelStats()
 
     override val uncommittedUnitsProperty: ListProperty<InsertUnit> = SimpleListProperty(observableListOf())
     override val uncommittedUnits: MutableList<InsertUnit> by uncommittedUnitsProperty
 
 
-    override fun generateUnits(files: List<File>): List<InsertUnit> {
+    init {
         files.forEach {
             if (!(it.isFile && it.canRead()))
                 throw IllegalArgumentException("Please provide correct readable file!")
@@ -53,10 +50,10 @@ class SimpleInsertModel private constructor(private val database: WorderInsertDB
                     .map { it.trim() }
                     .partition { BareWord.wordValidator.invoke(it) }
 
-            stats.apply {
-                totalValidWords += validWords.size
-                totalInvalidWords += invalidWords.size
-            }
+//            stats.apply {
+//                totalValidWords += validWords.size
+//                totalInvalidWords += invalidWords.size
+//            }
 
             BaseInsertUnit(
                     id = "Unit_${++unitsCounter}",
@@ -67,10 +64,9 @@ class SimpleInsertModel private constructor(private val database: WorderInsertDB
         }
 
         uncommittedUnits.addAll(newUnits)
-        stats.generatedUnits += newUnits.size
-
-        return newUnits
+//        stats.generatedUnits += newUnits.size
     }
+
 
     override suspend fun commitAllUnits() {
         supervisorScope {
@@ -172,11 +168,11 @@ class SimpleInsertModel private constructor(private val database: WorderInsertDB
                         .map { database.resolveWord(it) }
                         .partition { it == WorderInsertDB.ResolveRes.RESET }
 
-                this@SimpleInsertModel.stats.apply {
-                    committedUnits++
-                    this.reset += reset.size
-                    this.inserted += inserted.size
-                }
+//                this@SimpleInsertModel.stats.apply {
+//                    committedUnits++
+//                    this.reset += reset.size
+//                    this.inserted += inserted.size
+//                }
 
                 state = CommittedState()
             }

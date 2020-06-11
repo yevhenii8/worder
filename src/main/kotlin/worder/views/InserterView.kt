@@ -1,5 +1,6 @@
 package worder.views
 
+import javafx.beans.property.SimpleListProperty
 import javafx.geometry.Orientation.VERTICAL
 import javafx.geometry.Pos
 import javafx.scene.Parent
@@ -12,6 +13,7 @@ import tornadofx.addClass
 import tornadofx.bindComponents
 import tornadofx.hbox
 import tornadofx.insets
+import tornadofx.observableListOf
 import tornadofx.replaceChildren
 import tornadofx.scrollpane
 import tornadofx.stackpane
@@ -19,6 +21,7 @@ import tornadofx.vbox
 import worder.controllers.DatabaseController
 import worder.controllers.DatabaseEventListener
 import worder.controllers.InserterController
+import worder.model.SimpleObservableStats
 import worder.model.database.WorderDB
 import worder.model.insert.InsertModel
 import worder.views.fragments.DragAndDropFragment

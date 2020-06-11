@@ -1,13 +1,12 @@
 package worder.model.insert
 
-import worder.model.Stats
-import worder.model.insert.InsertModel.InsertModelStatus
+import worder.model.ObservableStats
 
-interface InsertModelStats : Stats {
-    val status: InsertModelStatus
-
+interface InsertModelStats : ObservableStats {
     val generatedUnits: Int
+    val uncommittedUnits: Int
     val committedUnits: Int
+    val excludedUnits: Int
 
     val totalValidWords: Int
     val totalInvalidWords: Int

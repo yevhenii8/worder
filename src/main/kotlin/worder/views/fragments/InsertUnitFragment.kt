@@ -77,7 +77,7 @@ class InsertUnitFragment : Fragment() {
 
         if (unit.invalidWords.isNotEmpty()) {
             val squeezebox = squeezebox {
-                fold("List of invalid words", expanded = true) {
+                fold("List of invalid words") {
                     form {
                         fieldset {
                             bindChildren(unit.invalidWordsProperty) { invalidWord ->
