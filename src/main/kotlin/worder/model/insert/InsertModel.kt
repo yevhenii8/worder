@@ -7,7 +7,7 @@ interface InsertModel {
     val statusProperty: ReadOnlyProperty<InsertModelStatus>
     val status: InsertModelStatus
 
-//    val stats: InsertModelStats
+    val stats: InsertModelStats
 
     val uncommittedUnitsProperty: ReadOnlyListProperty<InsertUnit>
     val uncommittedUnits: List<InsertUnit>

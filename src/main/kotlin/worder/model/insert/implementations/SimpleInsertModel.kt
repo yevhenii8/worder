@@ -32,10 +32,12 @@ class SimpleInsertModel private constructor(private val database: WorderInsertDB
     override val statusProperty: ObjectProperty<InsertModelStatus> = SimpleObjectProperty(InsertModelStatus.CREATED)
     override var status: InsertModelStatus by statusProperty
 
-//    override val stats: BaseInsertModelStats = BaseInsertModelStats()
-
     override val uncommittedUnitsProperty: ListProperty<InsertUnit> = SimpleListProperty(observableListOf())
     override val uncommittedUnits: MutableList<InsertUnit> by uncommittedUnitsProperty
+
+    override val stats: SimpleInsertModelStats = object : SimpleInsertModelStats() {
+        override var uncommittedUnits: Int by bindToStats(uncommittedUnitsProperty.sizeProperty())
+    }
 
 
     init {
@@ -50,12 +52,12 @@ class SimpleInsertModel private constructor(private val database: WorderInsertDB
                     .map { it.trim() }
                     .partition { BareWord.wordValidator.invoke(it) }
 
-//            stats.apply {
-//                totalValidWords += validWords.size
-//                totalInvalidWords += invalidWords.size
-//            }
+            stats.apply {
+                totalValidWords += validWords.size
+                totalInvalidWords += invalidWords.size
+            }
 
-            BaseInsertUnit(
+            SimpleInsertUnit(
                     id = "Unit_${++unitsCounter}",
                     source = file.name,
                     validWords = validWords,
@@ -64,7 +66,7 @@ class SimpleInsertModel private constructor(private val database: WorderInsertDB
         }
 
         uncommittedUnits.addAll(newUnits)
-//        stats.generatedUnits += newUnits.size
+        stats.generatedUnits += newUnits.size
     }
 
 
@@ -75,13 +77,13 @@ class SimpleInsertModel private constructor(private val database: WorderInsertDB
     }
 
 
-    private inner class BaseInsertUnit(
+    private inner class SimpleInsertUnit(
             id: String,
             source: String,
             validWords: List<String>,
             invalidWords: List<String>
     ) : InsertUnit {
-        private var state: UnitState
+        private var stateController: StateController
 
         override val idProperty: ReadOnlyStringProperty = SimpleStringProperty(id)
         override val id: String by idProperty
@@ -101,20 +103,25 @@ class SimpleInsertModel private constructor(private val database: WorderInsertDB
 
         init {
             validWordsProperty.set(validWords.map { BareWord(it) }.toObservable())
-            invalidWordsProperty.set(invalidWords.map { BaseInvalidWord(it) }.toObservable())
-            state = if (invalidWords.isEmpty()) ReadyToCommitState() else ActionNeededState()
+            invalidWordsProperty.set(invalidWords.map { SimpleInvalidWord(it) }.toObservable())
+            stateController = StateController(
+                    if (invalidWords.isEmpty())
+                        InsertUnitStatus.READY_TO_COMMIT
+                    else
+                        InsertUnitStatus.ACTION_NEEDED
+            )
         }
 
 
-        override suspend fun commit() = state.commit()
-        override fun excludeFromCommit() = state.excludeFromCommit()
-        override fun includeInCommit() = state.includeInCommit()
+        override suspend fun commit() = stateController.commit()
+        override fun excludeFromCommit() = stateController.excludeFromCommit()
+        override fun includeInCommit() = stateController.includeInCommit()
 
 
-        private inner class BaseInvalidWord(override val value: String) : InvalidWord {
+        private inner class SimpleInvalidWord(override val value: String) : InvalidWord {
             private fun updateState() {
-                if (invalidWords.isEmpty() && status == InsertUnitStatus.ACTION_NEEDED)
-                    state = ReadyToCommitState()
+//                if (invalidWords.isEmpty() && status == InsertUnitStatus.ACTION_NEEDED)
+//                    stateController = ReadyToCommitState()
             }
 
             override fun reject() {
@@ -134,76 +141,101 @@ class SimpleInsertModel private constructor(private val database: WorderInsertDB
             }
         }
 
-
-        /*
-        Actually It's a finite-state machine
-         */
-        private abstract inner class UnitState(status: InsertUnitStatus) {
-            init {
-                this@BaseInsertUnit.status = status
+        private inner class StateController(initStatus: InsertUnitStatus) {
+            private var state: UnitState = pickUpState(initStatus).also {
+                status = initStatus
+                it.onAttach()
             }
 
-            open suspend fun commit() {
-                throw IllegalStateException("You can't commit unit with status: $status")
+
+            suspend fun commit() = state.commit()
+            fun excludeFromCommit() = state.excludeFromCommit()
+            fun includeInCommit() = state.includeInCommit()
+
+
+            fun changeState(newStatus: InsertUnitStatus) {
+                state.onDetach()
+                state = pickUpState(newStatus)
+                status = newStatus
+                state.onAttach()
             }
 
-            open fun excludeFromCommit() {
-                throw IllegalStateException("You can't exclude unit with status: $status")
+            private fun pickUpState(status: InsertUnitStatus): UnitState = when (status) {
+                InsertUnitStatus.READY_TO_COMMIT -> ReadyToCommitState()
+                InsertUnitStatus.ACTION_NEEDED -> ActionNeededState()
+                InsertUnitStatus.EXCLUDED_FROM_COMMIT -> ExcludedFromCommitState()
+                InsertUnitStatus.COMMITTING -> CommittingState()
+                InsertUnitStatus.COMMITTED -> CommittedState()
             }
 
-            open fun includeInCommit() {
-                throw IllegalStateException("You can't include unit with status: $status")
-            }
-        }
 
-        private inner class ReadyToCommitState : UnitState(InsertUnitStatus.READY_TO_COMMIT) {
-            init {
-                this@SimpleInsertModel.status = InsertModelStatus.READY_TO_COMMIT
-            }
+            private abstract inner class UnitState {
+                open suspend fun commit() {
+                    throw IllegalStateException("You can't commit unit with state: $this")
+                }
 
-            override suspend fun commit() {
-                state = CommittingState()
+                open fun excludeFromCommit() {
+                    throw IllegalStateException("You can't exclude unit with state: $this")
+                }
 
-                val (reset, inserted) = validWords
-                        .map { database.resolveWord(it) }
-                        .partition { it == WorderInsertDB.ResolveRes.RESET }
+                open fun includeInCommit() {
+                    throw IllegalStateException("You can't include unit with state: $this")
+                }
 
-//                this@SimpleInsertModel.stats.apply {
-//                    committedUnits++
-//                    this.reset += reset.size
-//                    this.inserted += inserted.size
-//                }
 
-                state = CommittedState()
+                open fun onAttach() {}
+
+                open fun onDetach() {}
             }
 
-            override fun excludeFromCommit() {
-                state = ExcludedFromCommitState()
+            private inner class ReadyToCommitState : UnitState() {
+                override suspend fun commit() {
+                    changeState(InsertUnitStatus.COMMITTING)
+
+                    val (reset, inserted) = validWords
+                            .map { database.resolveWord(it) }
+                            .partition { it == WorderInsertDB.ResolveRes.RESET }
+
+                    this@SimpleInsertModel.stats.apply {
+                        this.reset += reset.size
+                        this.inserted += inserted.size
+                    }
+
+                    changeState(InsertUnitStatus.COMMITTED)
+                }
+
+                override fun excludeFromCommit() = changeState(InsertUnitStatus.EXCLUDED_FROM_COMMIT)
+
+                override fun onAttach() {
+                    this@SimpleInsertModel.status = InsertModelStatus.READY_TO_COMMIT
+                }
             }
-        }
 
-        private inner class ActionNeededState : UnitState(InsertUnitStatus.ACTION_NEEDED) {
-            override fun excludeFromCommit() {
-                state = ExcludedFromCommitState()
+            private inner class ActionNeededState : UnitState() {
+                init {
+                    stats.actionNeededUnits++
+                }
+
+                override fun excludeFromCommit() {
+//                    stateController = ExcludedFromCommitState()
+                }
             }
-        }
 
-        private inner class ExcludedFromCommitState : UnitState(InsertUnitStatus.EXCLUDED_FROM_COMMIT) {
-            override fun includeInCommit() {
-                state = ReadyToCommitState()
+            private inner class ExcludedFromCommitState : UnitState() {
+                override fun includeInCommit() {
+//                    stateController = ReadyToCommitState()
+                }
             }
-        }
 
-        private inner class CommittingState : UnitState(InsertUnitStatus.COMMITTING)
+            private inner class CommittingState : UnitState()
 
-        private inner class CommittedState : UnitState(InsertUnitStatus.COMMITTED) {
-            init {
-                this@SimpleInsertModel.apply {
-                    uncommittedUnits.remove(this@BaseInsertUnit)
-                    status = if (uncommittedUnits.isEmpty())
-                        InsertModelStatus.COMMITTED
-                    else
-                        InsertModelStatus.PARTIALLY_COMMITTED
+            private inner class CommittedState : UnitState() {
+                init {
+                    this@SimpleInsertModel.apply {
+                        status = if (uncommittedUnits.isEmpty()) InsertModelStatus.COMMITTED else InsertModelStatus.PARTIALLY_COMMITTED
+                        stats.committedUnits++
+                        uncommittedUnits.remove(this@SimpleInsertUnit)
+                    }
                 }
             }
         }

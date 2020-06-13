@@ -11,17 +11,17 @@ import kotlin.reflect.KProperty
 
 open class SimpleObservableStats(override val origin: String) : ObservableStats {
     companion object {
-        fun bind(
+        fun statsObject(
                 simpleObservableStats: SimpleObservableStats,
                 initValue: Any?,
                 defaultTitle: String? = null
-        ): SimpleObservableStats = simpleObservableStats.bind(initValue, defaultTitle)
+        ): SimpleObservableStats = simpleObservableStats.bindToStats(initValue, defaultTitle)
 
-        fun <T : Any?> bind(
+        fun <T : Any?> statsObject(
                 simpleObservableStats: SimpleObservableStats,
                 observableValue: ObservableValue<T>,
                 defaultTitle: String? = null
-        ): SimpleObservableStats = simpleObservableStats.bind(observableValue, defaultTitle)
+        ): SimpleObservableStats = simpleObservableStats.bindToStats(observableValue, defaultTitle)
     }
 
 
@@ -84,13 +84,13 @@ open class SimpleObservableStats(override val origin: String) : ObservableStats 
     }
 
 
-    protected fun bind(initValue: Any?, defaultTitle: String? = null): SimpleObservableStats {
+    protected fun bindToStats(initValue: Any?, defaultTitle: String? = null): SimpleObservableStats {
         defaultTitleTmp = defaultTitle
         initValueTmp = initValue
         return this
     }
 
-    protected fun <T : Any?> bind(observableValue: ObservableValue<T>, defaultTitle: String? = null): SimpleObservableStats {
+    protected fun <T : Any?> bindToStats(observableValue: ObservableValue<T>, defaultTitle: String? = null): SimpleObservableStats {
         defaultTitleTmp = defaultTitle
         initValueTmp = observableValue.value
         observableValueTmp = observableValue

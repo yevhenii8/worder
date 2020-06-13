@@ -7,6 +7,7 @@ interface InsertModelStats : ObservableStats {
     val uncommittedUnits: Int
     val committedUnits: Int
     val excludedUnits: Int
+    val actionNeededUnits: Int
 
     val totalValidWords: Int
     val totalInvalidWords: Int

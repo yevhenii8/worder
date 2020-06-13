@@ -117,13 +117,13 @@ class SqlLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wo
     private val resetTagId: Int = getTagId(UPDATED_TAG)
     private val skippedWords = mutableListOf<String>()
 
-    override val trackStats = BaseWorderTrackStats().apply {
+    override val trackStats = SimpleWorderTrackStats().apply {
         totalInserted = getWordsCount(tagId = insertedTagId)
         totalReset = getWordsCount(tagId = resetTagId)
         totalUpdated = getWordsCount(tagId = updatedTagId)
         totalAffected = totalInserted + totalReset + totalUpdated
     }
-    override val summaryStats = BaseWorderSummaryStats().apply {
+    override val summaryStats = SimpleWorderSummaryStats().apply {
         val totalColumn = WordTable.id.count()
 
         val learnedColumn = Sum(
@@ -146,8 +146,8 @@ class SqlLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wo
         unlearned = resultRow[unlearnedColumn]!!
         totalAmount = resultRow[totalColumn].toInt()
     }
-    override val inserterSessionStats = BaseInserterSessionStats()
-    override val updaterSessionStats = BaseUpdaterSessionStats()
+    override val inserterSessionStats = SimpleInserterSessionStats()
+    override val updaterSessionStats = SimpleUpdaterSessionStats()
 
     override val inserter: WorderInsertDB = this
     override val updater: WorderUpdateDB = this

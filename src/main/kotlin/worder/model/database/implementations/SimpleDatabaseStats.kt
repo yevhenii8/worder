@@ -6,7 +6,7 @@ import worder.model.database.UpdaterSessionStats
 import worder.model.database.WorderSummaryStats
 import worder.model.database.WorderTrackStats
 
-class BaseWorderTrackStats(
+class SimpleWorderTrackStats(
         origin: String = "Worder App Tracker",
         totalInserted: Int = 0,
         totalReset: Int = 0,
@@ -18,7 +18,7 @@ class BaseWorderTrackStats(
     override var totalUpdated: Int by SharedStatsBinder.bind(this, totalUpdated)
 }
 
-class BaseWorderSummaryStats(
+class SimpleWorderSummaryStats(
         origin: String = "Database Summary",
         unlearned: Int = 0,
         learned: Int = 0
@@ -28,7 +28,7 @@ class BaseWorderSummaryStats(
     override var learned: Int by SharedStatsBinder.bind(this, learned)
 }
 
-class BaseUpdaterSessionStats(
+class SimpleUpdaterSessionStats(
         origin: String = "Updater Session",
         removed: Int = 0,
         updated: Int = 0,
@@ -43,7 +43,7 @@ class BaseUpdaterSessionStats(
 
 }
 
-class BaseInserterSessionStats(
+class SimpleInserterSessionStats(
         origin: String = "Inserter Session",
         inserted: Int = 0,
         reset: Int = 0
