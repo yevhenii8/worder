@@ -4,13 +4,16 @@ import javafx.beans.property.ReadOnlyListProperty
 import javafx.beans.property.ReadOnlyProperty
 
 interface InsertModel {
-    val statusProperty: ReadOnlyProperty<InsertModelStatus>
-    val status: InsertModelStatus
+    val modelStatusProperty: ReadOnlyProperty<InsertModelStatus>
+    val modelStatus: InsertModelStatus
 
     val stats: InsertModelStats
 
     val uncommittedUnitsProperty: ReadOnlyListProperty<InsertUnit>
     val uncommittedUnits: List<InsertUnit>
+
+    val committedUnitsProperty: ReadOnlyListProperty<InsertUnit>
+    val committedUnits: List<InsertUnit>
 
 
     suspend fun commitAllUnits()

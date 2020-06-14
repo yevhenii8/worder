@@ -2,7 +2,7 @@ package worder.controllers
 
 import tornadofx.Controller
 import worder.model.insert.InsertModel
-import worder.model.insert.implementations.SimpleInsertModel
+import worder.model.insert.implementations.DefaultInsertModel
 import worder.views.InserterView
 import java.io.File
 
@@ -18,7 +18,7 @@ class InserterController : Controller() {
             throw IllegalStateException("No database connection established!")
 
         databaseController.db?.let {
-            insertModel = SimpleInsertModel.createInstance(it.inserter, files)
+            insertModel = DefaultInsertModel.createInstance(it.inserter, files)
             inserterView.showUploadedView()
         }
     }

@@ -9,8 +9,8 @@ interface InsertUnit {
     val idProperty: ReadOnlyStringProperty
     val id: String
 
-    val statusProperty: ReadOnlyProperty<InsertUnitStatus>
-    val status: InsertUnitStatus
+    val unitStatusProperty: ReadOnlyProperty<InsertUnitStatus>
+    val unitStatus: InsertUnitStatus
 
     val sourceProperty: ReadOnlyStringProperty
     val source: String

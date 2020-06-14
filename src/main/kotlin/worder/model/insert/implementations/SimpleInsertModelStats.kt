@@ -22,7 +22,7 @@ open class SimpleInsertModelStats(
     override var uncommittedUnits: Int by bindToStats(initValue = uncommittedUnits, defaultTitle = "Uncommitted units")
     override var committedUnits: Int by bindToStats(initValue = committedUnits, defaultTitle = "Committed units")
     override var excludedUnits: Int by bindToStats(initValue = excludedUnits, defaultTitle = "Excluded units")
-    override var actionNeededUnits: Int by bindToStats(initValue = actionNeededUnits, defaultTitle = "Action needed untis")
+    override var actionNeededUnits: Int by bindToStats(initValue = actionNeededUnits, defaultTitle = "Action needed units")
 
     override var totalValidWords: Int by bindToStats(initValue = totalValidWords, defaultTitle = "Total valid words")
     override var totalInvalidWords: Int by bindToStats(initValue = totalInvalidWords, defaultTitle = "Total invalid words")

@@ -106,3 +106,10 @@ open class BaseObservableStats(override val origin: String) : ObservableStats {
         titledMap[title] = value
     }
 }
+
+inline fun <T : BaseObservableStats> T.applySynchronized(block: T.() -> Unit): T {
+    synchronized(this) {
+        block.invoke(this)
+    }
+    return this
+}
