@@ -9,19 +9,19 @@ import tornadofx.observableMapOf
 import tornadofx.onChange
 import kotlin.reflect.KProperty
 
-open class SimpleObservableStats(override val origin: String) : ObservableStats {
+open class BaseObservableStats(override val origin: String) : ObservableStats {
     companion object {
         fun statsObject(
-                simpleObservableStats: SimpleObservableStats,
+                baseObservableStats: BaseObservableStats,
                 initValue: Any?,
                 defaultTitle: String? = null
-        ): SimpleObservableStats = simpleObservableStats.bindToStats(initValue, defaultTitle)
+        ): BaseObservableStats = baseObservableStats.bindToStats(initValue, defaultTitle)
 
         fun <T : Any?> statsObject(
-                simpleObservableStats: SimpleObservableStats,
+                baseObservableStats: BaseObservableStats,
                 observableValue: ObservableValue<T>,
                 defaultTitle: String? = null
-        ): SimpleObservableStats = simpleObservableStats.bindToStats(observableValue, defaultTitle)
+        ): BaseObservableStats = baseObservableStats.bindToStats(observableValue, defaultTitle)
     }
 
 
@@ -68,7 +68,7 @@ open class SimpleObservableStats(override val origin: String) : ObservableStats 
         updatePropertyValue(property.name, value)
     }
 
-    operator fun provideDelegate(thisRef: Any?, property: KProperty<*>): SimpleObservableStats {
+    operator fun provideDelegate(thisRef: Any?, property: KProperty<*>): BaseObservableStats {
         val title: String = defaultTitleTmp ?: property.name
         mutableTitleMapping[property.name] = title
         titledMap[title] = initValueTmp
@@ -84,13 +84,13 @@ open class SimpleObservableStats(override val origin: String) : ObservableStats 
     }
 
 
-    protected fun bindToStats(initValue: Any?, defaultTitle: String? = null): SimpleObservableStats {
+    protected fun bindToStats(initValue: Any?, defaultTitle: String? = null): BaseObservableStats {
         defaultTitleTmp = defaultTitle
         initValueTmp = initValue
         return this
     }
 
-    protected fun <T : Any?> bindToStats(observableValue: ObservableValue<T>, defaultTitle: String? = null): SimpleObservableStats {
+    protected fun <T : Any?> bindToStats(observableValue: ObservableValue<T>, defaultTitle: String? = null): BaseObservableStats {
         defaultTitleTmp = defaultTitle
         initValueTmp = observableValue.value
         observableValueTmp = observableValue

@@ -24,17 +24,26 @@ dependencies {
     implementation("org.xerial:sqlite-jdbc:3.30.1")
     implementation("org.jetbrains.exposed:exposed-core:0.23.1")
     implementation("org.jetbrains.exposed:exposed-jdbc:0.23.1")
+
+    testImplementation("io.kotest:kotest-runner-junit5-jvm:4.1.0.RC2")
+    testImplementation("io.mockk:mockk:1.10.0")
 }
 
 application {
     mainClassName = "worder.AppEntry"
-}
 
-javafx {
-    version = "14"
-    modules("javafx.controls", "javafx.graphics")
-}
+    tasks {
+        withType<KotlinCompile> {
+            kotlinOptions.jvmTarget = "1.8"
+        }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
+        withType<Test> {
+            useJUnitPlatform()
+        }
+    }
+
+    javafx {
+        version = "14"
+        modules("javafx.controls", "javafx.graphics")
+    }
 }
