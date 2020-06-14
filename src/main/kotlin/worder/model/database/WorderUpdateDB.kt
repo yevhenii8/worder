@@ -3,7 +3,7 @@ package worder.model.database
 import worder.model.BareWord
 
 interface WorderUpdateDB {
-    val updaterSessionStats: UpdaterSessionStats
+    val updaterStats: UpdaterStats
 
 
     suspend fun hasNextWord(): Boolean

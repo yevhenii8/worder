@@ -9,7 +9,7 @@ import kotlinx.coroutines.runBlocking
 
 class BaseObservableStatsTest : ShouldSpec({
     @Suppress("BlockingMethodInNonBlockingContext")
-    should("Perform concurrent operation synchronized") {
+    should("perform concurrent operation synchronized") {
         val times = 100_000
         val stats = object : BaseObservableStats("Testing Stats Object") {
             var counter: Int by bindToStats(0)

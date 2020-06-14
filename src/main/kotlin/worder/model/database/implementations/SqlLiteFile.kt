@@ -30,6 +30,7 @@ import org.jetbrains.exposed.sql.update
 import org.sqlite.SQLiteConfig
 import org.sqlite.SQLiteConfig.TransactionMode.IMMEDIATE
 import worder.model.BareWord
+import worder.model.applySynchronized
 import worder.model.database.DatabaseWord
 import worder.model.database.UpdatedWord
 import worder.model.database.WorderDB
@@ -101,7 +102,7 @@ class SqlLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wo
     }
 
 
-    private val sqlLiteCfg = SQLiteConfig().apply {
+    private val sqlLiteCfg: SQLiteConfig = SQLiteConfig().apply {
         setJournalMode(SQLiteConfig.JournalMode.OFF)
         transactionMode = IMMEDIATE
     }
@@ -115,15 +116,15 @@ class SqlLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wo
     private val updatedTagId: Int = getTagId(INSERTED_TAG)
     private val insertedTagId: Int = getTagId(RESET_TAG)
     private val resetTagId: Int = getTagId(UPDATED_TAG)
-    private val skippedWords = mutableListOf<String>()
+    private val skippedWords: MutableList<String> = mutableListOf()
 
-    override val trackStats = SimpleWorderTrackStats().apply {
+    override val trackStats: SimpleWorderTrackStats = SimpleWorderTrackStats().apply {
         totalInserted = getWordsCount(tagId = insertedTagId)
         totalReset = getWordsCount(tagId = resetTagId)
         totalUpdated = getWordsCount(tagId = updatedTagId)
         totalAffected = totalInserted + totalReset + totalUpdated
     }
-    override val summaryStats = SimpleWorderSummaryStats().apply {
+    override val summaryStats: SimpleWorderSummaryStats = SimpleWorderSummaryStats().apply {
         val totalColumn = WordTable.id.count()
 
         val learnedColumn = Sum(
@@ -146,8 +147,8 @@ class SqlLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wo
         unlearned = resultRow[unlearnedColumn]!!
         totalAmount = resultRow[totalColumn].toInt()
     }
-    override val inserterSessionStats = SimpleInserterSessionStats()
-    override val updaterSessionStats = SimpleUpdaterSessionStats()
+    override val inserterStats: SimpleInserterStats = SimpleInserterStats()
+    override val updaterStats: SimpleUpdaterStats = SimpleUpdaterStats()
 
     override val inserter: WorderInsertDB = this
     override val updater: WorderUpdateDB = this
@@ -251,12 +252,12 @@ class SqlLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wo
             }
         }
 
-        trackStats.apply {
+        trackStats.applySynchronized {
             totalAffected++
             totalUpdated++
         }
 
-        updaterSessionStats.apply {
+        updaterStats.applySynchronized {
             totalProcessed++
             updated++
         }
@@ -267,21 +268,23 @@ class SqlLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wo
             WordTable.deleteWhere { (WordTable.name eq bareWord.name) and (WordTable.dictionaryId eq dictionaryId) }
         }
 
-        summaryStats.apply {
+        summaryStats.applySynchronized {
             totalAmount--
             unlearned--
         }
 
-        updaterSessionStats.apply {
+        updaterStats.applySynchronized {
             totalProcessed++
             removed++
         }
     }
 
     override suspend fun setAsSkipped(bareWord: BareWord) {
-        skippedWords.add(skippedWords.size, bareWord.name)
+        synchronized(skippedWords) {
+            skippedWords.add(skippedWords.size, bareWord.name)
+        }
 
-        updaterSessionStats.apply {
+        updaterStats.applySynchronized {
             totalProcessed++
             skipped++
         }
@@ -296,12 +299,12 @@ class SqlLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wo
             }
         }
 
-        summaryStats.apply {
+        summaryStats.applySynchronized {
             learned++
             unlearned--
         }
 
-        updaterSessionStats.apply {
+        updaterStats.applySynchronized {
             totalProcessed++
             learned++
         }
@@ -329,17 +332,17 @@ class SqlLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wo
             }
         }
 
-        trackStats.apply {
+        trackStats.applySynchronized {
             totalAffected++
             totalInserted++
         }
 
-        summaryStats.apply {
+        summaryStats.applySynchronized {
             totalAmount++
             unlearned++
         }
 
-        inserterSessionStats.apply {
+        inserterStats.applySynchronized {
             totalProcessed++
             inserted++
         }
@@ -362,17 +365,17 @@ class SqlLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wo
             }
         }
 
-        trackStats.apply {
+        trackStats.applySynchronized {
             totalAffected++
             totalReset++
         }
 
-        summaryStats.apply {
+        summaryStats.applySynchronized {
             unlearned++
             learned--
         }
 
-        inserterSessionStats.apply {
+        inserterStats.applySynchronized {
             totalProcessed++
             reset++
         }

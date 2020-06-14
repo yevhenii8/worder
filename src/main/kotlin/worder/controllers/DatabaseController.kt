@@ -5,26 +5,36 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import tornadofx.Controller
-import worder.model.SharedStats
-import worder.model.SharedStats.SharedStatsBinder
+import worder.model.BaseObservableStats
 import worder.model.database.WorderDB
 import worder.model.database.implementations.SqlLiteFile
 import java.io.File
 
 class DatabaseController : Controller(), DatabaseEventProducer {
-    val stats = SharedStats("Database Controller")
+    val observableStats: BaseObservableStats = BaseObservableStats("Database Controller")
+
+    var db: WorderDB? by BaseObservableStats.statsObject(
+            baseObservableStats = observableStats,
+            initValue = null,
+            defaultTitle = "Data source"
+    )
+        private set
+
+    var isConnected: Boolean by BaseObservableStats.statsObject(
+            baseObservableStats = observableStats,
+            initValue = false,
+            defaultTitle = "Connected"
+    )
+        private set
 
 
     private val listeners = mutableListOf<DatabaseEventListener>()
-    private var timerValue: String by SharedStatsBinder.bind(stats, "00:00:00")
     private var timerJob: Job? = null
-
-
-    var db: WorderDB? by SharedStatsBinder.bind(stats, null)
-        private set
-
-    var isConnected: Boolean by SharedStatsBinder.bind(stats, false)
-        private set
+    private var timerValue: String by BaseObservableStats.statsObject(
+            baseObservableStats = observableStats,
+            initValue = "00:00:00",
+            defaultTitle = "Session duration"
+    )
 
 
     /*
