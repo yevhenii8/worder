@@ -107,7 +107,7 @@ class SqlLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wo
         transactionMode = IMMEDIATE
     }
     private val connection: Database = Database.connect({
-        sqlLiteCfg.createConnection("jdbc:sqlite:${file.name}")
+        sqlLiteCfg.createConnection("jdbc:sqlite:${file.absolutePath}")
     })
     private val dictionaryId: Int = defaultSqlLiteTransaction {
         DictionaryTable.select { DictionaryTable.langId eq LANG_ID }.firstOrNull()?.get(DictionaryTable.id)

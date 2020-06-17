@@ -32,18 +32,18 @@ dependencies {
 application {
     mainClassName = "worder.AppEntry"
 
-    tasks {
-        withType<KotlinCompile> {
-            kotlinOptions.jvmTarget = "1.8"
-        }
-
-        withType<Test> {
-            useJUnitPlatform()
-        }
-    }
-
     javafx {
         version = "14"
         modules("javafx.controls", "javafx.graphics")
+    }
+}
+
+tasks {
+    withType<KotlinCompile> {
+        kotlinOptions.jvmTarget = "1.8"
+    }
+
+    withType<Test> {
+        useJUnitPlatform()
     }
 }

@@ -18,7 +18,7 @@ import tornadofx.stackpane
 import tornadofx.vbox
 import worder.controllers.DatabaseController
 import worder.controllers.DatabaseEventListener
-import worder.controllers.InserterController
+import worder.controllers.InsertController
 import worder.model.database.WorderDB
 import worder.model.insert.InsertModel
 import worder.views.fragments.DragAndDropFragment
@@ -27,8 +27,8 @@ import worder.views.fragments.NoConnectionFragment
 import worder.views.styles.WorderStyle
 import java.io.File
 
-class InserterView : View("Inserter"), DatabaseEventListener {
-    private val inserterController: InserterController by inject()
+class InsertView : View("Insert"), DatabaseEventListener {
+    private val insertController: InsertController by inject()
     private val noConnectionFragment = find<NoConnectionFragment>().root
 
     override val root: Parent = stackpane()
@@ -44,7 +44,7 @@ class InserterView : View("Inserter"), DatabaseEventListener {
                 "text" to "Drag one or more plain files here to process them",
                 "windowTitle" to "Inserter Files Selection",
                 "extensionFilter" to ExtensionFilter("Text Files (*.txt)", "*.txt"),
-                "action" to { files: List<File> -> inserterController.uploadFiles(files) }
+                "action" to { files: List<File> -> insertController.uploadFiles(files) }
         )
 
         root.replaceChildren(fragment.root)
@@ -61,7 +61,7 @@ class InserterView : View("Inserter"), DatabaseEventListener {
 
 class InserterUploadedView : View() {
     private lateinit var insertModel: InsertModel
-    private val inserterController: InserterController by inject()
+    private val insertController: InsertController by inject()
     private val vScrollBar = ScrollBar().apply { orientation = VERTICAL }
     private val scrollPane = scrollpane {
         vbarPolicy = NEVER
@@ -90,7 +90,7 @@ class InserterUploadedView : View() {
 
 
     override fun onDock() {
-        insertModel = inserterController.insertModel!!
+        insertModel = insertController.insertModel!!
 
         scrollPane.content.apply {
             bindComponents(insertModel.uncommittedUnitsProperty) {

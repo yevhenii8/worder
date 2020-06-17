@@ -14,8 +14,8 @@ import worder.views.styles.WorderStyle
 class MainView : View("Worder GUI") {
     private val drawer: Drawer = drawer { }
     private val databaseTab: DrawerItem = drawer.item<DatabaseView>().apply { expanded = true }
-    private val updaterTab: DrawerItem = drawer.item<UpdaterView>()
-    private val inserterTab: DrawerItem = drawer.item<InserterView>()
+    private val updaterTab: DrawerItem = drawer.item<UpdateView>()
+    private val inserterTab: DrawerItem = drawer.item<InsertView>()
 
 
     override val root = borderpane {
@@ -39,7 +39,7 @@ class MainView : View("Worder GUI") {
         databaseTab.expanded = true
     }
 
-    fun switchToInserterTab() {
+    fun switchToInsertTab() {
         inserterTab.expanded = true
     }
 }

@@ -154,9 +154,12 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
         }
 
         private inner class StateController(initUnitStatus: InsertUnitStatus) {
-            private var unitState: UnitState = pickUpState(initUnitStatus).also {
+            private var unitState: UnitState = pickUpState(initUnitStatus)
+
+
+            init {
                 unitStatus = initUnitStatus
-                it.onAttach()
+                unitState.onAttach()
             }
 
 

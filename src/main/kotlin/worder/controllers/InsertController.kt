@@ -3,11 +3,11 @@ package worder.controllers
 import tornadofx.Controller
 import worder.model.insert.InsertModel
 import worder.model.insert.implementations.DefaultInsertModel
-import worder.views.InserterView
+import worder.views.InsertView
 import java.io.File
 
-class InserterController : Controller() {
-    private val inserterView: InserterView by inject()
+class InsertController : Controller() {
+    private val insertView: InsertView by inject()
     private val databaseController: DatabaseController by inject()
 
     var insertModel: InsertModel? = null
@@ -19,7 +19,7 @@ class InserterController : Controller() {
 
         databaseController.db?.let {
             insertModel = DefaultInsertModel.createInstance(it.inserter, files)
-            inserterView.showUploadedView()
+            insertView.showUploadedView()
         }
     }
 }

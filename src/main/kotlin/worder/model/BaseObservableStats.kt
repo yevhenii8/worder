@@ -5,6 +5,7 @@ import javafx.beans.property.ReadOnlyMapProperty
 import javafx.beans.property.SimpleMapProperty
 import javafx.beans.value.ObservableValue
 import tornadofx.getValue
+import tornadofx.observable
 import tornadofx.observableMapOf
 import tornadofx.onChange
 import kotlin.reflect.KProperty
@@ -30,7 +31,7 @@ open class BaseObservableStats(override val origin: String) : ObservableStats {
     private var defaultTitleTmp: String? = null
 
     private val mutableTitleMapping: MutableMap<String, String> = mutableMapOf()
-    private val mapProperty: MapProperty<String, Any?> = SimpleMapProperty(observableMapOf())
+    private val mapProperty: MapProperty<String, Any?> = SimpleMapProperty(LinkedHashMap<String, Any?>().observable())
     private val map: MutableMap<String, Any?> by mapProperty
     private val titledMapProperty: MapProperty<String, Any?> = SimpleMapProperty(observableMapOf())
     private val titledMap: MutableMap<String, Any?> by titledMapProperty

@@ -2,7 +2,6 @@ package worder.views.fragments
 
 import javafx.geometry.Pos
 import javafx.scene.layout.HBox
-import javafx.scene.paint.Color
 import tornadofx.Fragment
 import tornadofx.addClass
 import tornadofx.bindChildren
@@ -19,7 +18,6 @@ import tornadofx.label
 import tornadofx.onChange
 import tornadofx.squeezebox
 import tornadofx.textfield
-import tornadofx.tooltip
 import tornadofx.vbox
 import worder.model.insert.InsertUnit
 import worder.views.styles.WorderStyle
@@ -45,21 +43,21 @@ class InsertUnitFragment : Fragment() {
             vbox(alignment = Pos.BASELINE_LEFT) {
                 label(unit.idProperty)
 
-                label(unit.statusProperty) {
-                    fun updateStatusStyling() {
-                        tooltip(unit.status.description)
-                        textFill = when (unit.status) {
-                            InsertUnit.InsertUnitStatus.READY_TO_COMMIT -> Color.GREEN
-                            InsertUnit.InsertUnitStatus.ACTION_NEEDED -> Color.RED
-                            InsertUnit.InsertUnitStatus.EXCLUDED_FROM_COMMIT -> Color.YELLOW
-                            InsertUnit.InsertUnitStatus.COMMITTING -> Color.GREEN
-                            InsertUnit.InsertUnitStatus.COMMITTED -> Color.GREEN
-                        }
-                    }
-
-                    unit.statusProperty.onChange { updateStatusStyling() }
-                    updateStatusStyling()
-                }
+//                label(unit.statusProperty) {
+//                    fun updateStatusStyling() {
+//                        tooltip(unit.status.description)
+//                        textFill = when (unit.status) {
+//                            InsertUnit.InsertUnitStatus.READY_TO_COMMIT -> Color.GREEN
+//                            InsertUnit.InsertUnitStatus.ACTION_NEEDED -> Color.RED
+//                            InsertUnit.InsertUnitStatus.EXCLUDED_FROM_COMMIT -> Color.YELLOW
+//                            InsertUnit.InsertUnitStatus.COMMITTING -> Color.GREEN
+//                            InsertUnit.InsertUnitStatus.COMMITTED -> Color.GREEN
+//                        }
+//                    }
+//
+//                    unit.statusProperty.onChange { updateStatusStyling() }
+//                    updateStatusStyling()
+//                }
 
                 label(unit.sourceProperty)
                 label(unit.validWordsProperty.sizeProperty())
