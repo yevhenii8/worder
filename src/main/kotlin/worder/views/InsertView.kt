@@ -93,9 +93,9 @@ class InserterUploadedView : View() {
         insertModel = insertController.insertModel!!
 
         scrollPane.content.apply {
-            bindComponents(insertModel.uncommittedUnitsProperty) {
-                find<InsertUnitFragment>("unit" to it)
-            }
+//            bindComponents(insertModel.uncommittedUnitsProperty) {
+//                find<InsertUnitFragment>("unit" to it)
+//            }
         }
     }
 }

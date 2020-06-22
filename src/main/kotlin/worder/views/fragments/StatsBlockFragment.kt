@@ -9,6 +9,7 @@ import tornadofx.vbox
 import worder.model.Stats
 import worder.views.styles.WorderStyle
 
+@Deprecated("Use ObservableStatsFragment instead", level = DeprecationLevel.HIDDEN)
 class StatsBlockFragment : Fragment() {
     private val prettyNames: Map<String, String> by param()
     private val stats: Stats by param()

@@ -1,15 +1,15 @@
 package worder.model.insert.implementations
 
-import javafx.beans.property.ListProperty
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.ReadOnlyStringProperty
-import javafx.beans.property.SimpleListProperty
+import javafx.beans.property.SetProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleSetProperty
 import javafx.beans.property.SimpleStringProperty
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import tornadofx.getValue
-import tornadofx.observableListOf
+import tornadofx.observableSetOf
 import tornadofx.setValue
 import tornadofx.toObservable
 import worder.model.BareWord
@@ -31,11 +31,11 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
     override val modelStatusProperty: ObjectProperty<InsertModelStatus> = SimpleObjectProperty(InsertModelStatus.CREATED)
     override var modelStatus: InsertModelStatus by modelStatusProperty
 
-    override val uncommittedUnitsProperty: ListProperty<InsertUnit> = SimpleListProperty(observableListOf())
-    override val uncommittedUnits: MutableList<InsertUnit> by uncommittedUnitsProperty
+    override val uncommittedUnitsProperty: SetProperty<InsertUnit> = SimpleSetProperty(observableSetOf())
+    override val uncommittedUnits: MutableSet<InsertUnit> by uncommittedUnitsProperty
 
-    override val committedUnitsProperty: ListProperty<InsertUnit> = SimpleListProperty(observableListOf())
-    override val committedUnits: MutableList<InsertUnit> by committedUnitsProperty
+    override val committedUnitsProperty: SetProperty<InsertUnit> = SimpleSetProperty(observableSetOf())
+    override val committedUnits: MutableSet<InsertUnit> by committedUnitsProperty
 
     override val stats: SimpleInsertModelStats = object : SimpleInsertModelStats() {
         override var uncommittedUnits: Int by bindToStats(uncommittedUnitsProperty.sizeProperty())
@@ -45,8 +45,9 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
 
     init {
         files.forEach {
-            if (!(it.isFile && it.canRead()))
-                throw IllegalArgumentException("Please provide correct readable file!")
+            require(it.isFile && it.canRead()) {
+                "Please provide correct readable file! passed: ${it.name}"
+            }
         }
 
         files.forEachIndexed { index, file ->
@@ -116,16 +117,16 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
         override val sourceProperty: ReadOnlyStringProperty = SimpleStringProperty(source)
         override val source: String by sourceProperty
 
-        override val validWordsProperty: ListProperty<BareWord> = SimpleListProperty()
-        override val validWords: MutableList<BareWord> by validWordsProperty
+        override val validWordsProperty: SetProperty<BareWord> = SimpleSetProperty()
+        override val validWords: MutableSet<BareWord> by validWordsProperty
 
-        override val invalidWordsProperty: ListProperty<InvalidWord> = SimpleListProperty()
-        override val invalidWords: MutableList<InvalidWord> by invalidWordsProperty
+        override val invalidWordsProperty: SetProperty<InvalidWord> = SimpleSetProperty()
+        override val invalidWords: MutableSet<InvalidWord> by invalidWordsProperty
 
 
         init {
-            validWordsProperty.set(validWords.map { BareWord(it) }.toObservable())
-            invalidWordsProperty.set(invalidWords.map { SimpleInvalidWord(it) }.toObservable())
+            validWordsProperty.set(validWords.map { BareWord(it) }.toMutableSet().toObservable())
+            invalidWordsProperty.set(invalidWords.map { SimpleInvalidWord(it) }.toMutableSet().toObservable())
             stateController = StateController(InsertUnitStatus.READY_TO_COMMIT)
         }
 
@@ -187,15 +188,15 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
 
             private abstract inner class UnitState {
                 open suspend fun commit() {
-                    throw IllegalStateException("You can't commit unit with status: ${this@SimpleInsertUnit.unitStatus}")
+                    error("You can't commit unit with status: ${this@SimpleInsertUnit.unitStatus}")
                 }
 
                 open fun excludeFromCommit() {
-                    throw IllegalStateException("You can't exclude unit with status: ${this@SimpleInsertUnit.unitStatus}")
+                    error("You can't exclude unit with status: ${this@SimpleInsertUnit.unitStatus}")
                 }
 
                 open fun includeInCommit() {
-                    throw IllegalStateException("You can't include unit with status: ${this@SimpleInsertUnit.unitStatus}")
+                    error("You can't include unit with status: ${this@SimpleInsertUnit.unitStatus}")
                 }
 
 

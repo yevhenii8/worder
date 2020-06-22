@@ -4,8 +4,8 @@ import javafx.beans.property.MapProperty
 import javafx.beans.property.ReadOnlyMapProperty
 import javafx.beans.property.SimpleMapProperty
 import javafx.beans.value.ObservableValue
+import tornadofx.asObservable
 import tornadofx.getValue
-import tornadofx.observable
 import tornadofx.observableMapOf
 import tornadofx.onChange
 import kotlin.reflect.KProperty
@@ -31,7 +31,7 @@ open class BaseObservableStats(override val origin: String) : ObservableStats {
     private var defaultTitleTmp: String? = null
 
     private val mutableTitleMapping: MutableMap<String, String> = mutableMapOf()
-    private val mapProperty: MapProperty<String, Any?> = SimpleMapProperty(LinkedHashMap<String, Any?>().observable())
+    private val mapProperty: MapProperty<String, Any?> = SimpleMapProperty(LinkedHashMap<String, Any?>().asObservable())
     private val map: MutableMap<String, Any?> by mapProperty
     private val titledMapProperty: MapProperty<String, Any?> = SimpleMapProperty(observableMapOf())
     private val titledMap: MutableMap<String, Any?> by titledMapProperty
@@ -56,18 +56,14 @@ open class BaseObservableStats(override val origin: String) : ObservableStats {
 
     @Suppress("UNCHECKED_CAST")
     operator fun <T : Any?> getValue(thisRef: Any?, property: KProperty<*>): T {
-        if (!map.containsKey(property.name))
-            throw IllegalArgumentException("There's no value for property: ${property.name}")
+        require(map.containsKey(property.name)) {
+            "There's no such property under the stats object! trying to get: ${property.name}"
+        }
 
         return map[property.name] as T
     }
 
-    operator fun <T : Any?> setValue(thisRef: Any?, property: KProperty<*>, value: T) {
-        if (!map.containsKey(property.name))
-            throw IllegalArgumentException("There's no value for property: ${property.name}")
-
-        updatePropertyValue(property.name, value)
-    }
+    operator fun <T : Any?> setValue(thisRef: Any?, property: KProperty<*>, value: T) = updatePropertyValue(property.name, value)
 
     operator fun provideDelegate(thisRef: Any?, property: KProperty<*>): BaseObservableStats {
         val title: String = defaultTitleTmp ?: property.name
@@ -100,8 +96,13 @@ open class BaseObservableStats(override val origin: String) : ObservableStats {
 
 
     private fun updatePropertyValue(propertyName: String, value: Any?) {
-        val title: String = mutableTitleMapping[propertyName]
-                ?: throw IllegalStateException("There's no title mapping for property: $propertyName")
+        require(map.contains(propertyName)) {
+            "There's no such property under the stats object! trying to set: $propertyName"
+        }
+
+        val title: String = checkNotNull(mutableTitleMapping[propertyName]) {
+            "There's no title mapping for property: $propertyName"
+        }
 
         map[propertyName] = value
         titledMap[title] = value

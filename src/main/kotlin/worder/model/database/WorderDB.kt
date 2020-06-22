@@ -6,8 +6,8 @@ interface WorderDB {
 
 
     val inserter: WorderInsertDB
-        get() = throw IllegalStateException("Operation is not supported!")
+        get() = error("Operation is not supported!")
 
     val updater: WorderUpdateDB
-        get() = throw IllegalStateException("Operation is not supported!")
+        get() = error("Operation is not supported!")
 }

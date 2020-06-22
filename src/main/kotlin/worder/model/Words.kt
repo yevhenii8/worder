@@ -10,8 +10,9 @@ open class BareWord(val name: String) {
 
 
     init {
-        if (!wordValidator.invoke(name))
-            throw IllegalArgumentException("Passed word's name is invalid: $name")
+        require(wordValidator.invoke(name)) {
+            "Invalid word's name: $name"
+        }
     }
 
 

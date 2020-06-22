@@ -1,12 +1,15 @@
 package worder.model.insert.request
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.future.await
-import kotlinx.coroutines.sync.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withTimeout
 import worder.model.Word
-import java.io.IOException
 import java.net.URI
-import java.net.http.*
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 import java.util.concurrent.atomic.AtomicLong
 
 
@@ -30,8 +33,8 @@ open class RequesterBaseDecorator(private val requester: Requester) : Requester 
                 val request = HttpRequest.newBuilder(URI.create(url)).build()
                 val response = client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).await()
 
-                if (response.statusCode() != 200)
-                    throw IOException("HTTP request failed with code ${response.statusCode()}")
+//                if (response.statusCode() != 200)
+//                    throw IOException("HTTP request failed with code ${response.statusCode()}")
 
                 response.body()!!
             } else
@@ -118,17 +121,17 @@ open class RequesterBaseDecorator(private val requester: Requester) : Requester 
 
     val definitions: Set<String>
         get() = if (requester is DefinitionRequester) requester.definitions
-        else throw IllegalStateException("You can't use this requester as DefinitionRequester")
+        else error("You can't use this requester as DefinitionRequester")
 
     val translations: Set<String>
         get() = if (requester is TranslationRequester) requester.translations
-        else throw IllegalStateException("You can't use this requester as TranslationRequester")
+        else error("You can't use this requester as TranslationRequester")
 
     val examples: Set<String>
         get() = if (requester is ExampleRequester) requester.examples
-        else throw IllegalStateException("You can't use this requester as ExampleRequester")
+        else error("You can't use this requester as ExampleRequester")
 
     val transcriptions: Set<String>
         get() = if (requester is TranscriptionRequester) requester.transcriptions
-        else throw IllegalStateException("You can't use this requester as TranscriptionRequester")
+        else error("You can't use this requester as TranscriptionRequester")
 }

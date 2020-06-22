@@ -1,7 +1,7 @@
 package worder.model.insert
 
-import javafx.beans.property.ReadOnlyListProperty
 import javafx.beans.property.ReadOnlyProperty
+import javafx.beans.property.ReadOnlySetProperty
 import javafx.beans.property.ReadOnlyStringProperty
 import worder.model.BareWord
 
@@ -15,11 +15,11 @@ interface InsertUnit {
     val sourceProperty: ReadOnlyStringProperty
     val source: String
 
-    val validWordsProperty: ReadOnlyListProperty<BareWord>
-    val validWords: List<BareWord>
+    val validWordsProperty: ReadOnlySetProperty<BareWord>
+    val validWords: Set<BareWord>
 
-    val invalidWordsProperty: ReadOnlyListProperty<InvalidWord>
-    val invalidWords: List<InvalidWord>
+    val invalidWordsProperty: ReadOnlySetProperty<InvalidWord>
+    val invalidWords: Set<InvalidWord>
 
 
     suspend fun commit()

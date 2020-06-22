@@ -41,16 +41,15 @@ class DatabaseController : Controller(), DatabaseEventProducer {
     Public Controller's API
      */
 
-    fun connectToSqlLiteFile(file: File) {
-        db = SqlLiteFile.createInstance(file)
-        connect()
-    }
+    fun connectToSqlLiteFile(file: File) = connect(SqlLiteFile.createInstance(file))
 
     fun disconnect() {
-        db = null
-        isConnected = false
-        timerJob?.cancel()
-        notifyDisconnected()
+        if (isConnected) {
+            db = null
+            isConnected = false
+            timerJob?.cancel()
+            notifyDisconnected()
+        }
     }
 
     override fun subscribe(eventListener: DatabaseEventListener) {
@@ -71,7 +70,11 @@ class DatabaseController : Controller(), DatabaseEventProducer {
     Inner Private Methods
      */
 
-    private fun connect() {
+    private fun connect(otherDB: WorderDB) {
+        if (isConnected)
+            disconnect()
+
+        db = otherDB
         isConnected = true
         timerJob = MainScope().launch { clockUpdater() }
         notifyConnected()

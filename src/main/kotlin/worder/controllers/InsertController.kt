@@ -14,8 +14,9 @@ class InsertController : Controller() {
 
 
     fun uploadFiles(files: List<File>) {
-        if (!databaseController.isConnected)
-            throw IllegalStateException("No database connection established!")
+        check(databaseController.isConnected) {
+            "No database connection established!"
+        }
 
         databaseController.db?.let {
             insertModel = DefaultInsertModel.createInstance(it.inserter, files)

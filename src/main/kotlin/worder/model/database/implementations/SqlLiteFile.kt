@@ -94,10 +94,17 @@ class SqlLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wo
 
     init {
         file.run {
-            if (!exists())
-                throw IllegalArgumentException("File not found! file_path=${absolutePath}")
-            if (!(canRead() && canWrite()))
-                throw IllegalArgumentException("File should be permissible for reading and writing! file_path=${absolutePath}")
+            require(exists()) {
+                "File not found! file_path=${absolutePath}"
+            }
+
+            require(canRead()) {
+                "File should be permissible for reading! file_path=${absolutePath}"
+            }
+
+            require(canWrite()) {
+                "File should be permissible for writing! file_path=${absolutePath}"
+            }
         }
     }
 
@@ -110,9 +117,14 @@ class SqlLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wo
         sqlLiteCfg.createConnection("jdbc:sqlite:${file.absolutePath}")
     })
     private val dictionaryId: Int = defaultSqlLiteTransaction {
-        DictionaryTable.select { DictionaryTable.langId eq LANG_ID }.firstOrNull()?.get(DictionaryTable.id)
-                ?: throw IllegalArgumentException("There's no an English dictionary (LANG_ID: $LANG_ID) in the Database!")
-    }.value
+        val resultRow = DictionaryTable.select { DictionaryTable.langId eq LANG_ID }.firstOrNull()
+
+        requireNotNull(resultRow) {
+            "There's no an English dictionary (LANG_ID: $LANG_ID) in the Database!"
+        }
+
+        resultRow[DictionaryTable.id].value
+    }
     private val updatedTagId: Int = getTagId(INSERTED_TAG)
     private val insertedTagId: Int = getTagId(RESET_TAG)
     private val resetTagId: Int = getTagId(UPDATED_TAG)
@@ -171,7 +183,7 @@ class SqlLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wo
             statement = statement
     )
 
-    private fun getTagId(tagName: String) = defaultSqlLiteTransaction {
+    private fun getTagId(tagName: String): Int = defaultSqlLiteTransaction {
         TagsTable.select { (TagsTable.name eq tagName) and (TagsTable.dictionaryId eq dictionaryId) }.firstOrNull()?.get(TagsTable.id)
                 ?: TagsTable.insert {
                     it[dictionaryId] = this@SqlLiteFile.dictionaryId
@@ -179,7 +191,7 @@ class SqlLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wo
                 }[TagsTable.id]
     }.value
 
-    private fun getWordsCount(tagId: Int) = defaultSqlLiteTransaction {
+    private fun getWordsCount(tagId: Int): Int = defaultSqlLiteTransaction {
         WordTable.select { (WordTable.tags like "%$tagId%") and (WordTable.dictionaryId eq dictionaryId) }
                 .count()
                 .toInt()
@@ -203,28 +215,30 @@ class SqlLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wo
     override suspend fun hasNextWord(): Boolean = suspendedSqlLiteTransaction { !(selectNext().empty()) }
 
     override suspend fun getNextWord(order: SelectOrder): DatabaseWord = suspendedSqlLiteTransaction {
-        when (order) {
+        val resultRow = when (order) {
             ASC, DESC -> selectNext().orderBy(WordTable.id, SortOrder.valueOf(order.name))
             RANDOM -> selectNext().orderBy(Random())
-        }.firstOrNull()?.let {
-            DatabaseWord(
-                    name = it[WordTable.name.lowerCase()],
-                    transcription = it[WordTable.transcription],
-                    rate = it[WordTable.rate],
-                    register = it[WordTable.register],
-                    lastModification = it[WordTable.lastModification],
-                    lastRateModification = it[WordTable.lastRateModification],
-                    lastTraining = it[WordTable.lastTraining],
-                    examples = it[WordTable.example]?.split("#")?.filter(String::isNotBlank)?.toSet() ?: emptySet(),
-                    translations = run {
-                        val translations = it[WordTable.translation]?.split("#")?.filter(String::isNotBlank)
-                                ?: emptyList()
-                        val translationAdditions = it[WordTable.translationAddition]?.split("#")?.filter(String::isNotBlank)
-                                ?: emptyList()
-                        (translations + translationAdditions).toSet()
-                    }
-            )
-        } ?: throw IllegalStateException("Last call of hasNextWord() returned FALSE!")
+        }.firstOrNull()
+
+        checkNotNull(resultRow) {
+            "Last call of hasNextWord() returned FALSE!"
+        }
+
+        DatabaseWord(
+                name = resultRow[WordTable.name.lowerCase()],
+                transcription = resultRow[WordTable.transcription],
+                rate = resultRow[WordTable.rate],
+                register = resultRow[WordTable.register],
+                lastModification = resultRow[WordTable.lastModification],
+                lastRateModification = resultRow[WordTable.lastRateModification],
+                lastTraining = resultRow[WordTable.lastTraining],
+                examples = (resultRow[WordTable.example] ?: "").split("#").filter(String::isNotBlank).toSet(),
+                translations = run {
+                    val translations = (resultRow[WordTable.translation] ?: "").split("#").filter(String::isNotBlank)
+                    val translationAdditions = (resultRow[WordTable.translationAddition] ?: "").split("#").filter(String::isNotBlank)
+                    (translations + translationAdditions).toSet()
+                }
+        )
     }
 
     override suspend fun updateWord(updatedWord: UpdatedWord) {

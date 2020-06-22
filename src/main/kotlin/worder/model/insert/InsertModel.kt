@@ -1,7 +1,7 @@
 package worder.model.insert
 
-import javafx.beans.property.ReadOnlyListProperty
 import javafx.beans.property.ReadOnlyProperty
+import javafx.beans.property.ReadOnlySetProperty
 
 interface InsertModel {
     val modelStatusProperty: ReadOnlyProperty<InsertModelStatus>
@@ -9,11 +9,11 @@ interface InsertModel {
 
     val stats: InsertModelStats
 
-    val uncommittedUnitsProperty: ReadOnlyListProperty<InsertUnit>
-    val uncommittedUnits: List<InsertUnit>
+    val uncommittedUnitsProperty: ReadOnlySetProperty<InsertUnit>
+    val uncommittedUnits: Set<InsertUnit>
 
-    val committedUnitsProperty: ReadOnlyListProperty<InsertUnit>
-    val committedUnits: List<InsertUnit>
+    val committedUnitsProperty: ReadOnlySetProperty<InsertUnit>
+    val committedUnits: Set<InsertUnit>
 
 
     suspend fun commitAllUnits()
