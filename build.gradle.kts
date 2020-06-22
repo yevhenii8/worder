@@ -30,7 +30,7 @@ dependencies {
 }
 
 application {
-    mainClassName = "worder.AppEntry"
+    mainClassName = "worder.core.AppEntry"
 
     javafx {
         version = "14"
