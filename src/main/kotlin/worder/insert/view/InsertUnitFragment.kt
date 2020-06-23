@@ -1,26 +1,32 @@
 package worder.insert.view
 
 import javafx.geometry.Pos
-import javafx.scene.layout.HBox
+import javafx.scene.layout.Priority
+import javafx.scene.paint.Color
+import kotlinx.coroutines.runBlocking
 import tornadofx.Fragment
 import tornadofx.addClass
 import tornadofx.bindChildren
 import tornadofx.button
 import tornadofx.field
 import tornadofx.fieldset
+import tornadofx.fitToParentWidth
 import tornadofx.fold
 import tornadofx.form
 import tornadofx.getChildList
 import tornadofx.hbox
+import tornadofx.hgrow
 import tornadofx.imageview
-import tornadofx.insets
 import tornadofx.label
 import tornadofx.onChange
 import tornadofx.squeezebox
 import tornadofx.textfield
+import tornadofx.tooltip
+import tornadofx.useMaxSize
 import tornadofx.vbox
+import worder.core.model.statusLabel
+import worder.core.view.WorderBrightStyles
 import worder.insert.model.InsertUnit
-import worder.core.view.WorderBrightStyle
 
 class InsertUnitFragment : Fragment() {
     private val unit: InsertUnit by param()
@@ -28,11 +34,12 @@ class InsertUnitFragment : Fragment() {
     override val root = vbox {
         hbox(spacing = 20) {
             imageview("/icons/blue-document-icon_64x64.png") {
-                HBox.setMargin(this, insets(right = 15))
                 alignment = Pos.CENTER
             }
 
-            vbox(alignment = Pos.BASELINE_RIGHT) {
+            vbox(alignment = Pos.BASELINE_RIGHT, spacing = 5) {
+                hgrow = Priority.ALWAYS
+
                 label("ID:")
                 label("Status:")
                 label("Source:")
@@ -40,36 +47,49 @@ class InsertUnitFragment : Fragment() {
                 label("Invalid Words:")
             }
 
-            vbox(alignment = Pos.BASELINE_LEFT) {
-                label(unit.idProperty)
+            vbox(alignment = Pos.BASELINE_LEFT, spacing = 5) {
+                hgrow = Priority.ALWAYS
 
-//                label(unit.statusProperty) {
+                label(unit.idProperty)
+                statusLabel(unit.unitStatusProperty)
+//                label(unit.unitStatusProperty) {
 //                    fun updateStatusStyling() {
-//                        tooltip(unit.status.description)
-//                        textFill = when (unit.status) {
+//                        tooltip(unit.unitStatus.description)
+//                        textFill = when (unit.unitStatus) {
 //                            InsertUnit.InsertUnitStatus.READY_TO_COMMIT -> Color.GREEN
 //                            InsertUnit.InsertUnitStatus.ACTION_NEEDED -> Color.RED
-//                            InsertUnit.InsertUnitStatus.EXCLUDED_FROM_COMMIT -> Color.YELLOW
+//                            InsertUnit.InsertUnitStatus.EXCLUDED_FROM_COMMIT -> Color.ORANGE
 //                            InsertUnit.InsertUnitStatus.COMMITTING -> Color.GREEN
 //                            InsertUnit.InsertUnitStatus.COMMITTED -> Color.GREEN
 //                        }
 //                    }
 //
-//                    unit.statusProperty.onChange { updateStatusStyling() }
+//                    unit.unitStatusProperty.onChange { updateStatusStyling() }
 //                    updateStatusStyling()
 //                }
-
                 label(unit.sourceProperty)
                 label(unit.validWordsProperty.sizeProperty())
                 label(unit.invalidWordsProperty.sizeProperty())
             }
 
             vbox(spacing = 10) {
-                button("Commit")
-                button("Exclude")
-                button("Include")
+                button("Commit") {
+                    setOnAction {
+                        runBlocking { unit.commit() }
+                    }
+                }
+                button("Exclude") {
+                    setOnAction {
+                        runBlocking { unit.excludeFromCommit() }
+                    }
+                }
+                button("Include") {
+                    setOnAction {
+                        runBlocking { unit.includeInCommit() }
+                    }
+                }
 
-                addClass(WorderBrightStyle.unitActions)
+                addClass(WorderBrightStyles.unitButtons)
             }
         }
 
@@ -85,13 +105,15 @@ class InsertUnitFragment : Fragment() {
                                     button("OK") {
                                         setOnAction {
                                             if (!invalidWord.substitute(textFiled.text))
-                                                tornadofx.error("Validation error", "Please, type valid word!")
+                                                tornadofx.error("Validation error", "Please, type a valid word!")
+                                            form.fitToParentWidth()
                                         }
                                     }
 
                                     button("x") {
                                         setOnAction {
                                             invalidWord.reject()
+                                            form.fitToParentWidth()
                                         }
                                     }
                                 }
@@ -107,6 +129,6 @@ class InsertUnitFragment : Fragment() {
             }
         }
 
-        addClass(WorderBrightStyle.insertUnit)
+        addClass(WorderBrightStyles.insertUnit)
     }
 }

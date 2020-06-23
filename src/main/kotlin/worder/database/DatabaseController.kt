@@ -7,7 +7,7 @@ import kotlinx.coroutines.launch
 import tornadofx.Controller
 import worder.core.model.BaseObservableStats
 import worder.database.model.WorderDB
-import worder.database.model.implementations.SqlLiteFile
+import worder.database.model.implementations.SQLiteFile
 import java.io.File
 
 class DatabaseController : Controller(), DatabaseEventProducer {
@@ -41,14 +41,14 @@ class DatabaseController : Controller(), DatabaseEventProducer {
     Public Controller's API
      */
 
-    fun connectToSqlLiteFile(file: File) = connect(SqlLiteFile.createInstance(file))
+    fun connectToSqlLiteFile(file: File) = connect(SQLiteFile.createInstance(file))
 
     fun disconnect() {
         if (isConnected) {
             db = null
             isConnected = false
             timerJob?.cancel()
-            notifyDisconnected()
+            listeners.forEach { it.onDatabaseDisconnection() }
         }
     }
 
@@ -60,9 +60,9 @@ class DatabaseController : Controller(), DatabaseEventProducer {
         subscribe(eventListener)
 
         if (isConnected)
-            notifyConnected()
+            eventListener.onDatabaseConnection(db!!)
         else
-            notifyDisconnected()
+            eventListener.onDatabaseDisconnection()
     }
 
 
@@ -77,12 +77,8 @@ class DatabaseController : Controller(), DatabaseEventProducer {
         db = otherDB
         isConnected = true
         timerJob = MainScope().launch { clockUpdater() }
-        notifyConnected()
+        listeners.forEach { it.onDatabaseConnection(db!!) }
     }
-
-    private fun notifyConnected() = listeners.forEach { it.onDatabaseConnection(db!!) }
-
-    private fun notifyDisconnected() = listeners.forEach { it.onDatabaseDisconnection() }
 
     private suspend fun clockUpdater() {
         var seconds = 0

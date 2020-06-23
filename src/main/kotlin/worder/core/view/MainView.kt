@@ -26,7 +26,7 @@ class MainView : View("Worder GUI") {
         center = drawer
 
         bottom = hbox(alignment = Pos.CENTER) {
-            addClass(WorderBrightStyle.statusBar)
+            addClass(WorderBrightStyles.statusBar)
 
             hyperlink("Copyright yevhenii8 ® 2020") {
                 setOnAction {

@@ -15,12 +15,12 @@ class StatsBlockFragment : Fragment() {
 
     private val values = vbox(alignment = Pos.BASELINE_LEFT)
     private val names = vbox(alignment = Pos.BASELINE_RIGHT) {
-        addClass(WorderBrightStyle.names)
+        addClass(WorderBrightStyles.names)
     }
 
     override val root = vbox {
         label(stats.origin) {
-            addClass(WorderBrightStyle.title)
+            addClass(WorderBrightStyles.title)
         }
 
         hbox {
@@ -28,7 +28,7 @@ class StatsBlockFragment : Fragment() {
             add(values)
         }
 
-        addClass(WorderBrightStyle.statBlock)
+        addClass(WorderBrightStyles.statBlock)
     }
 
     init {

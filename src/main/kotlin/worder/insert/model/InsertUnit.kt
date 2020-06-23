@@ -3,7 +3,10 @@ package worder.insert.model
 import javafx.beans.property.ReadOnlyProperty
 import javafx.beans.property.ReadOnlySetProperty
 import javafx.beans.property.ReadOnlyStringProperty
+import javafx.scene.paint.Color
+import javafx.scene.paint.Paint
 import worder.core.model.BareWord
+import worder.core.model.Status
 
 interface InsertUnit {
     val idProperty: ReadOnlyStringProperty
@@ -37,11 +40,11 @@ interface InsertUnit {
     }
 
 
-    enum class InsertUnitStatus(val description: String) {
-        READY_TO_COMMIT("Unit can be committed either by model or by itself"),
-        ACTION_NEEDED("Invalid words should be rejected or substituted"),
-        EXCLUDED_FROM_COMMIT("Unit can not be committed"),
-        COMMITTING("Unit's committing is in progress"),
-        COMMITTED("Unit has been committed")
+    enum class InsertUnitStatus(override val description: String, override val color: Paint) : Status {
+        READY_TO_COMMIT("Unit can be committed either by model or by itself", Color.GREEN),
+        ACTION_NEEDED("Invalid words should be rejected or substituted", Color.RED),
+        EXCLUDED_FROM_COMMIT("Unit can not be committed", Color.DIMGRAY),
+        COMMITTING("Unit's committing is in progress", Color.DARKORANGE),
+        COMMITTED("Unit has been committed", Color.DIMGRAY)
     }
 }

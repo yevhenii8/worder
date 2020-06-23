@@ -37,7 +37,7 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
     override val committedUnitsProperty: SetProperty<InsertUnit> = SimpleSetProperty(observableSetOf())
     override val committedUnits: MutableSet<InsertUnit> by committedUnitsProperty
 
-    override val stats: SimpleInsertModelStats = object : SimpleInsertModelStats() {
+    override val observableStats: SimpleInsertModelStats = object : SimpleInsertModelStats() {
         override var uncommittedUnits: Int by bindToStats(uncommittedUnitsProperty.sizeProperty())
         override var committedUnits: Int by bindToStats(committedUnitsProperty.sizeProperty())
     }
@@ -65,7 +65,7 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
 
             uncommittedUnits.add(newUnit)
 
-            stats.apply {
+            observableStats.apply {
                 totalValidWords += validWords.size
                 totalInvalidWords += invalidWords.size
                 generatedUnits++
@@ -143,7 +143,7 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
             }
 
             override fun substitute(substitution: String): Boolean {
-                if (BareWord.wordValidator.invoke(substitution))
+                if (!BareWord.wordValidator.invoke(substitution))
                     return false
 
                 validWords.add(BareWord(substitution))
@@ -213,7 +213,7 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
                             .map { database.resolveWord(it) }
                             .partition { it == WorderInsertDB.ResolveRes.RESET }
 
-                    this@DefaultInsertModel.stats.applySynchronized {
+                    this@DefaultInsertModel.observableStats.applySynchronized {
                         this.reset += reset.size
                         this.inserted += inserted.size
                     }
@@ -239,11 +239,11 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
                 }
 
                 override fun onAttach() {
-                    stats.actionNeededUnits++
+                    observableStats.actionNeededUnits++
                 }
 
                 override fun onDetach() {
-                    stats.actionNeededUnits--
+                    observableStats.actionNeededUnits--
                 }
             }
 
@@ -253,11 +253,11 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
                 }
 
                 override fun onAttach() {
-                    stats.excludedUnits++
+                    observableStats.excludedUnits++
                 }
 
                 override fun onDetach() {
-                    stats.excludedUnits--
+                    observableStats.excludedUnits--
                 }
             }
 

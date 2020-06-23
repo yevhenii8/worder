@@ -21,10 +21,10 @@ class DashboardView : View(), DatabaseEventListener {
 
     override fun onDatabaseConnection(db: WorderDB) {
         root.addChildIfPossible(find<ObservableStatsFragment>("observableStats" to databaseController.observableStats).root)
-        root.addChildIfPossible(find<ObservableStatsFragment>("observableStats" to db.summaryStats).root)
-        root.addChildIfPossible(find<ObservableStatsFragment>("observableStats" to db.trackStats).root)
-        root.addChildIfPossible(find<ObservableStatsFragment>("observableStats" to db.inserter.inserterStats).root)
-        root.addChildIfPossible(find<ObservableStatsFragment>("observableStats" to db.updater.updaterStats).root)
+        root.addChildIfPossible(find<ObservableStatsFragment>("observableStats" to db.observableSummaryStats).root)
+        root.addChildIfPossible(find<ObservableStatsFragment>("observableStats" to db.observableTrackStats).root)
+        root.addChildIfPossible(find<ObservableStatsFragment>("observableStats" to db.inserter.observableInserterStats).root)
+        root.addChildIfPossible(find<ObservableStatsFragment>("observableStats" to db.updater.observableUpdaterStats).root)
     }
 
     override fun onDatabaseDisconnection() {

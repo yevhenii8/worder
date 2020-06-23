@@ -22,6 +22,6 @@ class ObservableStatsFragment : Fragment() {
             }
         }
 
-        addClass(WorderBrightStyle.statBlock)
+        addClass(WorderBrightStyles.statBlock)
     }
 }

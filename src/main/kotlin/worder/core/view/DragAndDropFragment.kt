@@ -50,6 +50,6 @@ class DragAndDropFragment : Fragment() {
             it.consume()
         }
 
-        addClass(WorderBrightStyle.dragDropField)
+        addClass(WorderBrightStyles.dragDropField)
     }
 }

@@ -2,20 +2,20 @@ package worder.database.model
 
 import worder.core.model.ObservableStats
 
-interface WorderSummaryStats : ObservableStats {
+interface ObservableWorderSummaryStats : ObservableStats {
     val totalAmount: Int
     val unlearned: Int
     val learned: Int
 }
 
-interface WorderTrackStats : ObservableStats {
+interface ObservableWorderTrackStats : ObservableStats {
     val totalInserted: Int
     val totalReset: Int
     val totalUpdated: Int
     val totalAffected: Int
 }
 
-interface UpdaterStats : ObservableStats {
+interface ObservableUpdaterStats : ObservableStats {
     val totalProcessed: Int
     val removed: Int
     val updated: Int
@@ -23,7 +23,7 @@ interface UpdaterStats : ObservableStats {
     val learned: Int
 }
 
-interface InserterStats : ObservableStats {
+interface ObservableInserterStats : ObservableStats {
     val totalProcessed: Int
     val inserted: Int
     val reset: Int

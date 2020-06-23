@@ -11,7 +11,7 @@ rabies
 recount
 negotiation
 postpone
-inhabit
+inhabit1
 thigh
 intoxicating
 incorporate
@@ -22,7 +22,7 @@ dowry
 groom
 welfare
 eradication
-eradicate
+eradicate1
 leaflet
 assess
 replenish
@@ -33,7 +33,7 @@ curriculum
 embroil
 onslaught
 vicious
-cramp
+cramp1
 poop
 sashay
 cuteness

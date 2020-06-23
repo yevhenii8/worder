@@ -14,6 +14,12 @@ Children's binding to map doesn't work due to https://github.com/edvin/tornadofx
 So, had to put some workarounds instead
  */
 
+
+/**
+ * Bind the children of this Layout node to the given observable map of items
+ * by converting them into nodes via the given converter function.
+ * Changes to the source map will be reflected in the children list of this layout node.
+ */
 inline fun <reified K, reified V> EventTarget.bindChildren(
         sourceMap: ObservableMap<K, V>,
         noinline converter: (K, V) -> Node
@@ -21,6 +27,11 @@ inline fun <reified K, reified V> EventTarget.bindChildren(
         getChildList()?.bind(sourceMap, converter)
 ) { "Unable to extract child nodes from $this" }
 
+
+/**
+ * Bind this map to the given observable list by converting them into the correct type via the given converter.
+ * Changes to the observable list are synced.
+ */
 fun <SourceTypeKey, SourceTypeValue, TargetType> MutableList<TargetType>.bind(
         sourceMap: ObservableMap<SourceTypeKey, SourceTypeValue>,
         converter: (SourceTypeKey, SourceTypeValue) -> TargetType
@@ -40,6 +51,11 @@ fun <SourceTypeKey, SourceTypeValue, TargetType> MutableList<TargetType>.bind(
     return sourceMapListener
 }
 
+
+/**
+ * Listens to changes on a Map of SourceTypeKey to SourceTypeValue and keeps the target list synced by converting
+ * each object into the TargetType via the supplied converter.
+ */
 class MapConversionListener<SourceTypeKey, SourceTypeValue, TargetType>(
         targetList: MutableList<TargetType>,
         sourceMap: ObservableMap<SourceTypeKey, SourceTypeValue>,

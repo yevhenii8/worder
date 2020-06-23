@@ -1,7 +1,7 @@
 package worder.insert.model.implementations
 
 import worder.core.model.BaseObservableStats
-import worder.insert.model.InsertModelStats
+import worder.insert.model.ObservableInsertModelStats
 
 open class SimpleInsertModelStats(
         origin: String = "Insert Model Stats",
@@ -17,7 +17,7 @@ open class SimpleInsertModelStats(
 
         reset: Int = 0,
         inserted: Int = 0
-) : BaseObservableStats(origin), InsertModelStats {
+) : BaseObservableStats(origin), ObservableInsertModelStats {
     override var generatedUnits: Int by bindToStats(initValue = generatedUnits, defaultTitle = "Generated units")
     override var uncommittedUnits: Int by bindToStats(initValue = uncommittedUnits, defaultTitle = "Uncommitted units")
     override var committedUnits: Int by bindToStats(initValue = committedUnits, defaultTitle = "Committed units")

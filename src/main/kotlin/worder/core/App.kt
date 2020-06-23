@@ -4,15 +4,15 @@ import javafx.stage.Stage
 import tornadofx.App
 import tornadofx.FX
 import tornadofx.find
+import worder.core.view.MainView
+import worder.core.view.WorderBrightStyles
 import worder.database.DatabaseController
 import worder.insert.InsertController
-import worder.core.view.MainView
-import worder.core.view.WorderBrightStyle
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class AppEntry : App(MainView::class, WorderBrightStyle::class) {
+class AppEntry : App(MainView::class, WorderBrightStyles::class) {
     companion object {
         private val databaseController: DatabaseController = find()
         private val appHomeDir: Path = Paths.get("").toAbsolutePath()
@@ -25,7 +25,10 @@ class AppEntry : App(MainView::class, WorderBrightStyle::class) {
             }
 
             if (databaseController.db?.toString() != "md-2019-12-21--18-32-51.bck") {
-                databaseController.connectToSqlLiteFile(File("$sampleDir/md-2019-12-21--18-32-51.bck"))
+                val originalSample = File("$sampleDir/md-2019-12-21--18-32-51.bck")
+                val tmpSample = File("$sampleDir/md-2019-12-21--18-32-51_TMP.bck")
+                originalSample.copyTo(tmpSample, overwrite = true)
+                databaseController.connectToSqlLiteFile(tmpSample)
             }
 
             block.invoke(sampleDir)
@@ -36,7 +39,7 @@ class AppEntry : App(MainView::class, WorderBrightStyle::class) {
 
         fun runDevInsert() = withSampleDB {
             find<MainView>().switchToInsertTab()
-            find<InsertController>().uploadFiles(
+            find<InsertController>().generateInsertModel(
                     listOf
                     (
                             File("$it/inserting/words0.txt"),

@@ -3,7 +3,7 @@ package worder.database.model
 import worder.core.model.BareWord
 
 interface WorderInsertDB {
-    val inserterStats: InserterStats
+    val observableInserterStats: ObservableInserterStats
 
 
     suspend fun containsWord(bareWord: BareWord): Boolean
