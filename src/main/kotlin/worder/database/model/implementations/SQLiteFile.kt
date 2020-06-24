@@ -1,6 +1,7 @@
 package worder.database.model.implementations
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.Concat
@@ -331,15 +332,12 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
     WorderInserterDB's Methods Implementation
      */
 
-    override suspend fun containsWord(bareWord: BareWord): Boolean = suspendedSqlLiteTransaction {
+    private suspend fun containsWord(bareWord: BareWord): Boolean = suspendedSqlLiteTransaction {
         WordTable.select((WordTable.name eq bareWord.name) and (WordTable.dictionaryId eq dictionaryId))
                 .count()
     } > 0
 
-    override suspend fun insertWord(bareWord: BareWord): Boolean {
-        if (containsWord(bareWord))
-            return false
-
+    private suspend fun insertWord(bareWord: BareWord): WorderInsertDB.ResolveRes {
         suspendedSqlLiteTransaction {
             WordTable.insert {
                 it[name] = bareWord.name
@@ -348,26 +346,11 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
             }
         }
 
-        observableTrackStats.applySynchronized {
-            totalAffected++
-            totalInserted++
-        }
-
-        observableSummaryStats.applySynchronized {
-            totalAmount++
-            unlearned++
-        }
-
-        observableInserterStats.applySynchronized {
-            totalProcessed++
-            inserted++
-        }
-
-        return true
+        return WorderInsertDB.ResolveRes.INSERTED
     }
 
-    override suspend fun resetWord(bareWord: BareWord): Boolean {
-        val updatedRowsCount = suspendedSqlLiteTransaction {
+    private suspend fun resetWord(bareWord: BareWord): WorderInsertDB.ResolveRes {
+        suspendedSqlLiteTransaction {
             WordTable.update({ (WordTable.name eq bareWord.name) and (WordTable.dictionaryId eq dictionaryId) })
             {
                 it[rate] = 0
@@ -381,22 +364,40 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
             }
         }
 
-        observableTrackStats.applySynchronized {
-            totalAffected++
-            totalReset++
+        return WorderInsertDB.ResolveRes.RESET
+    }
+
+
+    override suspend fun resolveWords(bareWords: Collection<BareWord>): Map<BareWord, WorderInsertDB.ResolveRes> {
+        val res = bareWords.associateWith { if (containsWord(it)) resetWord(it) else insertWord(it) }
+        val (reset, inserted) = res.entries
+                .partition { it.value == WorderInsertDB.ResolveRes.RESET }
+                .run {
+                    first.size to second.size
+                }
+
+        withContext(Dispatchers.Main) {
+            observableTrackStats.apply {
+                totalAffected += res.size
+                totalInserted += inserted
+                totalReset += reset
+            }
+
+            observableSummaryStats.apply {
+                totalAmount += inserted
+                unlearned += inserted
+                unlearned += reset
+                learned -= reset
+            }
+
+            observableInserterStats.apply {
+                totalProcessed += res.size
+                this.inserted += inserted
+                this.reset += reset
+            }
         }
 
-        observableSummaryStats.applySynchronized {
-            unlearned++
-            learned--
-        }
-
-        observableInserterStats.applySynchronized {
-            totalProcessed++
-            reset++
-        }
-
-        return updatedRowsCount > 0
+        return res
     }
 
 

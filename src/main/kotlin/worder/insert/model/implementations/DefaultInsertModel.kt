@@ -6,14 +6,15 @@ import javafx.beans.property.SetProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleSetProperty
 import javafx.beans.property.SimpleStringProperty
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
+import kotlinx.coroutines.withContext
 import tornadofx.getValue
 import tornadofx.observableSetOf
 import tornadofx.setValue
 import tornadofx.toObservable
 import worder.core.model.BareWord
-import worder.core.model.applySynchronized
 import worder.database.model.WorderInsertDB
 import worder.insert.model.InsertModel
 import worder.insert.model.InsertModel.InsertModelStatus
@@ -207,18 +208,22 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
 
             private inner class ReadyToCommitState : UnitState() {
                 override suspend fun commit() {
-                    changeState(InsertUnitStatus.COMMITTING)
-
-                    val (reset, inserted) = validWords
-                            .map { database.resolveWord(it) }
-                            .partition { it == WorderInsertDB.ResolveRes.RESET }
-
-                    this@DefaultInsertModel.observableStats.applySynchronized {
-                        this.reset += reset.size
-                        this.inserted += inserted.size
+                    withContext(Dispatchers.Main) {
+                        changeState(InsertUnitStatus.COMMITTING)
                     }
 
-                    changeState(InsertUnitStatus.COMMITTED)
+                    val (reset, inserted) = database.resolveWords(validWords)
+                            .entries
+                            .partition { it.value == WorderInsertDB.ResolveRes.RESET }
+
+                    withContext(Dispatchers.Main) {
+                        observableStats.apply {
+                            this.reset += reset.size
+                            this.inserted += inserted.size
+                        }
+
+                        changeState(InsertUnitStatus.COMMITTED)
+                    }
                 }
 
                 override fun excludeFromCommit() {

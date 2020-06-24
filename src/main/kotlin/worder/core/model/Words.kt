@@ -4,7 +4,7 @@ import java.util.*
 
 open class BareWord(val name: String) {
     companion object {
-        private val wordPattern = "([a-z\\-']+)|(([a-z\\-']+ [a-z\\-']+)+( [a-z\\-']+)?)".toRegex()
+        private val wordPattern = "([a-zA-Z\\-']+)|(([a-zA-Z\\-']+ [a-zA-Z\\-']+)+( [a-zA-Z\\-']+)?)".toRegex()
         val wordValidator: (word: String) -> Boolean = { word -> word.matches(wordPattern) }
     }
 

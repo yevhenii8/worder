@@ -27,7 +27,8 @@ class DatabaseView : View("Database"), DatabaseEventListener {
             "text" to "Drag MyDictionary backup file here to connect to it",
             "windowTitle" to "MyDictionary Backup File Selection",
             "extensionFilter" to ExtensionFilter("Backup File (*.bck)", "*.bck"),
-            "action" to { files: List<File> -> databaseController.connectToSqlLiteFile(files.first()) }
+            "action" to { files: List<File> -> databaseController.connectToSqlLiteFile(files.first()) },
+            "allowMultiselect" to false
     ).root
 
     override val root: Parent = stackpane {

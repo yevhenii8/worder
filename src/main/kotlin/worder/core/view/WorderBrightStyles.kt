@@ -31,7 +31,7 @@ class WorderBrightStyles : Stylesheet() {
 
     init {
         s(text, label) {
-            fontSize = 18.px
+            fontSize = 16.px
         }
 
         statBlock {
@@ -52,7 +52,7 @@ class WorderBrightStyles : Stylesheet() {
 
         insertUnit {
             squeezeBox {
-                padding = box(20.px, 0.px, 0.px, 0.px)
+                padding = box(15.px, 0.px, 0.px, 0.px)
             }
 
             unitButtons {
@@ -64,8 +64,8 @@ class WorderBrightStyles : Stylesheet() {
                 }
             }
 
-            padding = box(15.px)
-            borderInsets += box(15.px)
+            padding = box(12.px)
+            borderInsets += box(10.px)
             borderColor += box(Color.GRAY)
         }
 
@@ -89,7 +89,7 @@ class WorderBrightStyles : Stylesheet() {
 
         statusBar {
             text {
-                fontSize = 15.px
+                fontSize = 14.px
             }
         }
     }

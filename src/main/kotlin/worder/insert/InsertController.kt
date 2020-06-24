@@ -9,16 +9,11 @@ import worder.insert.model.implementations.DefaultInsertModel
 import worder.insert.view.InsertView
 import java.io.File
 
-class InsertController : Controller(), DatabaseEventListener {
+class InsertController : Controller() {
     private val insertView: InsertView by inject()
     private val databaseController: DatabaseController by inject()
 
     var currentInsertModel: InsertModel? = null
-
-
-    init {
-        databaseController.subscribeAndRaise(this)
-    }
 
 
     fun generateInsertModel(files: List<File>) {
@@ -30,8 +25,4 @@ class InsertController : Controller(), DatabaseEventListener {
         currentInsertModel = null
         insertView.toNotUploadedState()
     }
-
-    override fun onDatabaseConnection(db: WorderDB) = insertView.toNotUploadedState()
-
-    override fun onDatabaseDisconnection() = insertView.toNotConnectedState()
 }

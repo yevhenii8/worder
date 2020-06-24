@@ -2,8 +2,9 @@ package worder.insert.view
 
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
-import javafx.scene.paint.Color
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import tornadofx.Fragment
 import tornadofx.addClass
 import tornadofx.bindChildren
@@ -21,11 +22,9 @@ import tornadofx.label
 import tornadofx.onChange
 import tornadofx.squeezebox
 import tornadofx.textfield
-import tornadofx.tooltip
-import tornadofx.useMaxSize
 import tornadofx.vbox
-import worder.core.model.statusLabel
 import worder.core.view.WorderBrightStyles
+import worder.core.view.statusLabel
 import worder.insert.model.InsertUnit
 
 class InsertUnitFragment : Fragment() {
@@ -37,7 +36,7 @@ class InsertUnitFragment : Fragment() {
                 alignment = Pos.CENTER
             }
 
-            vbox(alignment = Pos.BASELINE_RIGHT, spacing = 5) {
+            vbox(alignment = Pos.BASELINE_RIGHT, spacing = 4) {
                 hgrow = Priority.ALWAYS
 
                 label("ID:")
@@ -47,26 +46,11 @@ class InsertUnitFragment : Fragment() {
                 label("Invalid Words:")
             }
 
-            vbox(alignment = Pos.BASELINE_LEFT, spacing = 5) {
+            vbox(alignment = Pos.BASELINE_LEFT, spacing = 4) {
                 hgrow = Priority.ALWAYS
 
                 label(unit.idProperty)
                 statusLabel(unit.unitStatusProperty)
-//                label(unit.unitStatusProperty) {
-//                    fun updateStatusStyling() {
-//                        tooltip(unit.unitStatus.description)
-//                        textFill = when (unit.unitStatus) {
-//                            InsertUnit.InsertUnitStatus.READY_TO_COMMIT -> Color.GREEN
-//                            InsertUnit.InsertUnitStatus.ACTION_NEEDED -> Color.RED
-//                            InsertUnit.InsertUnitStatus.EXCLUDED_FROM_COMMIT -> Color.ORANGE
-//                            InsertUnit.InsertUnitStatus.COMMITTING -> Color.GREEN
-//                            InsertUnit.InsertUnitStatus.COMMITTED -> Color.GREEN
-//                        }
-//                    }
-//
-//                    unit.unitStatusProperty.onChange { updateStatusStyling() }
-//                    updateStatusStyling()
-//                }
                 label(unit.sourceProperty)
                 label(unit.validWordsProperty.sizeProperty())
                 label(unit.invalidWordsProperty.sizeProperty())
@@ -75,17 +59,17 @@ class InsertUnitFragment : Fragment() {
             vbox(spacing = 10) {
                 button("Commit") {
                     setOnAction {
-                        runBlocking { unit.commit() }
+                        CoroutineScope(Dispatchers.Default).launch { unit.commit() }
                     }
                 }
                 button("Exclude") {
                     setOnAction {
-                        runBlocking { unit.excludeFromCommit() }
+                        unit.excludeFromCommit()
                     }
                 }
                 button("Include") {
                     setOnAction {
-                        runBlocking { unit.includeInCommit() }
+                        unit.includeInCommit()
                     }
                 }
 

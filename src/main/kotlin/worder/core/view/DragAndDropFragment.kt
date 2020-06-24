@@ -6,6 +6,7 @@ import javafx.scene.Parent
 import javafx.scene.input.TransferMode
 import javafx.scene.layout.VBox
 import javafx.stage.FileChooser
+import tornadofx.FileChooserMode
 import tornadofx.Fragment
 import tornadofx.addClass
 import tornadofx.chooseFile
@@ -14,6 +15,7 @@ import tornadofx.hyperlink
 import tornadofx.imageview
 import tornadofx.label
 import tornadofx.vbox
+import tornadofx.warning
 import java.io.File
 
 class DragAndDropFragment : Fragment() {
@@ -21,8 +23,11 @@ class DragAndDropFragment : Fragment() {
     private val windowTitle: String by param()
     private val extensionFilter: FileChooser.ExtensionFilter by param()
     private val action: (files: List<File>) -> Unit by param()
+    private val allowMultiselect: Boolean by param()
 
     override val root: Parent = vbox(alignment = Pos.CENTER) {
+        addClass(WorderBrightStyles.dragDropField)
+
         imageview("/images/files-image.png") {
             VBox.setMargin(this, Insets(20.0))
         }
@@ -31,25 +36,33 @@ class DragAndDropFragment : Fragment() {
 
         hbox(alignment = Pos.CENTER) {
             label("Or ")
-            hyperlink("choose your file(s)") {
+            hyperlink("choose your file${if (allowMultiselect) "(s)" else ""}") {
                 setOnAction {
-                    action.invoke(chooseFile(windowTitle, arrayOf(extensionFilter)))
+                    val chosenFiles = chooseFile(
+                            title = windowTitle,
+                            filters = arrayOf(extensionFilter),
+                            mode = if (allowMultiselect) FileChooserMode.Multi else FileChooserMode.Single
+                    )
+                    if (chosenFiles.isNotEmpty())
+                        action.invoke(chosenFiles)
                 }
             }
         }
 
-        setOnDragOver {
-            if (it.gestureSource !== this && it.dragboard.hasFiles())
-                it.acceptTransferModes(*TransferMode.COPY_OR_MOVE)
-            it.consume()
+        setOnDragOver { dragEvent ->
+            if (dragEvent.gestureSource !== this && dragEvent.dragboard.hasFiles())
+                dragEvent.acceptTransferModes(*TransferMode.COPY_OR_MOVE)
+            dragEvent.consume()
         }
 
-        setOnDragDropped {
-            if (it.dragboard.hasFiles())
-                action.invoke(it.dragboard.files)
-            it.consume()
+        setOnDragDropped { dragEvent ->
+            dragEvent.dragboard.files.let {
+                if (!allowMultiselect && it.size != 1)
+                    warning("Drag & Drop Selector", "Only one file is needed!")
+                else
+                    action.invoke(dragEvent.dragboard.files)
+            }
+            dragEvent.consume()
         }
-
-        addClass(WorderBrightStyles.dragDropField)
     }
 }

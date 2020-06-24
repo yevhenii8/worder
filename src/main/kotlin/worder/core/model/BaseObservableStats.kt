@@ -109,6 +109,7 @@ open class BaseObservableStats(override val origin: String) : ObservableStats {
     }
 }
 
+@Deprecated("Consider using Dispatchers.Main instead")
 inline fun <T : BaseObservableStats> T.applySynchronized(block: T.() -> Unit): T {
     synchronized(this) {
         block.invoke(this)

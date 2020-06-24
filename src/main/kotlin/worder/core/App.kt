@@ -15,38 +15,41 @@ import java.nio.file.Paths
 class AppEntry : App(MainView::class, WorderBrightStyles::class) {
     companion object {
         private val databaseController: DatabaseController = find()
-        private val appHomeDir: Path = Paths.get("").toAbsolutePath()
-        private val sampleDir: Path = appHomeDir.resolve("sample")
+        private val samplePath: Path = Paths.get("").toAbsolutePath().resolve("sample")
+        private val originalSampleDB: File = samplePath.resolve("sample-db.bck").toFile()
+
+        val sampleDB: File = samplePath.resolve("sample-db_TMP.bck").toFile()
+        val isConnectedToSample: Boolean
+            get() = databaseController.db?.toString() == sampleDB.name
+        var keepSample: Boolean = false
 
 
-        private fun withSampleDB(block: (sampleDir: Path) -> Unit) {
-            require(appHomeDir.resolve("sample").toFile().exists()) {
-                "There's no sample data provided! 'sample' directory doesn't exist!"
+        private fun withSampleDB(block: (samplePath: Path) -> Unit) {
+            if (!isConnectedToSample) {
+                require(originalSampleDB.exists()) {
+                    "There's no sample-db provided! Please check: $originalSampleDB"
+                }
+
+                originalSampleDB.copyTo(sampleDB, overwrite = true)
+                databaseController.connectToSqlLiteFile(sampleDB)
             }
 
-            if (databaseController.db?.toString() != "md-2019-12-21--18-32-51.bck") {
-                val originalSample = File("$sampleDir/md-2019-12-21--18-32-51.bck")
-                val tmpSample = File("$sampleDir/md-2019-12-21--18-32-51_TMP.bck")
-                originalSample.copyTo(tmpSample, overwrite = true)
-                databaseController.connectToSqlLiteFile(tmpSample)
-            }
-
-            block.invoke(sampleDir)
+            block.invoke(samplePath)
         }
 
 
-        fun runDevDatabase() = withSampleDB { }
+        fun runDevSample() = withSampleDB { }
 
-        fun runDevInsert() = withSampleDB {
+        fun runDevInsert() = withSampleDB { samplePath ->
             find<MainView>().switchToInsertTab()
             find<InsertController>().generateInsertModel(
                     listOf
                     (
-                            File("$it/inserting/words0.txt"),
-                            File("$it/inserting/words1.txt"),
-                            File("$it/inserting/words2.txt"),
-                            File("$it/inserting/words3.txt"),
-                            File("$it/inserting/words4.txt")
+                            File("$samplePath/inserting/words0.txt"),
+                            File("$samplePath/inserting/words1.txt"),
+                            File("$samplePath/inserting/words2.txt"),
+                            File("$samplePath/inserting/words3.txt"),
+                            File("$samplePath/inserting/words4.txt")
                     )
             )
         }
@@ -63,18 +66,30 @@ class AppEntry : App(MainView::class, WorderBrightStyles::class) {
         processArguments()
     }
 
+    override fun stop() {
+        if (isConnectedToSample && !keepSample)
+            sampleDB.delete()
+
+        super.stop()
+    }
+
 
     private fun processArguments() {
-        FX.application.parameters.raw
-                .map { WorderArgument.fromString(it) }
-                .requireNoNulls()
-                .forEach { it.action.invoke() }
+        val mappedArgs = FX.application.parameters.raw
+                .associateWith { WorderArgument.fromString(it) }
+
+        require(mappedArgs.all { it.value != null }) {
+            "Unexpected argument(s) has been passed! ${mappedArgs.filterValues { it == null }.keys}"
+        }
+
+        mappedArgs.forEach { it.value!!.action.invoke() }
     }
 
 
     enum class WorderArgument(val value: String, val description: String, val action: () -> Unit) {
-        DEV_DATABASE("--dev-database", "Development stage for the Database unit.", AppEntry.Companion::runDevDatabase),
-        DEV_INSERT("--dev-insert", "Development stage for the Insert unit.", AppEntry.Companion::runDevInsert);
+        DEV_DATABASE("--dev-sample", "Automatically connects to the sampleDB.", AppEntry.Companion::runDevSample),
+        DEV_INSERT("--dev-insert", "Development stage for the Insert Tab.", AppEntry.Companion::runDevInsert),
+        KEEP_SAMPLE_DB("--keep-sample-db", "Preserves sample-db-tmp file from removing at the end.", { withSampleDB { keepSample = true } });
 
 
         companion object {
