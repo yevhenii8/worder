@@ -1,7 +1,7 @@
 package worder.database.model.implementations
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.Concat
@@ -32,7 +32,7 @@ import org.jetbrains.exposed.sql.update
 import org.sqlite.SQLiteConfig
 import org.sqlite.SQLiteConfig.TransactionMode.IMMEDIATE
 import worder.core.model.BareWord
-import worder.core.model.applySynchronized
+import worder.core.model.applyWithMainUI
 import worder.database.model.DatabaseWord
 import worder.database.model.UpdatedWord
 import worder.database.model.WorderDB
@@ -99,9 +99,11 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
             require(exists()) {
                 "File not found! file_path=${absolutePath}"
             }
+
             require(canRead()) {
                 "File should be permissible for reading! file_path=${absolutePath}"
             }
+
             require(canWrite()) {
                 "File should be permissible for writing! file_path=${absolutePath}"
             }
@@ -119,7 +121,7 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
         // workaround for Exposed SQLite Driver && Suspended transactions
         TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
     }
-    private val dictionaryId: Int = defaultSqlLiteTransaction {
+    private val dictionaryId: Int = sqlLiteTransaction {
         val resultRow = DictionaryTable.select { DictionaryTable.langId eq LANG_ID }.firstOrNull()
 
         requireNotNull(resultRow) {
@@ -133,13 +135,41 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
     private val resetTagId: Int = getTagId(UPDATED_TAG)
     private val skippedWords: MutableList<String> = mutableListOf()
 
-    override val observableTrackStats: SimpleWorderTrackStats = SimpleWorderTrackStats().apply {
-        totalInserted = getWordsCount(tagId = insertedTagId)
-        totalReset = getWordsCount(tagId = resetTagId)
-        totalUpdated = getWordsCount(tagId = updatedTagId)
-        totalAffected = totalInserted + totalReset + totalUpdated
+    override val observableTrackStats: SimpleWorderTrackStats = SimpleWorderTrackStats()
+    override val observableSummaryStats: SimpleWorderSummaryStats = SimpleWorderSummaryStats()
+    override val observableInserterStats: SimpleInserterStats = SimpleInserterStats()
+    override val observableUpdaterStats: SimpleUpdaterStats = SimpleUpdaterStats()
+
+    override val inserter: WorderInsertDB = this
+    override val updater: WorderUpdateDB = this
+
+
+    init {
+        runBlocking {
+            updateTrackStats()
+            updateSummaryStats()
+        }
     }
-    override val observableSummaryStats: SimpleWorderSummaryStats = SimpleWorderSummaryStats().apply {
+
+
+    /*
+    Private inner/common methods
+     */
+
+    private suspend fun updateTrackStats() {
+        val totalInserted = getWordsCount(tagId = insertedTagId)
+        val totalReset = getWordsCount(tagId = resetTagId)
+        val totalUpdated = getWordsCount(tagId = updatedTagId)
+
+        observableTrackStats.applyWithMainUI {
+            this.totalInserted = totalInserted
+            this.totalReset = totalReset
+            this.totalUpdated = totalUpdated
+            this.totalAffected = totalInserted + totalReset + totalUpdated
+        }
+    }
+
+    private suspend fun updateSummaryStats() {
         val totalColumn = WordTable.id.count()
 
         val learnedColumn = Sum(
@@ -152,52 +182,46 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
                 IntegerColumnType()
         )
 
-        val resultRow = defaultSqlLiteTransaction {
+        val resultRow = sqlLiteTransactionAsync {
             WordTable.slice(totalColumn, learnedColumn, unlearnedColumn)
                     .selectAll()
                     .first()
         }
 
-        learned = resultRow[learnedColumn]!!
-        unlearned = resultRow[unlearnedColumn]!!
-        totalAmount = resultRow[totalColumn].toInt()
+        observableSummaryStats.applyWithMainUI {
+            learned = resultRow[learnedColumn]!!
+            unlearned = resultRow[unlearnedColumn]!!
+            totalAmount = resultRow[totalColumn].toInt()
+        }
     }
-    override val observableInserterStats: SimpleInserterStats = SimpleInserterStats()
-    override val observableUpdaterStats: SimpleUpdaterStats = SimpleUpdaterStats()
 
-    override val inserter: WorderInsertDB = this
-    override val updater: WorderUpdateDB = this
+    private suspend fun getWordsCount(tagId: Int): Int = sqlLiteTransactionAsync {
+        WordTable.select { (WordTable.tags like "%$tagId%") and (WordTable.dictionaryId eq dictionaryId) }
+                .count()
+                .toInt()
+    }
 
-
-    /*
-    Private inner/common methods
-     */
-
-    private suspend fun <T> suspendedSqlLiteTransaction(statement: suspend Transaction.() -> T): T = newSuspendedTransaction(
+    private suspend fun <T> sqlLiteTransactionAsync(statement: suspend Transaction.() -> T): T = newSuspendedTransaction(
             context = Dispatchers.Default,
             db = connection,
             statement = statement
     )
 
-    private fun <T> defaultSqlLiteTransaction(statement: Transaction.() -> T): T = transaction(
+    private fun <T> sqlLiteTransaction(statement: Transaction.() -> T): T = transaction(
             transactionIsolation = Connection.TRANSACTION_SERIALIZABLE,
             repetitionAttempts = 1,
             db = connection,
             statement = statement
     )
 
-    private fun getTagId(tagName: String): Int = defaultSqlLiteTransaction {
-        TagsTable.select { (TagsTable.name eq tagName) and (TagsTable.dictionaryId eq dictionaryId) }.firstOrNull()?.get(TagsTable.id)
+    private fun getTagId(tagName: String): Int = sqlLiteTransaction {
+        val res = TagsTable.select { (TagsTable.name eq tagName) and (TagsTable.dictionaryId eq dictionaryId) }.firstOrNull()?.get(TagsTable.id)
                 ?: TagsTable.insert {
                     it[dictionaryId] = this@SQLiteFile.dictionaryId
                     it[name] = tagName
                 }[TagsTable.id]
-    }.value
 
-    private fun getWordsCount(tagId: Int): Int = defaultSqlLiteTransaction {
-        WordTable.select { (WordTable.tags like "%$tagId%") and (WordTable.dictionaryId eq dictionaryId) }
-                .count()
-                .toInt()
+        res.value
     }
 
 
@@ -205,7 +229,7 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
     WorderUpdaterDB's Methods Implementation
      */
 
-    private suspend fun selectNext() = suspendedSqlLiteTransaction {
+    private suspend fun selectNext() = sqlLiteTransactionAsync {
         WordTable.slice(WordTable.columns.drop(2) + WordTable.name.lowerCase()).select {
             (WordTable.tags notLike "%$updatedTagId%" or WordTable.tags.isNull()) and
                     (WordTable.rate less 100) and
@@ -215,9 +239,9 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
     }
 
 
-    override suspend fun hasNextWord(): Boolean = suspendedSqlLiteTransaction { !(selectNext().empty()) }
+    override suspend fun hasNextWord(): Boolean = sqlLiteTransactionAsync { !(selectNext().empty()) }
 
-    override suspend fun getNextWord(order: SelectOrder): DatabaseWord = suspendedSqlLiteTransaction {
+    override suspend fun getNextWord(order: SelectOrder): DatabaseWord = sqlLiteTransactionAsync {
         val resultRow = when (order) {
             ASC, DESC -> selectNext().orderBy(WordTable.id, SortOrder.valueOf(order.name))
             RANDOM -> selectNext().orderBy(Random())
@@ -251,7 +275,7 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
                 .When(WordTable.tags like "%#", Concat("", WordTable.tags as Column<String>, stringLiteral("$tagId#")))
                 .Else(stringLiteral("#$tagId#"))
 
-        suspendedSqlLiteTransaction {
+        sqlLiteTransactionAsync {
             WordTable.update({ (WordTable.name eq updatedWord.name) and (WordTable.dictionaryId eq dictionaryId) }) {
                 it[translation] = updatedWord.primaryDefinition
                 it[translationAddition] = updatedWord.secondaryDefinition
@@ -269,28 +293,28 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
             }
         }
 
-        observableTrackStats.applySynchronized {
+        observableTrackStats.applyWithMainUI {
             totalAffected++
             totalUpdated++
         }
 
-        observableUpdaterStats.applySynchronized {
+        observableUpdaterStats.applyWithMainUI {
             totalProcessed++
             updated++
         }
     }
 
     override suspend fun removeWord(bareWord: BareWord) {
-        suspendedSqlLiteTransaction {
+        sqlLiteTransactionAsync {
             WordTable.deleteWhere { (WordTable.name eq bareWord.name) and (WordTable.dictionaryId eq dictionaryId) }
         }
 
-        observableSummaryStats.applySynchronized {
+        observableSummaryStats.applyWithMainUI {
             totalAmount--
             unlearned--
         }
 
-        observableUpdaterStats.applySynchronized {
+        observableUpdaterStats.applyWithMainUI {
             totalProcessed++
             removed++
         }
@@ -301,14 +325,14 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
             skippedWords.add(skippedWords.size, bareWord.name)
         }
 
-        observableUpdaterStats.applySynchronized {
+        observableUpdaterStats.applyWithMainUI {
             totalProcessed++
             skipped++
         }
     }
 
     override suspend fun setAsLearned(bareWord: BareWord) {
-        suspendedSqlLiteTransaction {
+        sqlLiteTransactionAsync {
             WordTable.update({ (WordTable.name eq bareWord.name) and (WordTable.dictionaryId eq dictionaryId) })
             {
                 it[rate] = 100
@@ -316,12 +340,12 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
             }
         }
 
-        observableSummaryStats.applySynchronized {
+        observableSummaryStats.applyWithMainUI {
             learned++
             unlearned--
         }
 
-        observableUpdaterStats.applySynchronized {
+        observableUpdaterStats.applyWithMainUI {
             totalProcessed++
             learned++
         }
@@ -332,13 +356,13 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
     WorderInserterDB's Methods Implementation
      */
 
-    private suspend fun containsWord(bareWord: BareWord): Boolean = suspendedSqlLiteTransaction {
+    private suspend fun containsWord(bareWord: BareWord): Boolean = sqlLiteTransactionAsync {
         WordTable.select((WordTable.name eq bareWord.name) and (WordTable.dictionaryId eq dictionaryId))
                 .count()
     } > 0
 
     private suspend fun insertWord(bareWord: BareWord): WorderInsertDB.ResolveRes {
-        suspendedSqlLiteTransaction {
+        sqlLiteTransactionAsync {
             WordTable.insert {
                 it[name] = bareWord.name
                 it[dictionaryId] = this@SQLiteFile.dictionaryId
@@ -350,7 +374,7 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
     }
 
     private suspend fun resetWord(bareWord: BareWord): WorderInsertDB.ResolveRes {
-        suspendedSqlLiteTransaction {
+        sqlLiteTransactionAsync {
             WordTable.update({ (WordTable.name eq bareWord.name) and (WordTable.dictionaryId eq dictionaryId) })
             {
                 it[rate] = 0
@@ -372,29 +396,14 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
         val res = bareWords.associateWith { if (containsWord(it)) resetWord(it) else insertWord(it) }
         val (reset, inserted) = res.entries
                 .partition { it.value == WorderInsertDB.ResolveRes.RESET }
-                .run {
-                    first.size to second.size
-                }
 
-        withContext(Dispatchers.Main) {
-            observableTrackStats.apply {
-                totalAffected += res.size
-                totalInserted += inserted
-                totalReset += reset
-            }
+        updateSummaryStats()
+        updateTrackStats()
 
-            observableSummaryStats.apply {
-                totalAmount += inserted
-                unlearned += inserted
-                unlearned += reset
-                learned -= reset
-            }
-
-            observableInserterStats.apply {
-                totalProcessed += res.size
-                this.inserted += inserted
-                this.reset += reset
-            }
+        observableInserterStats.applyWithMainUI {
+            this.inserted += inserted.size
+            this.reset += reset.size
+            totalProcessed += res.size
         }
 
         return res

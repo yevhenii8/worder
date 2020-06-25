@@ -7,12 +7,15 @@ import javafx.stage.FileChooser.ExtensionFilter
 import tornadofx.View
 import tornadofx.addClass
 import tornadofx.hbox
+import tornadofx.label
 import tornadofx.replaceChildren
 import tornadofx.scrollpane
 import tornadofx.stackpane
 import tornadofx.vbox
 import worder.core.view.DragAndDropFragment
-import worder.core.view.WorderBrightStyles
+import worder.core.styles.WorderDefaultStyles
+import worder.core.view.ObservableStatsFragment
+import worder.core.view.statusLabel
 import worder.database.DatabaseController
 import worder.database.DatabaseEventListener
 import worder.database.model.WorderDB
@@ -54,12 +57,13 @@ class InsertView : View("Insert"), DatabaseEventListener {
 
 class InsertUploadedView : View() {
     private val insertController: InsertController by inject()
-    private val scrollPane = scrollpane {
+    private val insertModelUI = vbox()
+    private val insertUnitsUI = scrollpane {
         vbarPolicy = NEVER
         hbarPolicy = NEVER
 
         add(vbox())
-        addClass(WorderBrightStyles.insertUnits)
+        addClass(WorderDefaultStyles.insertUnits)
 
         vvalueProperty().unbind()
         content.setOnScroll {
@@ -68,17 +72,24 @@ class InsertUploadedView : View() {
     }
 
     override val root: Parent = hbox(alignment = Pos.CENTER) {
-        add(scrollPane)
+        add(insertUnitsUI)
+        add(insertModelUI)
     }
 
 
     override fun onDock() {
         val insertModel = insertController.currentInsertModel!!
 
-        scrollPane.content.apply {
+        insertUnitsUI.content.apply {
             bindComponents(insertModel.uncommittedUnitsProperty) {
                 find<InsertUnitFragment>("unit" to it)
             }
+        }
+
+        insertModelUI.apply {
+            label("Insert Model")
+            statusLabel(insertModel.modelStatusProperty)
+            add(find<ObservableStatsFragment>("observableStats" to insertModel.observableStats))
         }
     }
 }

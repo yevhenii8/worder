@@ -6,6 +6,7 @@ import tornadofx.addClass
 import tornadofx.hbox
 import tornadofx.label
 import tornadofx.vbox
+import worder.core.styles.WorderDefaultStyles
 
 @Deprecated("Use ObservableStatsFragment instead", level = DeprecationLevel.HIDDEN)
 @Suppress("DEPRECATION_ERROR")
@@ -15,12 +16,12 @@ class StatsBlockFragment : Fragment() {
 
     private val values = vbox(alignment = Pos.BASELINE_LEFT)
     private val names = vbox(alignment = Pos.BASELINE_RIGHT) {
-        addClass(WorderBrightStyles.names)
+        addClass(WorderDefaultStyles.names)
     }
 
     override val root = vbox {
         label(stats.origin) {
-            addClass(WorderBrightStyles.title)
+            addClass(WorderDefaultStyles.title)
         }
 
         hbox {
@@ -28,7 +29,7 @@ class StatsBlockFragment : Fragment() {
             add(values)
         }
 
-        addClass(WorderBrightStyles.statBlock)
+        addClass(WorderDefaultStyles.statBlock)
     }
 
     init {

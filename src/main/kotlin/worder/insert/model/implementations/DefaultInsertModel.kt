@@ -39,8 +39,15 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
     override val committedUnits: MutableSet<InsertUnit> by committedUnitsProperty
 
     override val observableStats: SimpleInsertModelStats = object : SimpleInsertModelStats() {
-        override var uncommittedUnits: Int by bindToStats(uncommittedUnitsProperty.sizeProperty())
-        override var committedUnits: Int by bindToStats(committedUnitsProperty.sizeProperty())
+        override var uncommittedUnits: Int by bindToStats(
+                source = this@DefaultInsertModel.uncommittedUnitsProperty.sizeProperty(),
+                usePropertyNameAsTitle = false
+        )
+
+        override var committedUnits: Int by bindToStats(
+                source = this@DefaultInsertModel.committedUnitsProperty.sizeProperty(),
+                usePropertyNameAsTitle = false
+        )
     }
 
 
@@ -140,6 +147,7 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
         private inner class SimpleInvalidWord(override val value: String) : InvalidWord {
             override fun reject() {
                 invalidWords.remove(this)
+                observableStats.totalInvalidWords--
                 stateController.changeState(InsertUnitStatus.READY_TO_COMMIT)
             }
 
@@ -150,6 +158,11 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
                 validWords.add(BareWord(substitution))
                 invalidWords.remove(this)
                 stateController.changeState(InsertUnitStatus.READY_TO_COMMIT)
+
+                observableStats.apply {
+                    totalInvalidWords--
+                    totalValidWords++
+                }
 
                 return true
             }
@@ -220,6 +233,7 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
                         observableStats.apply {
                             this.reset += reset.size
                             this.inserted += inserted.size
+                            this.totalProcessed = this.reset + this.inserted
                         }
 
                         changeState(InsertUnitStatus.COMMITTED)

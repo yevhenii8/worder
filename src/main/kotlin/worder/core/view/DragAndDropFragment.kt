@@ -16,6 +16,7 @@ import tornadofx.imageview
 import tornadofx.label
 import tornadofx.vbox
 import tornadofx.warning
+import worder.core.styles.WorderDefaultStyles
 import java.io.File
 
 class DragAndDropFragment : Fragment() {
@@ -26,7 +27,7 @@ class DragAndDropFragment : Fragment() {
     private val allowMultiselect: Boolean by param()
 
     override val root: Parent = vbox(alignment = Pos.CENTER) {
-        addClass(WorderBrightStyles.dragDropField)
+        addClass(WorderDefaultStyles.dragDropField)
 
         imageview("/images/files-image.png") {
             VBox.setMargin(this, Insets(20.0))

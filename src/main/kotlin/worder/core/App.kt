@@ -5,14 +5,14 @@ import tornadofx.App
 import tornadofx.FX
 import tornadofx.find
 import worder.core.view.MainView
-import worder.core.view.WorderBrightStyles
+import worder.core.styles.WorderDefaultStyles
 import worder.database.DatabaseController
 import worder.insert.InsertController
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class AppEntry : App(MainView::class, WorderBrightStyles::class) {
+class AppEntry : App(MainView::class, WorderDefaultStyles::class) {
     companion object {
         private val databaseController: DatabaseController = find()
         private val samplePath: Path = Paths.get("").toAbsolutePath().resolve("sample")

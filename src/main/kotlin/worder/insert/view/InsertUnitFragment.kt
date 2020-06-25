@@ -23,7 +23,7 @@ import tornadofx.onChange
 import tornadofx.squeezebox
 import tornadofx.textfield
 import tornadofx.vbox
-import worder.core.view.WorderBrightStyles
+import worder.core.styles.WorderDefaultStyles
 import worder.core.view.statusLabel
 import worder.insert.model.InsertUnit
 
@@ -73,7 +73,7 @@ class InsertUnitFragment : Fragment() {
                     }
                 }
 
-                addClass(WorderBrightStyles.unitButtons)
+                addClass(WorderDefaultStyles.unitButtons)
             }
         }
 
@@ -113,6 +113,6 @@ class InsertUnitFragment : Fragment() {
             }
         }
 
-        addClass(WorderBrightStyles.insertUnit)
+        addClass(WorderDefaultStyles.insertUnit)
     }
 }

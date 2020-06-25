@@ -1,4 +1,4 @@
-package worder.core.view
+package worder.core.styles
 
 import javafx.geometry.Pos
 import javafx.scene.layout.BackgroundPosition
@@ -14,7 +14,7 @@ import tornadofx.cssclass
 import tornadofx.infinity
 import tornadofx.px
 
-class WorderBrightStyles : Stylesheet() {
+class WorderDefaultStyles : Stylesheet() {
     companion object {
         val statBlock by cssclass()
         val title by cssclass()
@@ -64,7 +64,7 @@ class WorderBrightStyles : Stylesheet() {
                 }
             }
 
-            padding = box(12.px)
+            padding = box(10.px)
             borderInsets += box(10.px)
             borderColor += box(Color.GRAY)
         }

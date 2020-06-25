@@ -9,6 +9,7 @@ import tornadofx.borderpane
 import tornadofx.drawer
 import tornadofx.hbox
 import tornadofx.hyperlink
+import worder.core.styles.WorderDefaultStyles
 import worder.database.view.DatabaseView
 import worder.insert.view.InsertView
 import worder.update.view.UpdateView
@@ -26,7 +27,7 @@ class MainView : View("Worder GUI") {
         center = drawer
 
         bottom = hbox(alignment = Pos.CENTER) {
-            addClass(WorderBrightStyles.statusBar)
+            addClass(WorderDefaultStyles.statusBar)
 
             hyperlink("Copyright yevhenii8 ® 2020") {
                 setOnAction {

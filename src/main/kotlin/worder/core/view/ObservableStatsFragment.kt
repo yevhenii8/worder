@@ -6,6 +6,7 @@ import tornadofx.label
 import tornadofx.paddingBottom
 import tornadofx.vbox
 import worder.core.model.ObservableStats
+import worder.core.styles.WorderDefaultStyles
 import worder.tornadofx.bindChildren
 
 class ObservableStatsFragment : Fragment() {
@@ -22,6 +23,6 @@ class ObservableStatsFragment : Fragment() {
             }
         }
 
-        addClass(WorderBrightStyles.statBlock)
+        addClass(WorderDefaultStyles.statBlock)
     }
 }
