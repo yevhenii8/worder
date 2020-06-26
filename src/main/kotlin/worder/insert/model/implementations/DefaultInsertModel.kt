@@ -1,13 +1,9 @@
 package worder.insert.model.implementations
 
-import javafx.beans.property.IntegerProperty
 import javafx.beans.property.ObjectProperty
-import javafx.beans.property.ReadOnlyStringProperty
 import javafx.beans.property.SetProperty
-import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleSetProperty
-import javafx.beans.property.SimpleStringProperty
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
@@ -80,7 +76,7 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
     override suspend fun commitAllUnits() {
         supervisorScope {
             uncommittedUnits
-                    .filter { it.unitStatus == InsertUnitStatus.READY_TO_COMMIT }
+                    .filter { it.statusProperty.value == InsertUnitStatus.READY_TO_COMMIT }
                     .forEach { launch { it.commit() } }
         }
     }
@@ -88,7 +84,7 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
 
     private fun updateModelStatus() {
         when {
-            uncommittedUnits.any { it.unitStatus == InsertUnitStatus.READY_TO_COMMIT } -> {
+            uncommittedUnits.any { it.statusProperty.value == InsertUnitStatus.READY_TO_COMMIT } -> {
                 modelStatus = InsertModelStatus.READY_TO_COMMIT
             }
 
@@ -104,27 +100,21 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
 
 
     private inner class SimpleInsertUnit(
-            id: String,
-            source: String,
+            override val id: String,
+            override val source: String,
             validWords: List<String>,
             invalidWords: List<String>
     ) : InsertUnit {
         private var stateController: StateController
 
-        override val idProperty: ReadOnlyStringProperty = SimpleStringProperty(id)
-        override val id: String by idProperty
-
-        override val unitStatusProperty: ObjectProperty<InsertUnitStatus> = SimpleObjectProperty()
-        override var unitStatus: InsertUnitStatus by unitStatusProperty
-
-        override val sourceProperty: ReadOnlyStringProperty = SimpleStringProperty(source)
-        override val source: String by sourceProperty
+        override val statusProperty: ObjectProperty<InsertUnitStatus> = SimpleObjectProperty()
+        var unitStatus: InsertUnitStatus by statusProperty
 
         override val validWordsProperty: SetProperty<BareWord> = SimpleSetProperty()
-        override val validWords: MutableSet<BareWord> by validWordsProperty
+        val validWords: MutableSet<BareWord> by validWordsProperty
 
         override val invalidWordsProperty: SetProperty<InvalidWord> = SimpleSetProperty()
-        override val invalidWords: MutableSet<InvalidWord> by invalidWordsProperty
+        val invalidWords: MutableSet<InvalidWord> by invalidWordsProperty
 
 
         init {
@@ -135,8 +125,8 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
 
 
         override suspend fun commit() = stateController.commit()
-        override fun excludeFromCommit() = stateController.excludeFromCommit()
-        override fun includeInCommit() = stateController.includeInCommit()
+        override fun exclude() = stateController.excludeFromCommit()
+        override fun include() = stateController.includeInCommit()
 
 
         private inner class SimpleInvalidWord(override val value: String) : InvalidWord {

@@ -1,5 +1,7 @@
 package worder.insert.view
 
+import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.value.ObservableValue
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import kotlinx.coroutines.CoroutineScope
@@ -9,6 +11,7 @@ import tornadofx.Fragment
 import tornadofx.addClass
 import tornadofx.bindChildren
 import tornadofx.button
+import tornadofx.enableWhen
 import tornadofx.field
 import tornadofx.fieldset
 import tornadofx.fitToParentWidth
@@ -24,7 +27,7 @@ import tornadofx.squeezebox
 import tornadofx.textfield
 import tornadofx.vbox
 import worder.core.styles.WorderDefaultStyles
-import worder.core.view.statusLabel
+import worder.core.view.worderStatusLabel
 import worder.insert.model.InsertUnit
 
 class InsertUnitFragment : Fragment() {
@@ -49,27 +52,46 @@ class InsertUnitFragment : Fragment() {
             vbox(alignment = Pos.BASELINE_LEFT, spacing = 4) {
                 hgrow = Priority.ALWAYS
 
-                label(unit.idProperty)
-                statusLabel(unit.unitStatusProperty)
-                label(unit.sourceProperty)
+                label(unit.id)
+                worderStatusLabel(unit.statusProperty)
+                label(unit.source)
                 label(unit.validWordsProperty.sizeProperty())
                 label(unit.invalidWordsProperty.sizeProperty())
             }
 
             vbox(spacing = 10) {
+                fun InsertUnit.InsertUnitAction.getListener(): ObservableValue<Boolean> {
+                    val listener = SimpleBooleanProperty(unit.statusProperty.value.availableActions.contains(this))
+                    unit.statusProperty.onChange {
+                        listener.value = it!!.availableActions.contains(this)
+                    }
+                    return listener
+                }
+
                 button("Commit") {
+                    enableWhen {
+                        InsertUnit.InsertUnitAction.COMMIT.getListener()
+                    }
                     setOnAction {
                         CoroutineScope(Dispatchers.Default).launch { unit.commit() }
                     }
                 }
+
                 button("Exclude") {
+                    enableWhen {
+                        InsertUnit.InsertUnitAction.EXCLUDE.getListener()
+                    }
                     setOnAction {
-                        unit.excludeFromCommit()
+                        unit.exclude()
                     }
                 }
+
                 button("Include") {
+                    enableWhen {
+                        InsertUnit.InsertUnitAction.INCLUDE.getListener()
+                    }
                     setOnAction {
-                        unit.includeInCommit()
+                        unit.include()
                     }
                 }
 
@@ -77,7 +99,7 @@ class InsertUnitFragment : Fragment() {
             }
         }
 
-        if (unit.invalidWords.isNotEmpty()) {
+        if (unit.invalidWordsProperty.isNotEmpty()) {
             val squeezebox = squeezebox {
                 fold("List of invalid words") {
                     form {

@@ -1,5 +1,6 @@
 package worder.core.view
 
+import javafx.beans.property.ReadOnlyProperty
 import javafx.beans.value.ObservableValue
 import javafx.event.EventTarget
 import javafx.scene.control.Label
@@ -9,17 +10,24 @@ import tornadofx.stringBinding
 import tornadofx.tooltip
 import worder.core.model.Status
 
-fun EventTarget.statusLabel(
+inline fun EventTarget.worderStatusLabel(
         observableStatus: ObservableValue<out Status>,
         op: Label.() -> Unit = {}
 ) = Label().attachTo(this, op) { label ->
     label.textProperty().bind(observableStatus.stringBinding { it.toString() })
 
-    fun updateStatusStyle() {
+    label.tooltip(observableStatus.value.description)
+    label.textFill = observableStatus.value.color
+
+    observableStatus.onChange {
         label.tooltip(observableStatus.value.description)
         label.textFill = observableStatus.value.color
     }
+}
 
-    observableStatus.onChange { updateStatusStyle() }
-    updateStatusStyle()
+inline fun <reified T> EventTarget.worderPropertyLabel(
+        property: ReadOnlyProperty<T>,
+        op: Label.() -> Unit = {}
+) = Label("${property.name}: ${property.value}").attachTo(this, op) { label ->
+    label.textProperty().bind(property.stringBinding { "${property.name}: ${property.value}" })
 }

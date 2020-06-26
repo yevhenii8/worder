@@ -17,7 +17,8 @@ import tornadofx.vbox
 import worder.core.styles.WorderDefaultStyles
 import worder.core.view.DragAndDropFragment
 import worder.core.view.ObservableStatsFragment
-import worder.core.view.statusLabel
+import worder.core.view.worderPropertyLabel
+import worder.core.view.worderStatusLabel
 import worder.database.DatabaseController
 import worder.database.DatabaseEventListener
 import worder.database.model.WorderDB
@@ -83,23 +84,23 @@ class InsertUploadedView : View() {
 
         insertModelUI.apply {
             label("Insert Model")
-            statusLabel(insertModel.modelStatusProperty)
+            worderStatusLabel(insertModel.modelStatusProperty)
             hbox {
                 vbox {
                     padding = insets(top = 67, right = 10, bottom = 0, left = 10)
                     with (insertModel.observableStats) {
-                        label(generatedUnitsProperty)
-                        label(uncommittedUnitsProperty)
-                        label(committedUnitsProperty)
-                        label(excludedUnitsProperty)
-                        label(actionNeededUnitsProperty)
+                        worderPropertyLabel(generatedUnitsProperty)
+                        worderPropertyLabel(uncommittedUnitsProperty)
+                        worderPropertyLabel(committedUnitsProperty)
+                        worderPropertyLabel(excludedUnitsProperty)
+                        worderPropertyLabel(actionNeededUnitsProperty)
 
-                        label(totalValidWordsProperty)
-                        label(totalInvalidWordsProperty)
+                        worderPropertyLabel(totalValidWordsProperty)
+                        worderPropertyLabel(totalInvalidWordsProperty)
 
-                        label(totalProcessedProperty)
-                        label(insertedProperty)
-                        label(resetProperty)
+                        worderPropertyLabel(totalProcessedProperty)
+                        worderPropertyLabel(insertedProperty)
+                        worderPropertyLabel(resetProperty)
                     }
                 }
                 add(find<ObservableStatsFragment>("observableStats" to insertModel.observableStats))
