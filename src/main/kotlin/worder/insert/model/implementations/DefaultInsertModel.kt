@@ -1,8 +1,10 @@
 package worder.insert.model.implementations
 
+import javafx.beans.property.IntegerProperty
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.ReadOnlyStringProperty
 import javafx.beans.property.SetProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleSetProperty
 import javafx.beans.property.SimpleStringProperty
@@ -38,16 +40,9 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
     override val committedUnitsProperty: SetProperty<InsertUnit> = SimpleSetProperty(observableSetOf())
     override val committedUnits: MutableSet<InsertUnit> by committedUnitsProperty
 
-    override val observableStats: SimpleInsertModelStats = object : SimpleInsertModelStats() {
-        override var uncommittedUnits: Int by bindToStats(
-                source = this@DefaultInsertModel.uncommittedUnitsProperty.sizeProperty(),
-                usePropertyNameAsTitle = false
-        )
-
-        override var committedUnits: Int by bindToStats(
-                source = this@DefaultInsertModel.committedUnitsProperty.sizeProperty(),
-                usePropertyNameAsTitle = false
-        )
+    override val observableStats: SimpleInsertModelStats = SimpleInsertModelStats().apply {
+        uncommittedUnitsProperty.bind(this@DefaultInsertModel.uncommittedUnitsProperty.sizeProperty())
+        committedUnitsProperty.bind(this@DefaultInsertModel.committedUnitsProperty.sizeProperty())
     }
 
 

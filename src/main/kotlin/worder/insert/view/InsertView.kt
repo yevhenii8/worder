@@ -2,18 +2,20 @@ package worder.insert.view
 
 import javafx.geometry.Pos
 import javafx.scene.Parent
+import javafx.scene.control.ScrollPane
 import javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER
 import javafx.stage.FileChooser.ExtensionFilter
 import tornadofx.View
 import tornadofx.addClass
 import tornadofx.hbox
+import tornadofx.insets
 import tornadofx.label
 import tornadofx.replaceChildren
 import tornadofx.scrollpane
 import tornadofx.stackpane
 import tornadofx.vbox
-import worder.core.view.DragAndDropFragment
 import worder.core.styles.WorderDefaultStyles
+import worder.core.view.DragAndDropFragment
 import worder.core.view.ObservableStatsFragment
 import worder.core.view.statusLabel
 import worder.database.DatabaseController
@@ -57,8 +59,55 @@ class InsertView : View("Insert"), DatabaseEventListener {
 
 class InsertUploadedView : View() {
     private val insertController: InsertController by inject()
+    private val uncommittedUnitsUI: ScrollPane = getInsertUnitsContainer()
+    private val committedUnitsUI: ScrollPane = getInsertUnitsContainer()
     private val insertModelUI = vbox()
-    private val insertUnitsUI = scrollpane {
+
+    override val root: Parent = hbox(alignment = Pos.CENTER) {
+        add(uncommittedUnitsUI)
+        add(insertModelUI)
+        add(committedUnitsUI)
+    }
+
+
+    override fun onDock() {
+        val insertModel = insertController.currentInsertModel!!
+
+        uncommittedUnitsUI.content.bindComponents(insertModel.uncommittedUnitsProperty) {
+            find<InsertUnitFragment>("unit" to it)
+        }
+
+        committedUnitsUI.content.bindComponents(insertModel.committedUnitsProperty) {
+            find<InsertUnitFragment>("unit" to it)
+        }
+
+        insertModelUI.apply {
+            label("Insert Model")
+            statusLabel(insertModel.modelStatusProperty)
+            hbox {
+                vbox {
+                    padding = insets(top = 67, right = 10, bottom = 0, left = 10)
+                    with (insertModel.observableStats) {
+                        label(generatedUnitsProperty)
+                        label(uncommittedUnitsProperty)
+                        label(committedUnitsProperty)
+                        label(excludedUnitsProperty)
+                        label(actionNeededUnitsProperty)
+
+                        label(totalValidWordsProperty)
+                        label(totalInvalidWordsProperty)
+
+                        label(totalProcessedProperty)
+                        label(insertedProperty)
+                        label(resetProperty)
+                    }
+                }
+                add(find<ObservableStatsFragment>("observableStats" to insertModel.observableStats))
+            }
+        }
+    }
+
+    private fun getInsertUnitsContainer(): ScrollPane = scrollpane {
         vbarPolicy = NEVER
         hbarPolicy = NEVER
 
@@ -68,28 +117,6 @@ class InsertUploadedView : View() {
         vvalueProperty().unbind()
         content.setOnScroll {
             vvalue -= it.deltaY * 0.01
-        }
-    }
-
-    override val root: Parent = hbox(alignment = Pos.CENTER) {
-        add(insertUnitsUI)
-        add(insertModelUI)
-    }
-
-
-    override fun onDock() {
-        val insertModel = insertController.currentInsertModel!!
-
-        insertUnitsUI.content.apply {
-            bindComponents(insertModel.uncommittedUnitsProperty) {
-                find<InsertUnitFragment>("unit" to it)
-            }
-        }
-
-        insertModelUI.apply {
-            label("Insert Model")
-            statusLabel(insertModel.modelStatusProperty)
-            add(find<ObservableStatsFragment>("observableStats" to insertModel.observableStats))
         }
     }
 }

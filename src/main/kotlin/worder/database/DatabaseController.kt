@@ -13,15 +13,13 @@ import java.io.File
 class DatabaseController : Controller(), DatabaseEventProducer {
     val observableStats: BaseObservableStats = BaseObservableStats("Database Controller")
 
-    var db: WorderDB? by BaseObservableStats.statsObject(
-            baseObservableStats = observableStats,
+    var db: WorderDB? by observableStats.bindToStats(
             initValue = null,
             defaultTitle = "Data source"
     )
         private set
 
-    var isConnected: Boolean by BaseObservableStats.statsObject(
-            baseObservableStats = observableStats,
+    var isConnected: Boolean by observableStats.bindToStats(
             initValue = false,
             defaultTitle = "Connected"
     )
@@ -30,8 +28,7 @@ class DatabaseController : Controller(), DatabaseEventProducer {
 
     private val listeners = mutableListOf<DatabaseEventListener>()
     private var timerJob: Job? = null
-    private var timerValue: String by BaseObservableStats.statsObject(
-            baseObservableStats = observableStats,
+    private var timerValue: String by observableStats.bindToStats(
             initValue = "00:00:00",
             defaultTitle = "Session duration"
     )

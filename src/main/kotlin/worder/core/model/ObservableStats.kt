@@ -10,9 +10,4 @@ interface ObservableStats {
 
     val asTitledMapProperty: ReadOnlyMapProperty<String, Any?>
     val asTitledMap: Map<String, Any?>
-
-    val titleMapping: Map<String, String>
-
-
-    fun updateTitle(propertyName: String, newTitle: String): Boolean
 }

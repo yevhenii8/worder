@@ -1,6 +1,6 @@
 package worder.insert.model
 
-import javafx.beans.property.SimpleIntegerProperty
+import javafx.beans.property.ReadOnlyIntegerProperty
 import worder.core.model.ObservableStats
 
 interface ObservableInsertModelStats : ObservableStats {
@@ -8,19 +8,19 @@ interface ObservableInsertModelStats : ObservableStats {
      * Contains stats values related to units
      */
 
-    val generatedUnitsProperty: SimpleIntegerProperty
+    val generatedUnitsProperty: ReadOnlyIntegerProperty
     val generatedUnits: Int
 
-    val uncommittedUnitsProperty: SimpleIntegerProperty
+    val uncommittedUnitsProperty: ReadOnlyIntegerProperty
     val uncommittedUnits: Int
 
-    val committedUnitsProperty: SimpleIntegerProperty
+    val committedUnitsProperty: ReadOnlyIntegerProperty
     val committedUnits: Int
 
-    val excludedUnitsProperty: SimpleIntegerProperty
+    val excludedUnitsProperty: ReadOnlyIntegerProperty
     val excludedUnits: Int
 
-    val actionNeededUnitsProperty: SimpleIntegerProperty
+    val actionNeededUnitsProperty: ReadOnlyIntegerProperty
     val actionNeededUnits: Int
 
 
@@ -28,22 +28,22 @@ interface ObservableInsertModelStats : ObservableStats {
      * Contains stats values related to processed files
      */
 
-    val totalValidWordsProperty: SimpleIntegerProperty
+    val totalValidWordsProperty: ReadOnlyIntegerProperty
     val totalValidWords: Int
 
-    val totalInvalidWordsProperty: SimpleIntegerProperty
+    val totalInvalidWordsProperty: ReadOnlyIntegerProperty
     val totalInvalidWords: Int
 
 
     /**
      * Contains stats values related to InsertModel itself
      */
-    val totalProcessedProperty: SimpleIntegerProperty
+    val totalProcessedProperty: ReadOnlyIntegerProperty
     val totalProcessed: Int
 
-    val resetProperty: SimpleIntegerProperty
-    val reset: Int
-
-    val insertedProperty: SimpleIntegerProperty
+    val insertedProperty: ReadOnlyIntegerProperty
     val inserted: Int
+
+    val resetProperty: ReadOnlyIntegerProperty
+    val reset: Int
 }

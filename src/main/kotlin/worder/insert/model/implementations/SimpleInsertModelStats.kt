@@ -1,6 +1,9 @@
 package worder.insert.model.implementations
 
+import javafx.beans.property.IntegerProperty
 import javafx.beans.property.SimpleIntegerProperty
+import tornadofx.getValue
+import tornadofx.setValue
 import worder.core.model.BaseObservableStats
 import worder.insert.model.ObservableInsertModelStats
 
@@ -20,35 +23,35 @@ open class SimpleInsertModelStats(
         reset: Int = 0,
         inserted: Int = 0
 ) : BaseObservableStats(origin), ObservableInsertModelStats {
-    final override val generatedUnitsProperty: SimpleIntegerProperty = SimpleIntegerProperty(null, "Generated units", generatedUnits)
-    override var generatedUnits: Int by bindToStats(generatedUnitsProperty)
+    final override val generatedUnitsProperty: IntegerProperty = SimpleIntegerProperty(null, "Generated units", generatedUnits)
+    override var generatedUnits: Int by bindToPropertyAndStats(generatedUnitsProperty)
 
-    final override var uncommittedUnitsProperty: SimpleIntegerProperty = SimpleIntegerProperty(null, "Uncommitted units", uncommittedUnits)
-    override var uncommittedUnits: Int by bindToStats(uncommittedUnitsProperty)
+    final override val uncommittedUnitsProperty: IntegerProperty = SimpleIntegerProperty(null, "Uncommitted units", uncommittedUnits)
+    override var uncommittedUnits: Int by bindToPropertyAndStats(uncommittedUnitsProperty)
 
-    final override var committedUnitsProperty: SimpleIntegerProperty = SimpleIntegerProperty(null, "Committed units", committedUnits)
-    override var committedUnits: Int by bindToStats(committedUnitsProperty)
+    final override val committedUnitsProperty: IntegerProperty = SimpleIntegerProperty(null, "Committed units", committedUnits)
+    override var committedUnits: Int by bindToPropertyAndStats(committedUnitsProperty)
 
-    final override var excludedUnitsProperty: SimpleIntegerProperty = SimpleIntegerProperty(null, "Excluded units", excludedUnits)
-    override var excludedUnits: Int by bindToStats(excludedUnitsProperty)
+    final override val excludedUnitsProperty: IntegerProperty = SimpleIntegerProperty(null, "Excluded units", excludedUnits)
+    override var excludedUnits: Int by bindToPropertyAndStats(excludedUnitsProperty)
 
-    final override var actionNeededUnitsProperty: SimpleIntegerProperty = SimpleIntegerProperty(null, "Action needed units", actionNeededUnits)
-    override var actionNeededUnits: Int by bindToStats(actionNeededUnitsProperty)
-
-
-    final override var totalValidWordsProperty: SimpleIntegerProperty = SimpleIntegerProperty(null, "Total valid words", totalValidWords)
-    override var totalValidWords: Int by bindToStats(totalValidWordsProperty)
-
-    final override var totalInvalidWordsProperty: SimpleIntegerProperty = SimpleIntegerProperty(null, "Total invalid words", totalInvalidWords)
-    override var totalInvalidWords: Int by bindToStats(totalInvalidWordsProperty)
+    final override val actionNeededUnitsProperty: IntegerProperty = SimpleIntegerProperty(null, "Action needed units", actionNeededUnits)
+    override var actionNeededUnits: Int by bindToPropertyAndStats(actionNeededUnitsProperty)
 
 
-    final override var totalProcessedProperty: SimpleIntegerProperty = SimpleIntegerProperty(null, "Total processed words", totalProcessed)
-    override var totalProcessed: Int by bindToStats(totalProcessedProperty)
+    final override val totalValidWordsProperty: IntegerProperty = SimpleIntegerProperty(null, "Total valid words", totalValidWords)
+    override var totalValidWords: Int by bindToPropertyAndStats(totalValidWordsProperty)
 
-    final override var insertedProperty: SimpleIntegerProperty = SimpleIntegerProperty(null, "Inserted words", inserted)
-    override var inserted: Int by bindToStats(insertedProperty)
+    final override val totalInvalidWordsProperty: IntegerProperty = SimpleIntegerProperty(null, "Total invalid words", totalInvalidWords)
+    override var totalInvalidWords: Int by bindToPropertyAndStats(totalInvalidWordsProperty)
 
-    final override var resetProperty: SimpleIntegerProperty = SimpleIntegerProperty(null, "Reset words", reset)
-    override var reset: Int by bindToStats(resetProperty)
+
+    final override val totalProcessedProperty: IntegerProperty = SimpleIntegerProperty(null, "Total processed words", totalProcessed)
+    override var totalProcessed: Int by bindToPropertyAndStats(totalProcessedProperty)
+
+    final override val insertedProperty: IntegerProperty = SimpleIntegerProperty(null, "Inserted words", inserted)
+    override var inserted: Int by bindToPropertyAndStats(insertedProperty)
+
+    final override val resetProperty: IntegerProperty = SimpleIntegerProperty(null, "Reset words", reset)
+    override var reset: Int by bindToPropertyAndStats(resetProperty)
 }
