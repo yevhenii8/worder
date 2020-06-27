@@ -2,7 +2,6 @@ package worder.core.model
 
 import javafx.beans.property.IntegerProperty
 import javafx.beans.property.MapProperty
-import javafx.beans.property.Property
 import javafx.beans.property.ReadOnlyMapProperty
 import javafx.beans.property.SimpleMapProperty
 import kotlinx.coroutines.MainScope
@@ -36,16 +35,16 @@ open class BaseObservableStats(override val origin: String) : ObservableStats {
             defaultTitle: String? = null
     ): BaseObservableStatsDelegate = BaseObservableStatsDelegate(initValue, defaultTitle)
 
-    fun <T> bindToPropertyAndStats(
-            source: Property<T>,
-            defaultTitle: String? = null,
-            usePropertyNameAsTitle: Boolean = false
-    ): BasePropertyDelegate<T> = BasePropertyDelegate(source, defaultTitle, usePropertyNameAsTitle)
+//    fun <T> bindToPropertyAndStats(
+//            source: Property<T>,
+//            defaultTitle: String? = null,
+//            usePropertyNameAsTitle: Boolean = false
+//    ): BasePropertyDelegate<T> = BasePropertyDelegate(source, defaultTitle, usePropertyNameAsTitle)
 
     fun bindToPropertyAndStats(
             source: IntegerProperty,
             defaultTitle: String? = null,
-            usePropertyNameAsTitle: Boolean = false
+            usePropertyNameAsTitle: Boolean = true
     ): IntegerPropertyDelegate = IntegerPropertyDelegate(source, defaultTitle, usePropertyNameAsTitle)
 
 
@@ -83,26 +82,26 @@ open class BaseObservableStats(override val origin: String) : ObservableStats {
         }
     }
 
-    inner class BasePropertyDelegate<T>(
-            private val source: Property<T>,
-            private val defaultTitle: String?,
-            private val usePropertyNameAsTitle: Boolean
-    ) {
-        operator fun provideDelegate(thisRef: Any?, property: KProperty<*>): Property<T> {
-            initPropertyTitle(
-                    property.name,
-                    if (usePropertyNameAsTitle && source.name.isNotBlank()) source.name else defaultTitle
-            )
-
-            updatePropertyValue(property.name, source.value)
-
-            source.onChange {
-                updatePropertyValue(property.name, it)
-            }
-
-            return source
-        }
-    }
+//    inner class BasePropertyDelegate<T>(
+//            private val source: Property<T>,
+//            private val defaultTitle: String?,
+//            private val usePropertyNameAsTitle: Boolean
+//    ) {
+//        operator fun provideDelegate(thisRef: Any?, property: KProperty<*>): Property<T> {
+//            initPropertyTitle(
+//                    property.name,
+//                    if (usePropertyNameAsTitle && source.name.isNotBlank()) source.name else defaultTitle
+//            )
+//
+//            updatePropertyValue(property.name, source.value)
+//
+//            source.onChange {
+//                updatePropertyValue(property.name, it)
+//            }
+//
+//            return source
+//        }
+//    }
 
     inner class IntegerPropertyDelegate(
             private val source: IntegerProperty,
@@ -126,24 +125,9 @@ open class BaseObservableStats(override val origin: String) : ObservableStats {
     }
 }
 
-@Deprecated
-(
-        message = "Consider using applyThroughMainUI instead",
-        replaceWith = ReplaceWith("applyWithMainUI(block)", "worder.core.model.applyWithMainUI"),
-        level = DeprecationLevel.WARNING
-)
-inline fun <T : BaseObservableStats> T.applySynchronized(block: T.() -> Unit): T {
-    synchronized(this) {
-        block.invoke(this)
-    }
-
-    return this
-}
-
 suspend inline fun <T : BaseObservableStats> T.applyWithMainUI(crossinline block: suspend T.() -> Unit): T {
     MainScope().launch {
         block.invoke(this@applyWithMainUI)
     }
-
     return this
 }

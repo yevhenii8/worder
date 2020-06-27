@@ -6,8 +6,6 @@ import io.kotest.matchers.shouldNotBe
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import worder.core.model.BaseObservableStats
-import worder.core.model.applySynchronized
 
 class BaseObservableStatsTest : ShouldSpec({
     @Suppress("BlockingMethodInNonBlockingContext")
@@ -28,7 +26,7 @@ class BaseObservableStatsTest : ShouldSpec({
 
         runBlocking(Dispatchers.Default) {
             repeat(times) {
-                launch { stats.applySynchronized { counter++ } }
+                launch { stats.applyWithMainUI { counter++ } }
             }
         }
 

@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.nio.file.Files
 
 plugins {
     application
@@ -25,7 +26,8 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-core:0.23.1")
     implementation("org.jetbrains.exposed:exposed-jdbc:0.23.1")
 
-    testImplementation("io.kotest:kotest-runner-junit5-jvm:4.1.0.RC2")
+    testImplementation("io.kotest:kotest-runner-junit5-jvm:latest.integration")
+    testImplementation("io.kotest:kotest-runner-console-jvm:latest.integration")
     testImplementation("io.mockk:mockk:1.10.0")
 }
 
@@ -45,5 +47,16 @@ tasks {
 
     withType<Test> {
         useJUnitPlatform()
+    }
+
+    register("updateFileStamps") {
+        group = "Documentation"
+        description = "Updates stamps at the beginning of source files."
+
+        doFirst {
+            projectDir.walkTopDown()
+                    .filter { it.name.endsWith(".kt") || it.name.endsWith(".kts") }
+                    .forEach { file -> println("${file.name}: ${Files.getAttribute(file.toPath(), "crtime")}") }
+        }
     }
 }

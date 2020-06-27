@@ -4,8 +4,8 @@ import javafx.stage.Stage
 import tornadofx.App
 import tornadofx.FX
 import tornadofx.find
-import worder.core.view.MainView
 import worder.core.styles.WorderDefaultStyles
+import worder.core.view.MainView
 import worder.database.DatabaseController
 import worder.insert.InsertController
 import java.io.File
@@ -15,7 +15,7 @@ import java.nio.file.Paths
 class AppEntry : App(MainView::class, WorderDefaultStyles::class) {
     companion object {
         private val databaseController: DatabaseController = find()
-        private val samplePath: Path = Paths.get("").toAbsolutePath().resolve("sample")
+        private val samplePath: Path = Path.of("stuff").resolve("sample")
         private val originalSampleDB: File = samplePath.resolve("sample-db.bck").toFile()
 
         val sampleDB: File = samplePath.resolve("sample-db_TMP.bck").toFile()

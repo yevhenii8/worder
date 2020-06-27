@@ -37,8 +37,8 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
     override val committedUnits: MutableSet<InsertUnit> by committedUnitsProperty
 
     override val observableStats: SimpleInsertModelStats = SimpleInsertModelStats().apply {
-        uncommittedUnitsProperty.bind(this@DefaultInsertModel.uncommittedUnitsProperty.sizeProperty())
-        committedUnitsProperty.bind(this@DefaultInsertModel.committedUnitsProperty.sizeProperty())
+//        uncommittedUnitsProperty.bind(this@DefaultInsertModel.uncommittedUnitsProperty.sizeProperty())
+//        committedUnitsProperty.bind(this@DefaultInsertModel.committedUnitsProperty.sizeProperty())
     }
 
 

@@ -1,7 +1,7 @@
 package worder.insert.model
 
-import javafx.beans.property.ReadOnlyProperty
 import javafx.beans.property.ReadOnlySetProperty
+import javafx.beans.value.ObservableValue
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
 import worder.core.model.BareWord
@@ -11,7 +11,7 @@ interface InsertUnit {
     val id: String
     val source: String
 
-    val statusProperty: ReadOnlyProperty<InsertUnitStatus>
+    val statusProperty: ObservableValue<InsertUnitStatus>
     val validWordsProperty: ReadOnlySetProperty<BareWord>
     val invalidWordsProperty: ReadOnlySetProperty<InvalidWord>
 

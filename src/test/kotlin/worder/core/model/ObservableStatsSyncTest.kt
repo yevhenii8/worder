@@ -11,7 +11,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import worder.core.model.BaseObservableStats
 
 class ObservableStatsSyncTest : ShouldSpec({
     class TestStats : BaseObservableStats("Testing Stats Object") {
