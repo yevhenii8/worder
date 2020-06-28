@@ -66,18 +66,15 @@ class SourceFileStampTest : ShouldSpec({
     }
     val validStampFiles = listOf(
             testDir.resolve("validStamp.kt").also { it.writeText(validStamp) },
-            testDir.resolve("validStamp.kts").also { it.writeText(validStamp) },
-            testDir.resolve("validStamp.html").also { it.writeText(validStamp) }
+            testDir.resolve("validStamp.kts").also { it.writeText(validStamp) }
     )
     val invalidStampFiles = listOf(
             testDir.resolve("invalidStamp.kt").also { it.writeText(invalidStamp) },
-            testDir.resolve("invalidStamp.kts").also { it.writeText(invalidStamp) },
-            testDir.resolve("invalidStamp.html").also { it.writeText(invalidStamp) }
+            testDir.resolve("invalidStamp.kts").also { it.writeText(invalidStamp) }
     )
     val noStampFiles = listOf(
             testDir.resolve("noStamp.kt").also { it.writeText(noStamp) },
-            testDir.resolve("noStamp.kts").also { it.writeText(noStamp) },
-            testDir.resolve("noStamp.html").also { it.writeText(noStamp) }
+            testDir.resolve("noStamp.kts").also { it.writeText(noStamp) }
     )
 
 
