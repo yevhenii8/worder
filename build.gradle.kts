@@ -49,6 +49,11 @@ tasks {
         useJUnitPlatform()
     }
 
+    withType<Wrapper> {
+        distributionType = Wrapper.DistributionType.ALL
+        gradleVersion = "6.5"
+    }
+
     register("updateFileStamps") {
         group = "Documentation"
         description = "Updates stamps at the beginning of source files."
