@@ -1,5 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.nio.file.Files
+import worder.UpdateFileStampsTask
 
 plugins {
     application
@@ -46,7 +46,7 @@ tasks {
 
     withType<Test> {
         useJUnitPlatform()
-        testLogging.setEvents(listOf("passed", "skipped", "failed"))
+//        testLogging.setEvents(listOf("passed", "skipped", "failed"))
     }
 
     withType<Wrapper> {
@@ -54,14 +54,7 @@ tasks {
         gradleVersion = "6.5"
     }
 
-    register("updateFileStamps") {
-        group = "Documentation"
-        description = "Updates stamps at the beginning of source files."
-
-        doFirst {
-            projectDir.walkTopDown()
-                    .filter { it.name.endsWith(".kt") || it.name.endsWith(".kts") }
-                    .forEach { file -> println("${file.name}: ${Files.getAttribute(file.toPath(), "crtime")}") }
-        }
+    register<UpdateFileStampsTask>("updateFileStamps", projectDir, listOf(".kt", ".kts")).apply {
+        run.get().dependsOn(this.get())
     }
 }

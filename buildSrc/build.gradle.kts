@@ -9,7 +9,7 @@ repositories {
 }
 
 dependencies {
-//    implementation(gradleApi())
+    implementation(gradleApi())
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
@@ -24,8 +24,8 @@ tasks {
 
     withType<Test> {
         useJUnitPlatform()
-        testLogging.setEvents(listOf("passed", "skipped", "failed"))
-        testLogging.showStandardStreams = true
+//        testLogging.setEvents(listOf("passed", "skipped", "failed"))
+//        testLogging.showStandardStreams = true
     }
 
     withType<Wrapper> {

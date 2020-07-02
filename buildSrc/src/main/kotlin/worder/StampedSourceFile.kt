@@ -1,7 +1,6 @@
 package worder
 
 import java.io.File
-import java.net.URI
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -14,8 +13,8 @@ class StampedSourceFile private constructor(
         private val presentStamp: String?
 ) {
     companion object {
-        private val pathToStampPattern: URI = this::class.java.getResource("/sourceFileStampPattern.txt").toURI()
-        private val stampPattern: String = File(pathToStampPattern).readText()
+        private const val pathToStampPattern = "/sourceFileStampPattern.txt"
+        private val stampPattern: String = String(this::class.java.getResourceAsStream(pathToStampPattern).readBytes())
         private val regexProperty = "(?<=<).*?(?=>)".toRegex()
         private val regexStampPattern: Regex = "^$stampPattern"
                 .replace("*", "\\*")

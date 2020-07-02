@@ -113,15 +113,15 @@ class StampedSourceFileTest : ShouldSpec({
     }
 
 
-    should("work with valid stamp") {
+    xshould("work with valid stamp") {
         validStampFiles.map { StampedSourceFile.fromFile(it) } shouldNot containNull()
     }
 
-    should("work with files with no stamp") {
+    xshould("work with files with no stamp") {
         noStampFiles.map { StampedSourceFile.fromFile(it) } shouldNot containNull()
     }
 
-    should("not work with invalid stamp") {
+    xshould("not work with invalid stamp") {
         invalidStampFiles.map { StampedSourceFile.fromFile(it) } should containOnlyNulls()
     }
 
