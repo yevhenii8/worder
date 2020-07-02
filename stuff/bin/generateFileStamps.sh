@@ -50,7 +50,8 @@ if [[ $EUID != 0 ]]; then
 fi
 
 
-WORDER_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." >/dev/null 2>&1 && pwd )"
+WORDER_HOME="/home/yevhenii/Projects/worder/buildSrc/build/tests/SourceFileStampTest"
+# WORDER_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." >/dev/null 2>&1 && pwd )"
 STAMP_PATTERN_ORIGINAL=$(cat ../../buildSrc/src/main/resources/sourceFileStampPattern.txt)
 STAMP_PATTERN_LENGTH=$(echo "$STAMP_PATTERN_ORIGINAL" | wc --lines)
 STAMP_PATTERN=$(echo "${STAMP_PATTERN_ORIGINAL//"*"/"\*"}" | sed -E 's/<[^>]*>/<.*>/g')
@@ -58,40 +59,29 @@ STAMP_PATTERN=$(echo "${STAMP_PATTERN_ORIGINAL//"*"/"\*"}" | sed -E 's/<[^>]*>/<
 
 for file in $(find $WORDER_HOME -name '*.kt' -or -name '*.kts');
 do
-    if [[ $(grep --line-regexp --count "$STAMP_PATTERN" "$file") != $STAMP_PATTERN_LENGTH ]];
-    then
+    if [[ $(cat $file) == "/**"* ]]; then
+        echo ""
+        echo "Can't add the stamp to $file!"
+        echo "File already contains a beginning comment! Please check and remove it!"
+        echo ""
+    else
+        echo "Adding the stamp to $file"
+        
         who=$(basename $BASH_SOURCE)
         when=$(date +"%-m/%-d/%-g, %-I:%-M %p")
-        creation_date_raw=$(getFileCreationDate $file)
-        creation_date=$(formatDateToShort $creation_date_raw)
-        modifiction_date_raw=$(getFileModificationDate $file)
-        modifiction_date=$(formatDateToShort $modifiction_date_raw)
+        creation_date_raw=$(getFileCreationDate "$file")
+        creation_date=$(formatDateToShort "$creation_date_raw")
 
-        new_stamp=${STAMP_PATTERN_ORIGINAL/"GENERATED_BY"/"$who"}
-        new_stamp=${new_stamp/"CHECKED_BY"/"$who"}
-        new_stamp=${new_stamp/"GENERATION_TIME"/"$when"}
-        new_stamp=${new_stamp/"CHECK_TIME"/"$when"}
+        new_stamp=${STAMP_PATTERN_ORIGINAL/"STAMP_GENERATED_BY"/"$who"}
+        new_stamp=${new_stamp/"STAMP_LAST_MODIFIED_BY"/"$who"}
 
-        new_stamp=${new_stamp/"CREATION_TIME"/"$creation_date"}
-        new_stamp=${new_stamp/"MODIFICATION_TIME"/"$modifiction_date"}
-        new_stamp=${new_stamp/"VERSION_NUMBER"/"1"}
-
-
-        if [[ $(cat $file) == "/**"* ]];
-        then
-            echo ""
-            echo ""
-            echo "Can't add the stamp to: $file!"
-            echo "File already contains a beginning comment! Please add it manually or remove the comment and try again!"
-            echo "$new_stamp"
-            echo ""
-            echo ""
-        else
-            echo "Adding the stamp to: $file"
-            echo "$new_stamp"
-            echo ""
-            echo ""
-            # echo -e "$new_stamp\n\n$(cat $file)" > "$file"
-        fi
+        new_stamp=${new_stamp/"FILE_CREATION_TIME"/"$creation_date"}
+        new_stamp=${new_stamp/"FILE_MODIFICATION_TIME"/"$when"}
+        new_stamp=${new_stamp/"FILE_VERSION_NUMBER"/"1"}
+        
+        # echo "$new_stamp"
+        # echo ""
+        # echo ""
+        echo -e "$new_stamp\n\n$(cat $file)" > "$file"
     fi
 done

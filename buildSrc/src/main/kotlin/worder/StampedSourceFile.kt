@@ -1,10 +1,9 @@
 package worder
 
-import org.gradle.internal.os.OperatingSystem
 import java.io.File
 import java.net.URI
-import java.nio.file.Path
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.*
@@ -20,7 +19,8 @@ class StampedSourceFile private constructor(
         private val regexProperty = "(?<=<).*?(?=>)".toRegex()
         private val regexStampPattern: Regex = "^$stampPattern"
                 .replace("*", "\\*")
-                .replace("<.*?>".toRegex(), "<.*?>")
+                .replace("<[^<]*?_TIME>".toRegex(), "<[0-9]{1,2}/[0-9]{1,2}/[0-9]{2}, [0-9]{1,2}:[0-9]{1,2} (PM|AM)>")
+                .replace("<[A-Z_]*?>".toRegex(), "<.*?>")
                 .toRegex()
 
 
@@ -55,6 +55,8 @@ class StampedSourceFile private constructor(
                 if (fileContent.startsWith("/**")) fileContent.substringBefore("*/") + "*/\n" else null
 
         private fun isStampValid(rawStamp: String): Boolean = rawStamp.matches(regexStampPattern)
+
+        private fun LocalDateTime.toStampDateTime(): String = format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT))
     }
 
 
@@ -64,11 +66,15 @@ class StampedSourceFile private constructor(
 
     init {
         if (presentStamp != null) {
-            val values = regexProperty.findAll(presentStamp).iterator()
-            val titles = properties.iterator()
+            val values = regexProperty.findAll(presentStamp).map { it.value }.iterator()
+            val titles = StampProperty.values().iterator()
 
             while (values.hasNext() && titles.hasNext()) {
-                properties[titles.next().key] = values.next().value
+                properties[titles.next()] = values.next()
+            }
+
+            check(properties.size == StampProperty.values().size) {
+                "Error during parsing stamp's properties of $sourceFile!"
             }
         }
     }
@@ -79,65 +85,44 @@ class StampedSourceFile private constructor(
             "Stamp has already been updated! This object can't be reused. "
         }
 
-        fun datetimeFormatter(datetime: LocalDateTime): String = datetime.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT))
-        val now = LocalDateTime.now()
-        val who = "${javaClass.simpleName}.kt"
+        // there are only two possible states for this object (enforced by static factory)
+        // 1) when a file doesn't have stamp and 2) when it has stamp
+        // this object can't be created for invalid stamp or leading comment
 
-        properties[StampProperty.CHECKED_BY] = who
-        properties[StampProperty.CHECK_TIME] = datetimeFormatter(now)
+        val lastFileModificationTime = LocalDateTime
+                .ofEpochSecond(sourceFile.lastModified() / 1000, 0, ZoneOffset.ofHours(3))
+                .toStampDateTime()
 
-        if (presentStamp == null) {
-            properties[StampProperty.GENERATED_BY] = who
-            properties[StampProperty.GENERATION_TIME] = datetimeFormatter(now)
-            properties[StampProperty.CREATION_TIME] = datetimeFormatter(obtainFileCreationTime() ?: now)
-            properties[StampProperty.MODIFICATION_TIME] = datetimeFormatter(now)
-            properties[StampProperty.VERSION_NUMBER] = "1"
-        } else {
-            val modificationTime = obtainFileModificationTime()
-            if (modificationTime != null) {
-                properties[StampProperty.MODIFICATION_TIME] = datetimeFormatter(modificationTime)
-                properties[StampProperty.VERSION_NUMBER] = (properties[StampProperty.VERSION_NUMBER]!!.toInt() + 1).toString()
+        val isItNewStamp = presentStamp == null
+        val wasFileModified = lastFileModificationTime != properties[StampProperty.FILE_MODIFICATION_TIME]
+
+        if (isItNewStamp || wasFileModified) {
+            val who = "${javaClass.simpleName}.kt"
+            val now = LocalDateTime.now().toStampDateTime()
+
+            if (isItNewStamp) {
+                properties[StampProperty.FILE_CREATION_TIME] = now
+                properties[StampProperty.FILE_MODIFICATION_TIME] = now
+                properties[StampProperty.STAMP_LAST_MODIFIED_BY] = who
+                properties[StampProperty.STAMP_GENERATED_BY] = who
+                properties[StampProperty.FILE_VERSION_NUMBER] = "1"
+            } else {
+                properties[StampProperty.FILE_MODIFICATION_TIME] = now
+                properties[StampProperty.STAMP_LAST_MODIFIED_BY] = who
+                properties[StampProperty.FILE_VERSION_NUMBER] = (properties[StampProperty.FILE_VERSION_NUMBER]!!.toInt() + 1).toString()
             }
-        }
 
-        val newStamp = regexProperty.replace(stampPattern) { properties[StampProperty.valueOf(it.value)]!! }
-        val newFileContent = if (presentStamp != null) fileContent.replace(presentStamp, newStamp) else "$newStamp$fileContent"
-        //        sourceFile.writeText(newFileContent)
-        println(newFileContent)
+            val newStamp = regexProperty.replace(stampPattern) { properties[StampProperty.valueOf(it.value)]!! }
+            val newFileContent = if (presentStamp != null) fileContent.replace(presentStamp, newStamp) else "$newStamp\n$fileContent"
+            sourceFile.writeText(newFileContent)
+        }
 
         isConsumed = true
     }
 
 
-    // returns file's creation date or null if it can't be determined
-    fun obtainFileCreationTime(): LocalDateTime? {
-        val os = OperatingSystem.current()
-        return when {
-            os.isLinux -> obtainFileCreationTimeLinux()
-            else -> error("Unsupported OS: [${os.familyName} -> ${os.name}]")
-        }
-    }
-
-    private fun obtainFileCreationTimeLinux(): LocalDateTime? {
-        val pathToFile = Path.of("../").resolve("stuff").resolve("bin").resolve("getFileCreationDate.sh").toAbsolutePath()
-        val command = ProcessBuilder("sudo -S", "bash", "-c", pathToFile.toString(), "build.gradle.kts")
-                .directory(File(System.getenv("HOME")))
-                .inheritIO()
-                .start()
-        val res = String(command.inputStream.readAllBytes())
-        println("res: $res")
-        return null
-    }
-
-    // returns file's last modification date or null if a file was not modified since the LAST STAMP CHANGE
-    private fun obtainFileModificationTime(): LocalDateTime? {
-        TODO()
-    }
-
-
     enum class StampProperty {
-        GENERATED_BY, GENERATION_TIME,
-        CHECKED_BY, CHECK_TIME,
-        CREATION_TIME, MODIFICATION_TIME, VERSION_NUMBER
+        STAMP_GENERATED_BY, STAMP_LAST_MODIFIED_BY,
+        FILE_CREATION_TIME, FILE_MODIFICATION_TIME, FILE_VERSION_NUMBER
     }
 }
