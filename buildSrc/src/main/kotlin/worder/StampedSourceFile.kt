@@ -1,13 +1,15 @@
 package worder
 
+import org.gradle.internal.os.OperatingSystem
 import java.io.File
 import java.net.URI
+import java.nio.file.Path
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.*
 
-class SourceFileStamp private constructor(
+class StampedSourceFile private constructor(
         private val sourceFile: File,
         private val fileContent: String,
         private val presentStamp: String?
@@ -33,17 +35,19 @@ class SourceFileStamp private constructor(
             }
 
             // StampProperty declaration order and the order of property appearance in the pattern should be same
-            for (i in 0..patternProperties.size)
-                if (patternProperties[i] != supportedProperties[i])
-                    error("StampProperty declaration order and the order of property appearance in the pattern should be same")
+            patternProperties.forEachIndexed { i, value ->
+                check(value == supportedProperties[i]) {
+                    "StampProperty declaration order and the order of property appearance in the pattern should be same"
+                }
+            }
         }
 
 
-        fun fromFile(sourceFile: File): SourceFileStamp? {
+        fun fromFile(sourceFile: File): StampedSourceFile? {
             val fileContent = sourceFile.readText()
             val presentStamp = parseRawStamp(fileContent)
             val isStampValid = presentStamp?.let { isStampValid(it) }
-            return if (isStampValid == false) null else SourceFileStamp(sourceFile, fileContent, presentStamp)
+            return if (isStampValid == false) null else StampedSourceFile(sourceFile, fileContent, presentStamp)
         }
 
 
@@ -75,7 +79,6 @@ class SourceFileStamp private constructor(
             "Stamp has already been updated! This object can't be reused. "
         }
 
-        // Updating Stamp's properties
         fun datetimeFormatter(datetime: LocalDateTime): String = datetime.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT))
         val now = LocalDateTime.now()
         val who = "${javaClass.simpleName}.kt"
@@ -97,18 +100,33 @@ class SourceFileStamp private constructor(
             }
         }
 
-        // Creating a new Stamp and applying changes to the file
         val newStamp = regexProperty.replace(stampPattern) { properties[StampProperty.valueOf(it.value)]!! }
         val newFileContent = if (presentStamp != null) fileContent.replace(presentStamp, newStamp) else "$newStamp$fileContent"
-        sourceFile.writeText(newFileContent)
+        //        sourceFile.writeText(newFileContent)
+        println(newFileContent)
 
         isConsumed = true
     }
 
 
     // returns file's creation date or null if it can't be determined
-    private fun obtainFileCreationTime(): LocalDateTime? {
-        TODO()
+    fun obtainFileCreationTime(): LocalDateTime? {
+        val os = OperatingSystem.current()
+        return when {
+            os.isLinux -> obtainFileCreationTimeLinux()
+            else -> error("Unsupported OS: [${os.familyName} -> ${os.name}]")
+        }
+    }
+
+    private fun obtainFileCreationTimeLinux(): LocalDateTime? {
+        val pathToFile = Path.of("../").resolve("stuff").resolve("bin").resolve("getFileCreationDate.sh").toAbsolutePath()
+        val command = ProcessBuilder("sudo -S", "bash", "-c", pathToFile.toString(), "build.gradle.kts")
+                .directory(File(System.getenv("HOME")))
+                .inheritIO()
+                .start()
+        val res = String(command.inputStream.readAllBytes())
+        println("res: $res")
+        return null
     }
 
     // returns file's last modification date or null if a file was not modified since the LAST STAMP CHANGE

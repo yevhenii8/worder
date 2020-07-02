@@ -10,11 +10,11 @@ repositories {
 }
 
 dependencies {
+    implementation(gradleApi())
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
-    testImplementation("io.kotest:kotest-runner-junit5-jvm:latest.integration")
-    testImplementation("io.kotest:kotest-runner-console-jvm:latest.integration")
+    testImplementation("io.kotest:kotest-runner-junit5-jvm:4.1.1")
     testImplementation("io.mockk:mockk:1.10.0")
 }
 
@@ -25,6 +25,7 @@ tasks {
 
     withType<Test> {
         useJUnitPlatform()
+        testLogging.setEvents(listOf("passed", "skipped", "failed"))
         testLogging.showStandardStreams = true
     }
 

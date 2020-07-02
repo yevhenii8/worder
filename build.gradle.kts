@@ -26,8 +26,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-core:0.23.1")
     implementation("org.jetbrains.exposed:exposed-jdbc:0.23.1")
 
-    testImplementation("io.kotest:kotest-runner-junit5-jvm:latest.integration")
-    testImplementation("io.kotest:kotest-runner-console-jvm:latest.integration")
+    testImplementation("io.kotest:kotest-runner-junit5-jvm:4.1.1")
     testImplementation("io.mockk:mockk:1.10.0")
 }
 
@@ -47,6 +46,7 @@ tasks {
 
     withType<Test> {
         useJUnitPlatform()
+        testLogging.setEvents(listOf("passed", "skipped", "failed"))
     }
 
     withType<Wrapper> {
