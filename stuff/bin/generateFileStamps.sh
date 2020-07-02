@@ -50,8 +50,8 @@ if [[ $EUID != 0 ]]; then
 fi
 
 
-WORDER_HOME="/home/yevhenii/Projects/worder/buildSrc/build/tests/StampedSourceFileTest"
-# WORDER_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." >/dev/null 2>&1 && pwd )"
+# WORDER_HOME="/home/yevhenii/Projects/worder/buildSrc/build/tests/StampedSourceFileTest"
+WORDER_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." >/dev/null 2>&1 && pwd )"
 STAMP_PATTERN_ORIGINAL=$(cat ../../buildSrc/src/main/resources/sourceFileStampPattern.txt)
 STAMP_PATTERN_LENGTH=$(echo "$STAMP_PATTERN_ORIGINAL" | wc --lines)
 STAMP_PATTERN=$(echo "${STAMP_PATTERN_ORIGINAL//"*"/"\*"}" | sed -E 's/<[^>]*>/<.*>/g')
