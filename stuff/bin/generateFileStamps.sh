@@ -50,7 +50,7 @@ if [[ $EUID != 0 ]]; then
 fi
 
 
-WORDER_HOME="/home/yevhenii/Projects/worder/buildSrc/build/tests/SourceFileStampTest"
+WORDER_HOME="/home/yevhenii/Projects/worder/buildSrc/build/tests/StampedSourceFileTest"
 # WORDER_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." >/dev/null 2>&1 && pwd )"
 STAMP_PATTERN_ORIGINAL=$(cat ../../buildSrc/src/main/resources/sourceFileStampPattern.txt)
 STAMP_PATTERN_LENGTH=$(echo "$STAMP_PATTERN_ORIGINAL" | wc --lines)
@@ -78,10 +78,11 @@ do
         new_stamp=${new_stamp/"FILE_CREATION_TIME"/"$creation_date"}
         new_stamp=${new_stamp/"FILE_MODIFICATION_TIME"/"$when"}
         new_stamp=${new_stamp/"FILE_VERSION_NUMBER"/"1"}
+        new_stamp=$new_stamp$'\n'$'\n'
         
         # echo "$new_stamp"
         # echo ""
         # echo ""
-        echo -e "$new_stamp\n\n$(cat $file)" > "$file"
+        echo "$new_stamp$(cat $file)" > "$file"
     fi
 done

@@ -125,9 +125,11 @@ class StampedSourceFileTest : ShouldSpec({
         invalidStampFiles.map { StampedSourceFile.fromFile(it) } should containOnlyNulls()
     }
 
-    xshould("process all files properly") {
-        testDir.walk()
-                .filter { it.name.endsWith(".kt") || it.name.endsWith(".kts") }
-                .forEach { StampedSourceFile.fromFile(it)?.update() }
+    should("process all files properly") {
+        StampedSourceFile.fromFile(testDir.resolve("StampedSourceFile.kt"))!!.update()
+
+//        testDir.walk()
+//                .filter { it.name.endsWith(".kt") || it.name.endsWith(".kts") }
+//                .forEach { StampedSourceFile.fromFile(it)?.update() }
     }
 })
