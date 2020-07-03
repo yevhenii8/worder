@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="worder:buildSrc [test StampedSourceFileTest]" type="GradleRunConfiguration" factoryName="Gradle">
+  <configuration default="false" name="worder:buildSrc [StampedSourceFileTest]" type="GradleRunConfiguration" factoryName="Gradle">
     <ExternalSystemSettings>
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$/buildSrc" />
@@ -11,7 +11,7 @@
       <option name="taskNames">
         <list>
           <option value="test" />
-          <option value="--tests" />
+          <option value="--test" />
           <option value="StampedSourceFileTest" />
         </list>
       </option>

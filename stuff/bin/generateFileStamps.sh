@@ -57,8 +57,7 @@ STAMP_PATTERN_LENGTH=$(echo "$STAMP_PATTERN_ORIGINAL" | wc --lines)
 STAMP_PATTERN=$(echo "${STAMP_PATTERN_ORIGINAL//"*"/"\*"}" | sed -E 's/<[^>]*>/<.*>/g')
 
 
-for file in $(find $WORDER_HOME -name '*.kt' -or -name '*.kts');
-do
+for file in $(find $WORDER_HOME -name '*.kt' -or -name '*.kts'); do
     if [[ $(cat $file) == "/**"* ]]; then
         echo ""
         echo "Can't add the stamp to $file!"
