@@ -11,7 +11,7 @@
       <option name="taskNames">
         <list>
           <option value="test" />
-          <option value="--test" />
+          <option value="--tests" />
           <option value="StampedSourceFileTest" />
         </list>
       </option>
