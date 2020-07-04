@@ -28,7 +28,7 @@ open class UpdateFileStampsTask @Inject constructor(
             invalid.forEach {
                 logger.error("Source file contains invalid Stamp: ${it.first}")
             }
-            error("Invalid source file stamp(s) occurred! Source files' stamps updating has been cancelled!")
+            error("Invalid source file stamp(s) occurred! Source files' stamp updating has been cancelled!")
         }
 
         valid.forEach {

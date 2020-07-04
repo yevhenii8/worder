@@ -4,7 +4,6 @@ import java.io.File
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 import java.util.*
 
 class StampedSourceFile private constructor(
@@ -18,7 +17,7 @@ class StampedSourceFile private constructor(
         private val regexProperty = "(?<=<).*?(?=>)".toRegex()
         private val regexStampPattern: Regex = "^$stampPattern"
                 .replace("*", "\\*")
-                .replace("<[^<]*?_TIME>".toRegex(), "<[0-9]{1,2}/[0-9]{1,2}/[0-9]{2}, [0-9]{1,2}:[0-9]{1,2} (PM|AM)>")
+                .replace("<[^<]*?_TIME>".toRegex(), "<\\\\d{2}/\\\\d{2}/\\\\d{4}, \\\\d{2}:\\\\d{2}:\\\\d{2} (AM|PM)>")
                 .replace("<[A-Z_]*?>".toRegex(), "<.*?>")
                 .toRegex()
 
@@ -55,7 +54,7 @@ class StampedSourceFile private constructor(
 
         private fun isStampValid(rawStamp: String): Boolean = rawStamp.matches(regexStampPattern)
 
-        private fun LocalDateTime.toStampDateTime(): String = format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT))
+        private fun LocalDateTime.toStampDateTime(): String = format(DateTimeFormatter.ofPattern("dd/MM/yyyy, hh:mm:ss a"))
     }
 
 
