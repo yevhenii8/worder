@@ -3,38 +3,33 @@
  * Last time was modified by <StampedSourceFile.kt>
  *
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <04/07/2020, 11:14:25 PM>
- * Version: <66>
+ * Modified: <05/07/2020, 11:28:52 PM>
+ * Version: <180>
  */
 
 package worder.insert.view
 
 import javafx.geometry.HorizontalDirection
-import javafx.geometry.Orientation
 import javafx.geometry.Pos
 import javafx.scene.Parent
-import javafx.scene.control.ScrollBar
-import javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER
 import javafx.scene.layout.VBox
 import javafx.stage.FileChooser.ExtensionFilter
 import tornadofx.View
 import tornadofx.addClass
 import tornadofx.borderpane
+import tornadofx.box
+import tornadofx.button
 import tornadofx.hbox
-import tornadofx.imageview
-import tornadofx.insets
 import tornadofx.label
 import tornadofx.onChange
-import tornadofx.paddingTop
-import tornadofx.px
+import tornadofx.paddingAll
 import tornadofx.replaceChildren
-import tornadofx.scrollpane
+import tornadofx.separator
 import tornadofx.stackpane
 import tornadofx.style
 import tornadofx.vbox
 import worder.core.styles.WorderDefaultStyles
 import worder.core.view.DragAndDropFragment
-import worder.core.view.ObservableStatsFragment
 import worder.core.view.worderStatusLabel
 import worder.database.DatabaseController
 import worder.database.DatabaseEventListener
@@ -43,6 +38,7 @@ import worder.database.view.NoConnectionFragment
 import worder.insert.InsertController
 import worder.insert.model.InsertUnit
 import worder.tornadofx.addAll
+import java.awt.Color
 import java.io.File
 
 class InsertView : View("Insert"), DatabaseEventListener {
@@ -79,14 +75,31 @@ class InsertView : View("Insert"), DatabaseEventListener {
 
 class InsertUploadedView : View() {
     private val insertController: InsertController by inject()
-    private val insertModelUI = vbox(spacing = 10, alignment = Pos.CENTER)
+    private val insertModelUI = vbox(spacing = 15, alignment = Pos.BASELINE_CENTER)
     private val uncommittedUnitsUI: VBox = vbox(spacing = 15)
     private val committedUnitsUI: VBox = vbox(spacing = 15)
 
+
     override val root: Parent = borderpane {
-        left = newInsertUnitsContainer("UNCOMMITTED UNITS", uncommittedUnitsUI, HorizontalDirection.LEFT)
+        paddingAll = 15
+
+        left = find<InsertUnitsContainerFragment>(
+                "containerTitle" to "UNCOMMITTED UNITS",
+                "units" to uncommittedUnitsUI,
+                "direction" to HorizontalDirection.LEFT
+        ).root
+
         center = insertModelUI
-        right = newInsertUnitsContainer("COMMITTED UNITS", committedUnitsUI, HorizontalDirection.RIGHT)
+
+        right = find<InsertUnitsContainerFragment>(
+                "containerTitle" to "COMMITTED UNITS",
+                "units" to committedUnitsUI,
+                "direction" to HorizontalDirection.RIGHT
+        ).root
+
+//        children.style {
+//            borderColor += box(Color.GRAY)
+//        }
     }
 
 
@@ -105,88 +118,61 @@ class InsertUploadedView : View() {
         )
 
         insertModelUI.apply {
-            label("Insert Model")
+            addClass(WorderDefaultStyles.insertModel)
+
+            label("INSERT MODEL")
             worderStatusLabel(insertModel.modelStatusProperty)
+
             hbox {
-                vbox {
-                    padding = insets(top = 67, right = 10, bottom = 0, left = 10)
-                    with(insertModel.observableStats) {
+                isFillWidth = false
+                with(insertModel.observableStats) {
+                    vbox(alignment = Pos.BASELINE_RIGHT) {
+                        label("${generatedUnitsProperty.name}: ")
+                        label("${uncommittedUnitsProperty.name}: ")
+                        label("${committedUnitsProperty.name}: ")
+                        label("${excludedUnitsProperty.name}: ")
+                        label("${actionNeededUnitsProperty.name}: ")
+
+                        separator()
+
+                        label("${totalValidWordsProperty.name}: ")
+                        label("${totalInvalidWordsProperty.name}: ")
+
+                        separator()
+
+                        label("${totalProcessedProperty.name}: ")
+                        label("${insertedProperty.name}: ")
+                        label("${resetProperty.name}: ")
+                    }
+
+                    vbox(alignment = Pos.BASELINE_LEFT) {
                         label(generatedUnitsProperty)
                         label(uncommittedUnitsProperty)
                         label(committedUnitsProperty)
                         label(excludedUnitsProperty)
                         label(actionNeededUnitsProperty)
 
+                        separator()
+
                         label(totalValidWordsProperty)
                         label(totalInvalidWordsProperty)
+
+                        separator()
 
                         label(totalProcessedProperty)
                         label(insertedProperty)
                         label(resetProperty)
                     }
                 }
-                add(find<ObservableStatsFragment>("observableStats" to insertModel.observableStats))
             }
+
+            hbox(spacing = 15) {
+                button("<<  Reset This Model")
+                button("Commit All Units  >>")
+            }
+ 
+
+            children.style { borderColor += box(javafx.scene.paint.Color.GRAY) }
         }
     }
-
-    private fun newInsertUnitsContainer(title: String, units: VBox, direction: HorizontalDirection): VBox =
-            vbox(alignment = Pos.BASELINE_CENTER, spacing = 25) {
-                label(title) {
-                    style {
-                        paddingTop = 10
-                        fontSize = 20.px
-                    }
-                }
-
-                hbox {
-                    val scrollBar = ScrollBar()
-                    val emptyContainer = VBox().apply {
-                        spacing = 15.0
-                        alignment = Pos.CENTER
-                        paddingTop = 200
-                        imageview("/images/empty-box.png")
-                        label("No units here :(")
-                    }
-
-                    if (direction == HorizontalDirection.LEFT)
-                        add(scrollBar)
-
-                    val scrollPane = scrollpane {
-                        addClass(WorderDefaultStyles.insertUnits)
-
-                        content = if (units.children.isEmpty()) emptyContainer else units
-                        vbarPolicy = NEVER
-                        hbarPolicy = NEVER
-
-                        scrollBar.apply {
-                            isVisible = false
-                            orientation = Orientation.VERTICAL
-
-                            minProperty().bind(vminProperty())
-                            maxProperty().bind(vmaxProperty())
-                            visibleAmountProperty().bind(heightProperty().divide(units.heightProperty()))
-                        }
-
-                        vvalueProperty().bindBidirectional(scrollBar.valueProperty())
-                        units.setOnScroll {
-                            vvalue -= it.deltaY * 0.01
-                        }
-                    }
-
-                    if (direction == HorizontalDirection.RIGHT)
-                        add(scrollBar)
-
-                    units.apply {
-                        setOnMouseExited { scrollBar.isVisible = false }
-                        setOnMouseEntered { scrollBar.isVisible = scrollBar.visibleAmount < 1.0 }
-                        children.onChange {
-                            when (it.list.size) {
-                                0 -> scrollPane.content = emptyContainer
-                                1 -> scrollPane.content = this
-                            }
-                        }
-                    }
-                }
-            }
 }

@@ -3,8 +3,8 @@
  * Last time was modified by <StampedSourceFile.kt>
  *
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <04/07/2020, 10:57:25 PM>
- * Version: <2>
+ * Modified: <05/07/2020, 07:21:06 PM>
+ * Version: <3>
  */
 
 package worder.core.view
@@ -14,7 +14,9 @@ import javafx.event.EventTarget
 import javafx.scene.control.Label
 import tornadofx.attachTo
 import tornadofx.onChange
+import tornadofx.px
 import tornadofx.stringBinding
+import tornadofx.style
 import tornadofx.tooltip
 import worder.core.model.Status
 
@@ -32,3 +34,10 @@ inline fun EventTarget.worderStatusLabel(
         label.textFill = status.value.color
     }
 }
+
+fun EventTarget.h1Label(text: String = "", op: Label.() -> Unit = {}) =
+        Label(text).attachTo(this, op) {
+            it.style {
+                fontSize = 20.px
+            }
+        }

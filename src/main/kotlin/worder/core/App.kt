@@ -3,23 +3,29 @@
  * Last time was modified by <StampedSourceFile.kt>
  *
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <04/07/2020, 10:57:25 PM>
- * Version: <5>
+ * Modified: <05/07/2020, 10:44:55 PM>
+ * Version: <19>
  */
 
 package worder.core
 
 import javafx.stage.Stage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import tornadofx.App
 import tornadofx.FX
+import tornadofx.dumpStylesheets
 import tornadofx.find
 import worder.core.styles.WorderDefaultStyles
 import worder.core.view.MainView
 import worder.database.DatabaseController
 import worder.insert.InsertController
+import worder.insert.model.InsertUnit
 import java.io.File
 import java.nio.file.Path
-import java.nio.file.Paths
 
 class AppEntry : App(MainView::class, WorderDefaultStyles::class) {
     companion object {
@@ -58,13 +64,28 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class) {
                             File("$samplePath/inserting/words1.txt"),
                             File("$samplePath/inserting/words2.txt"),
                             File("$samplePath/inserting/words3.txt"),
-                            File("$samplePath/inserting/words4.txt")
+                            File("$samplePath/inserting/words4.txt"),
+                            File("$samplePath/inserting/words5.txt"),
+                            File("$samplePath/inserting/words0.txt"),
+                            File("$samplePath/inserting/words1.txt"),
+                            File("$samplePath/inserting/words2.txt"),
+                            File("$samplePath/inserting/words3.txt"),
+                            File("$samplePath/inserting/words4.txt"),
+                            File("$samplePath/inserting/words5.txt")
                     )
             )
+
+            CoroutineScope(Dispatchers.Default).launch {
+                find<InsertController>().currentInsertModel!!
+                        .uncommittedUnits
+                        .filter { it.source != "words4.txt" && it.statusProperty.value == InsertUnit.InsertUnitStatus.READY_TO_COMMIT }
+                        .take(6)
+                        .forEach { it.commit() }
+            }
         }
     }
 
-
+    
     override fun start(stage: Stage) {
         stage.apply {
             icons += resources.image("/icons/worder-icon_512x512.png")

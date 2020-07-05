@@ -3,15 +3,18 @@
  * Last time was modified by <StampedSourceFile.kt>
  *
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <04/07/2020, 10:57:25 PM>
- * Version: <10>
+ * Modified: <05/07/2020, 11:10:40 PM>
+ * Version: <57>
  */
 
 package worder.core.styles
 
 import javafx.geometry.Pos
+import javafx.scene.effect.DropShadow
+import javafx.scene.effect.InnerShadow
 import javafx.scene.layout.BackgroundPosition
 import javafx.scene.layout.BackgroundRepeat
+import javafx.scene.layout.BorderStrokeStyle
 import javafx.scene.paint.Color
 import tornadofx.DrawerStyles.Companion.drawer
 import tornadofx.DrawerStyles.Companion.drawerItem
@@ -31,6 +34,7 @@ class WorderDefaultStyles : Stylesheet() {
 
         val insertUnit by cssclass()
         val insertUnits by cssclass()
+        val insertModel by cssclass()
         val unitButtons by cssclass()
 
         val dragDropField by cssclass()
@@ -38,12 +42,19 @@ class WorderDefaultStyles : Stylesheet() {
     }
 
     init {
-        s(text, label) {
-            fontSize = 16.px
+        text {
+            fontSize = 14.px
         }
 
         imageView and Stylesheet.disabled {
             opacity = 0.2
+        }
+
+        separator {
+            padding = box(25.px, 0.px, 20.px, 0.px)
+            line {
+                effect = DropShadow()
+            }
         }
 
         statBlock {
@@ -62,26 +73,32 @@ class WorderDefaultStyles : Stylesheet() {
             }
         }
 
-        insertUnit {
-            squeezeBox {
-                padding = box(15.px, 0.px, 0.px, 0.px)
-            }
-
-            unitButtons {
-                button {
-                    maxWidth = infinity
-                    padding = box(6.px)
-                    backgroundInsets += box(0.px)
-                    backgroundRadius += box(0.px)
-                }
-            }
-
-            padding = box(10.px)
-            borderColor += box(Color.GRAY)
-        }
-
         insertUnits {
             backgroundColor += Color.TRANSPARENT
+
+            insertUnit {
+                squeezeBox {
+                    padding = box(15.px, 0.px, 0.px, 0.px)
+                }
+
+                unitButtons {
+                    button {
+                        maxWidth = infinity
+                        padding = box(6.px)
+                        backgroundInsets += box(0.px)
+                        backgroundRadius += box(0.px)
+                    }
+                }
+
+                padding = box(10.px)
+                borderColor += box(Color.GRAY)
+            }
+        }
+
+        insertModel {
+            text {
+                fontSize = 20.px
+            }
         }
 
         dragDropField {
