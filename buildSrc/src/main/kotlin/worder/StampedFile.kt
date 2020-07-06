@@ -97,8 +97,7 @@ class StampedFile private constructor(
         val isItNewStamp = presentStamp == null
         val wasFileModified = lastFileModificationTime != properties[StampProperty.FILE_MODIFICATION_TIME]
 
-        @Suppress("DuplicatedCode")
-        if (isItNewStamp || wasFileModified) {
+        if (isItNewStamp || wasFileModified || useTransit) {
             val who = "${javaClass.simpleName}.kt"
             val now = LocalDateTime.now().toStampDateTime()
 
@@ -115,7 +114,8 @@ class StampedFile private constructor(
                 properties[StampProperty.FILE_VERSION_NUMBER] = (properties[StampProperty.FILE_VERSION_NUMBER]!!.toInt() + 1).toString()
 
                 check(properties[StampProperty.FILE_NAME] == sourceFile.name) {
-                    "Stamp's FILE_NAME property value doesn't correspond to the actual file name!"
+                    "Stamp's FILE_NAME property doesn't correspond to the actual file name!\n" +
+                            "Processed file: $sourceFile"
                 }
             }
 
