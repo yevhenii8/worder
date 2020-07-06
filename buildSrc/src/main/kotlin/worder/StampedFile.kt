@@ -14,10 +14,17 @@ class StampedFile private constructor(
 ) {
     companion object {
         private const val pathToStampPattern = "/sourceFileStampPattern.txt"
-        private const val pathToStampPatternTransit = "/sourceFileStampPatternTransit.txt"
         private val stampPattern: String = String(this::class.java.getResourceAsStream(pathToStampPattern).readBytes())
+
+        @Suppress("DuplicatedCode")
+        private val regexStampPattern: Regex = "^$stampPattern"
+                .replace("*", "\\*")
+                .replace("<[^<]*?_TIME>".toRegex(), "<\\\\d{2}/\\\\d{2}/\\\\d{4}, \\\\d{2}:\\\\d{2}:\\\\d{2} (AM|PM)>")
+                .replace("<[A-Z_]*?>".toRegex(), "<.*?>")
+                .toRegex()
+
+        private const val pathToStampPatternTransit = "/sourceFileStampPatternTransit.txt"
         private val stampPatternTransit: String = String(this::class.java.getResourceAsStream(pathToStampPatternTransit).readBytes())
-        private val regexProperty = "(?<=<).*?(?=>)".toRegex()
 
         @Suppress("DuplicatedCode")
         private val regexStampPatternTransit: Regex = "^$stampPatternTransit"
@@ -26,12 +33,7 @@ class StampedFile private constructor(
                 .replace("<[A-Z_]*?>".toRegex(), "<.*?>")
                 .toRegex()
 
-        @Suppress("DuplicatedCode")
-        private val regexStampPattern: Regex = "^$stampPattern"
-                .replace("*", "\\*")
-                .replace("<[^<]*?_TIME>".toRegex(), "<\\\\d{2}/\\\\d{2}/\\\\d{4}, \\\\d{2}:\\\\d{2}:\\\\d{2} (AM|PM)>")
-                .replace("<[A-Z_]*?>".toRegex(), "<.*?>")
-                .toRegex()
+        private val regexProperty = "(?<=<).*?(?=>)".toRegex()
 
 
         init {
@@ -79,8 +81,15 @@ class StampedFile private constructor(
 
         val properties = getProperties<StampProperty>()
 
-        if (useTransit)
+        if (useTransit) {
+            val propertiesTransit = getProperties<StampPropertyTransit>()
+
+            propertiesTransit.forEach { (k, v) ->
+                properties[StampProperty.valueOf(k.toString())] = v
+            }
+
             transitAction(properties)
+        }
 
         val lastFileModificationTime = LocalDateTime
                 .ofEpochSecond(sourceFile.lastModified() / 1000, 0, ZoneOffset.ofHours(3))
@@ -129,8 +138,9 @@ class StampedFile private constructor(
                 res[titles.next()] = values.next()
             }
 
-            check(res.size == enumValues.size) {
-                "Error during parsing stamp's properties of $sourceFile!"
+            check(res.size == enumValues.size || useTransit) {
+                "Count of properties in the stamp pattern and in the file is different!\n" +
+                        "Processed file: $sourceFile\n"
             }
         }
 
@@ -147,7 +157,6 @@ class StampedFile private constructor(
         FILE_CREATION_TIME, FILE_MODIFICATION_TIME, FILE_VERSION_NUMBER
     }
 
-    @Suppress("unused")
     enum class StampPropertyTransit {
         STAMP_GENERATED_BY, STAMP_LAST_MODIFIED_BY,
         FILE_CREATION_TIME, FILE_MODIFICATION_TIME, FILE_VERSION_NUMBER
