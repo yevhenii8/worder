@@ -157,6 +157,7 @@ class StampedFile private constructor(
         FILE_CREATION_TIME, FILE_MODIFICATION_TIME, FILE_VERSION_NUMBER
     }
 
+    @Suppress("unused")
     enum class StampPropertyTransit {
         STAMP_GENERATED_BY, STAMP_LAST_MODIFIED_BY,
         FILE_CREATION_TIME, FILE_MODIFICATION_TIME, FILE_VERSION_NUMBER

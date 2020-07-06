@@ -4,8 +4,8 @@
  *
  * Name: <InsertUnitFragment.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <06/07/2020, 07:25:08 PM>
- * Version: <22>
+ * Modified: <06/07/2020, 10:29:06 PM>
+ * Version: <26>
  */
 
 package worder.insert.view
@@ -27,12 +27,13 @@ import tornadofx.fieldset
 import tornadofx.fitToParentWidth
 import tornadofx.fold
 import tornadofx.form
-import tornadofx.getChildList
 import tornadofx.hbox
 import tornadofx.hgrow
 import tornadofx.imageview
 import tornadofx.label
 import tornadofx.onChange
+import tornadofx.paddingTop
+import tornadofx.removeWhen
 import tornadofx.squeezebox
 import tornadofx.textfield
 import tornadofx.vbox
@@ -43,12 +44,6 @@ import worder.insert.model.InsertUnit
 class InsertUnitFragment : Fragment() {
     val unit: InsertUnit by param()
 
-    init {
-        unit.statusProperty.onChange { status ->
-            if (status == InsertUnit.InsertUnitStatus.COMMITTED)
-                root.isDisable = true
-        }
-    }
 
     override val root = vbox {
         addClass(WorderDefaultStyles.insertUnit)
@@ -79,14 +74,6 @@ class InsertUnitFragment : Fragment() {
             }
 
             vbox(spacing = 10) {
-                fun InsertUnit.InsertUnitAction.getListener(): ObservableValue<Boolean> {
-                    val listener = SimpleBooleanProperty(unit.statusProperty.value.availableActions.contains(this))
-                    unit.statusProperty.onChange {
-                        listener.value = it!!.availableActions.contains(this)
-                    }
-                    return listener
-                }
-
                 button("Commit") {
                     enableWhen {
                         InsertUnit.InsertUnitAction.COMMIT.getListener()
@@ -114,12 +101,15 @@ class InsertUnitFragment : Fragment() {
                     }
                 }
 
-                addClass(WorderDefaultStyles.unitButtons)
+                children.addClass(WorderDefaultStyles.unitButton)
             }
         }
 
         if (unit.invalidWordsProperty.isNotEmpty()) {
-            val squeezebox = squeezebox {
+            squeezebox {
+                paddingTop = 15
+                removeWhen(unit.invalidWordsProperty.sizeProperty().isEqualTo(0))
+
                 fold("List of invalid words") {
                     form {
                         fieldset {
@@ -147,11 +137,28 @@ class InsertUnitFragment : Fragment() {
                     }
                 }
             }
+        }
+    }
 
-            unit.invalidWordsProperty.sizeProperty().onChange {
-                if (it == 0)
-                    getChildList()?.remove(squeezebox)
+
+    init {
+        with(unit.statusProperty) {
+            if (value == InsertUnit.InsertUnitStatus.COMMITTED)
+                root.isDisable = true
+
+            onChange { status ->
+                if (status == InsertUnit.InsertUnitStatus.COMMITTED)
+                    root.isDisable = true
             }
         }
+    }
+
+
+    private fun InsertUnit.InsertUnitAction.getListener(): ObservableValue<Boolean> {
+        val listener = SimpleBooleanProperty(unit.statusProperty.value.availableActions.contains(this))
+        unit.statusProperty.onChange {
+            listener.value = it!!.availableActions.contains(this)
+        }
+        return listener
     }
 }

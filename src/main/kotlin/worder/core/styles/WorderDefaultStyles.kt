@@ -4,22 +4,19 @@
  *
  * Name: <WorderDefaultStyles.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <06/07/2020, 07:25:08 PM>
- * Version: <58>
+ * Modified: <06/07/2020, 10:29:06 PM>
+ * Version: <60>
  */
 
 package worder.core.styles
 
 import javafx.geometry.Pos
 import javafx.scene.effect.DropShadow
-import javafx.scene.effect.InnerShadow
 import javafx.scene.layout.BackgroundPosition
 import javafx.scene.layout.BackgroundRepeat
-import javafx.scene.layout.BorderStrokeStyle
 import javafx.scene.paint.Color
 import tornadofx.DrawerStyles.Companion.drawer
 import tornadofx.DrawerStyles.Companion.drawerItem
-import tornadofx.SqueezeBoxStyles.Companion.squeezeBox
 import tornadofx.Stylesheet
 import tornadofx.box
 import tornadofx.c
@@ -36,7 +33,7 @@ class WorderDefaultStyles : Stylesheet() {
         val insertUnit by cssclass()
         val insertUnits by cssclass()
         val insertModel by cssclass()
-        val unitButtons by cssclass()
+        val unitButton by cssclass()
 
         val dragDropField by cssclass()
         val statusBar by cssclass()
@@ -78,17 +75,11 @@ class WorderDefaultStyles : Stylesheet() {
             backgroundColor += Color.TRANSPARENT
 
             insertUnit {
-                squeezeBox {
-                    padding = box(15.px, 0.px, 0.px, 0.px)
-                }
-
-                unitButtons {
-                    button {
-                        maxWidth = infinity
-                        padding = box(6.px)
-                        backgroundInsets += box(0.px)
-                        backgroundRadius += box(0.px)
-                    }
+                unitButton {
+                    maxWidth = infinity
+                    padding = box(6.px)
+                    backgroundInsets += box(0.px)
+                    backgroundRadius += box(0.px)
                 }
 
                 padding = box(10.px)

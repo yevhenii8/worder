@@ -4,18 +4,17 @@
  *
  * Name: <InsertUnitsContainerFragment.kt>
  * Created: <05/07/2020, 06:50:42 PM>
- * Modified: <06/07/2020, 07:25:08 PM>
- * Version: <16>
+ * Modified: <06/07/2020, 10:15:39 PM>
+ * Version: <35>
  */
 
 package worder.insert.view
 
-import javafx.beans.property.DoubleProperty
-import javafx.beans.property.ReadOnlyDoubleProperty
-import javafx.beans.property.SimpleDoubleProperty
+import javafx.beans.property.ReadOnlySetProperty
 import javafx.geometry.HorizontalDirection
 import javafx.geometry.Orientation
 import javafx.geometry.Pos
+import javafx.scene.Parent
 import javafx.scene.control.ScrollBar
 import javafx.scene.control.ScrollPane
 import javafx.scene.layout.VBox
@@ -28,43 +27,30 @@ import tornadofx.onChange
 import tornadofx.paddingLeft
 import tornadofx.paddingRight
 import tornadofx.paddingTop
-import tornadofx.px
 import tornadofx.scrollpane
-import tornadofx.style
 import tornadofx.vbox
+import tornadofx.visibleWhen
 import worder.core.styles.WorderDefaultStyles
+import worder.insert.model.InsertUnit
+import worder.tornadofx.bindComponents
 
 class InsertUnitsContainerFragment : Fragment() {
-    private companion object {
-        val allContainersWidths: MutableList<ReadOnlyDoubleProperty> = mutableListOf()
-        val commonUnitsContainerWidth: DoubleProperty = SimpleDoubleProperty(0.0)
+    private val units: ReadOnlySetProperty<InsertUnit> by param()
+    private val direction: HorizontalDirection by param()
+    private val scrollBar: ScrollBar = ScrollBar().apply {
+        visibleWhen {
+            visibleAmountProperty().lessThan(1.0)
+        }
+    }
+    private val unitsUI: VBox = vbox(spacing = 20) {
+        bindComponents(units) { unit ->
+            find<InsertUnitFragment>("unit" to unit)
+        }
     }
 
 
-    private val containerTitle: String by param()
-    private val units: VBox by param()
-    private val direction: HorizontalDirection by param()
-
-
-    override val root = vbox(alignment = Pos.BASELINE_CENTER, spacing = 25) {
-        minWidthProperty().bind(commonUnitsContainerWidth)
-
-        label(containerTitle) {
-            style {
-                fontSize = 20.px
-            }
-        }
-
+    override val root = vbox(alignment = Pos.BASELINE_CENTER) {
         hbox {
-            val scrollBar = ScrollBar()
-            val emptyContainer = VBox().apply {
-                alignment = Pos.CENTER
-                spacing = 15.0
-                paddingTop = 200
-                imageview("/images/empty-box.png")
-                label("No units here :(")
-            }
-
             if (direction == HorizontalDirection.LEFT) {
                 paddingRight = scrollBar.width
                 add(scrollBar)
@@ -73,28 +59,21 @@ class InsertUnitsContainerFragment : Fragment() {
             val scrollPane = scrollpane {
                 addClass(WorderDefaultStyles.insertUnits)
 
-                content = if (units.children.isEmpty()) emptyContainer else units
+                content = if (units.isEmpty()) find<EmptyUnitsContainer>().root else unitsUI
                 alignment = Pos.CENTER
                 vbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
                 hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
 
                 scrollBar.apply {
-                    isVisible = false
                     orientation = Orientation.VERTICAL
-
                     minProperty().bind(vminProperty())
                     maxProperty().bind(vmaxProperty())
-                    visibleAmountProperty().bind(heightProperty().divide(units.heightProperty()))
+                    visibleAmountProperty().bind(heightProperty().divide(unitsUI.heightProperty()))
                 }
 
                 vvalueProperty().bindBidirectional(scrollBar.valueProperty())
-                units.setOnScroll {
+                unitsUI.setOnScroll {
                     vvalue -= it.deltaY * 0.01
-                }
-
-                allContainersWidths.add(widthProperty())
-                widthProperty().onChange {
-                    commonUnitsContainerWidth.value = allContainersWidths.map { it.value }.max()
                 }
             }
 
@@ -103,16 +82,23 @@ class InsertUnitsContainerFragment : Fragment() {
                 add(scrollBar)
             }
 
-            units.apply {
-                setOnMouseExited { scrollBar.isVisible = false }
-                setOnMouseEntered { scrollBar.isVisible = scrollBar.visibleAmount < 1.0 }
-                children.onChange {
-                    when (it.list.size) {
-                        0 -> scrollPane.content = emptyContainer
-                        1 -> scrollPane.content = this
-                    }
+            unitsUI.children.onChange {
+                when (it.list.size) {
+                    0 -> scrollPane.content = find<EmptyUnitsContainer>().root
+                    1 -> scrollPane.content = unitsUI
                 }
             }
+        }
+    }
+
+
+    class EmptyUnitsContainer : Fragment() {
+        override val root: Parent = vbox {
+            alignment = Pos.CENTER
+            spacing = 15.0
+            paddingTop = 200
+            imageview("/images/empty-box.png")
+            label("No units here :(")
         }
     }
 }

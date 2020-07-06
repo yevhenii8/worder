@@ -4,8 +4,8 @@
  *
  * Name: <InsertView.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <06/07/2020, 07:25:08 PM>
- * Version: <181>
+ * Modified: <06/07/2020, 10:20:40 PM>
+ * Version: <203>
  */
 
 package worder.insert.view
@@ -14,6 +14,7 @@ import javafx.geometry.HorizontalDirection
 import javafx.geometry.Pos
 import javafx.scene.Parent
 import javafx.scene.layout.VBox
+import javafx.scene.paint.Color
 import javafx.stage.FileChooser.ExtensionFilter
 import tornadofx.View
 import tornadofx.addClass
@@ -22,24 +23,20 @@ import tornadofx.box
 import tornadofx.button
 import tornadofx.hbox
 import tornadofx.label
-import tornadofx.onChange
 import tornadofx.paddingAll
+import tornadofx.px
 import tornadofx.replaceChildren
-import tornadofx.separator
 import tornadofx.stackpane
 import tornadofx.style
 import tornadofx.vbox
 import worder.core.styles.WorderDefaultStyles
 import worder.core.view.DragAndDropFragment
-import worder.core.view.worderStatusLabel
 import worder.database.DatabaseController
 import worder.database.DatabaseEventListener
 import worder.database.model.WorderDB
 import worder.database.view.NoConnectionFragment
 import worder.insert.InsertController
-import worder.insert.model.InsertUnit
-import worder.tornadofx.addAll
-import java.awt.Color
+import worder.insert.model.InsertModel
 import java.io.File
 
 class InsertView : View("Insert"), DatabaseEventListener {
@@ -76,104 +73,87 @@ class InsertView : View("Insert"), DatabaseEventListener {
 
 class InsertUploadedView : View() {
     private val insertController: InsertController by inject()
-    private val insertModelUI = vbox(spacing = 15, alignment = Pos.BASELINE_CENTER)
-    private val uncommittedUnitsUI: VBox = vbox(spacing = 15)
-    private val committedUnitsUI: VBox = vbox(spacing = 15)
+    private var insertModel: InsertModel = insertController.currentInsertModel!!
 
 
     override val root: Parent = borderpane {
         paddingAll = 15
 
-        left = find<InsertUnitsContainerFragment>(
-                "containerTitle" to "UNCOMMITTED UNITS",
-                "units" to uncommittedUnitsUI,
-                "direction" to HorizontalDirection.LEFT
-        ).root
+        left = vbox(alignment = Pos.BASELINE_CENTER, spacing = 25) {
+            label("UNCOMMITTED UNITS").style { fontSize = 20.px }
+            add(find<InsertUnitsContainerFragment>(
+                    "units" to insertModel.uncommittedUnitsProperty,
+                    "direction" to HorizontalDirection.LEFT
+            ))
+        }
 
-        center = insertModelUI
-
-        right = find<InsertUnitsContainerFragment>(
-                "containerTitle" to "COMMITTED UNITS",
-                "units" to committedUnitsUI,
-                "direction" to HorizontalDirection.RIGHT
-        ).root
-
-//        children.style {
-//            borderColor += box(Color.GRAY)
-//        }
-    }
-
-
-    override fun onDock() {
-        val insertModel = insertController.currentInsertModel!!
-
-        uncommittedUnitsUI.addAll(
-                insertModel.uncommittedUnits
-                        .map { find<InsertUnitFragment>("unit" to it) }
-                        .onEach {
-                            it.unit.statusProperty.onChange { status ->
-                                if (status == InsertUnit.InsertUnitStatus.COMMITTED)
-                                    committedUnitsUI.add(it)
-                            }
-                        }
-        )
-
-        insertModelUI.apply {
+        center = vbox(alignment = Pos.BASELINE_CENTER, spacing = 25) {
             addClass(WorderDefaultStyles.insertModel)
-
-            label("INSERT MODEL")
-            worderStatusLabel(insertModel.modelStatusProperty)
+            label("INSERT MODEL").style { fontSize = 20.px }
 
             hbox {
-                isFillWidth = false
-                with(insertModel.observableStats) {
-                    vbox(alignment = Pos.BASELINE_RIGHT) {
-                        label("${generatedUnitsProperty.name}: ")
-                        label("${uncommittedUnitsProperty.name}: ")
-                        label("${committedUnitsProperty.name}: ")
-                        label("${excludedUnitsProperty.name}: ")
-                        label("${actionNeededUnitsProperty.name}: ")
+                label("Received Raw Data")
+                label("==>")
+                vbox(alignment = Pos.BASELINE_RIGHT) {
+                    label("${insertModel.observableStats.totalValidWordsProperty.name}: ")
+                    label("${insertModel.observableStats.totalInvalidWordsProperty.name}: ")
+                }
+                vbox(alignment = Pos.BASELINE_LEFT) {
+                    label(insertModel.observableStats.totalValidWordsProperty)
+                    label(insertModel.observableStats.totalInvalidWordsProperty)
+                }
+            }
 
-                        separator()
+            hbox {
+                label("Primary Processed Data")
+                label("==>")
+                vbox(alignment = Pos.BASELINE_RIGHT) {
+                    label("${insertModel.observableStats.totalProcessedProperty.name}: ")
+                    label("${insertModel.observableStats.insertedProperty.name}: ")
+                    label("${insertModel.observableStats.resetProperty.name}: ")
+                }
+                vbox(alignment = Pos.BASELINE_LEFT) {
+                    label(insertModel.observableStats.totalProcessedProperty)
+                    label(insertModel.observableStats.insertedProperty)
+                    label(insertModel.observableStats.resetProperty)
+                }
+            }
 
-                        label("${totalValidWordsProperty.name}: ")
-                        label("${totalInvalidWordsProperty.name}: ")
-
-                        separator()
-
-                        label("${totalProcessedProperty.name}: ")
-                        label("${insertedProperty.name}: ")
-                        label("${resetProperty.name}: ")
-                    }
-
-                    vbox(alignment = Pos.BASELINE_LEFT) {
-                        label(generatedUnitsProperty)
-                        label(uncommittedUnitsProperty)
-                        label(committedUnitsProperty)
-                        label(excludedUnitsProperty)
-                        label(actionNeededUnitsProperty)
-
-                        separator()
-
-                        label(totalValidWordsProperty)
-                        label(totalInvalidWordsProperty)
-
-                        separator()
-
-                        label(totalProcessedProperty)
-                        label(insertedProperty)
-                        label(resetProperty)
+            hbox(spacing = 25) {
+                button("<<  Reset This Model")
+                button("Commit All Units  >>") {
+                    setOnAction {
+                        println("width: ${(this@borderpane.left as VBox).width}")
+                        println("minWidth: ${(this@borderpane.left as VBox).minWidth}")
+                        println("maxWidth: ${(this@borderpane.left as VBox).maxWidth}")
+                        println("prefWidth: ${(this@borderpane.left as VBox).prefWidth}")
+                        println("")
+                        println("width: ${(this@borderpane.right as VBox).width}")
+                        println("minWidth: ${(this@borderpane.right as VBox).minWidth}")
+                        println("maxWidth: ${(this@borderpane.right as VBox).maxWidth}")
+                        println("prefWidth: ${(this@borderpane.right as VBox).prefWidth}")
+                        println("")
+                        println("")
                     }
                 }
             }
 
-            hbox(spacing = 15) {
-                button("<<  Reset This Model")
-                button("Commit All Units  >>")
-            }
- 
-
-            children.style { borderColor += box(javafx.scene.paint.Color.GRAY) }
+            children.style { borderColor += box(Color.GRAY) }
         }
+
+        right = vbox(alignment = Pos.BASELINE_CENTER, spacing = 25) {
+            label("COMMITTED UNITS").style { fontSize = 20.px }
+            add(find<InsertUnitsContainerFragment>(
+                    "units" to insertModel.committedUnitsProperty,
+                    "direction" to HorizontalDirection.RIGHT
+            ))
+        }
+
+        children.style { borderColor += box(Color.GRAY) }
+    }
+
+
+    override fun onDock() {
+        insertModel = insertController.currentInsertModel!!
     }
 }
