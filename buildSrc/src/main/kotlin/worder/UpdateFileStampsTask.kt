@@ -2,6 +2,7 @@ package worder
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.options.Option
 import java.io.File
 import javax.inject.Inject
 
@@ -9,9 +10,13 @@ open class UpdateFileStampsTask @Inject constructor(
         private val sourcesDir: File,
         private val sourcesFormats: List<String>
 ) : DefaultTask() {
+    @Option(description = "Run the task in the Transit mode. Use when updating a stamp structure.")
+    var useTransit = false
+
+
     init {
         group = "Documentation"
-        description = "Updates stamps at the beginning of source files."
+        description = "Updates stamps at beginning of the files specified by extension and directory (recursively)."
     }
 
 
@@ -21,7 +26,7 @@ open class UpdateFileStampsTask @Inject constructor(
 
         val (valid, invalid) = sourcesDir.walk()
                 .filter { file -> sourcesFormats.any { file.name.endsWith(it) } }
-                .map { file -> file to StampedSourceFile.fromFile(file) }
+                .map { file -> file to StampedFile.fromFile(file, useTransit) }
                 .partition { it.second != null }
 
         if (invalid.isNotEmpty()) {
@@ -32,7 +37,7 @@ open class UpdateFileStampsTask @Inject constructor(
         }
 
         valid.forEach {
-            it.second?.update()
+            it.second?.updateStamp()
         }
     }
 }

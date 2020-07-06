@@ -114,20 +114,20 @@ class StampedSourceFileTest : ShouldSpec({
 
 
     xshould("work with valid stamp") {
-        validStampFiles.map { StampedSourceFile.fromFile(it) } shouldNot containNull()
+        validStampFiles.map { StampedFile.fromFile(it, false) } shouldNot containNull()
     }
 
     xshould("work with files with no stamp") {
-        noStampFiles.map { StampedSourceFile.fromFile(it) } shouldNot containNull()
+        noStampFiles.map { StampedFile.fromFile(it, false) } shouldNot containNull()
     }
 
     xshould("not work with invalid stamp") {
-        invalidStampFiles.map { StampedSourceFile.fromFile(it) } should containOnlyNulls()
+        invalidStampFiles.map { StampedFile.fromFile(it, false) } should containOnlyNulls()
     }
 
     xshould("process all files properly") {
         testDir.walk()
                 .filter { it.name.endsWith(".kt") || it.name.endsWith(".kts") }
-                .forEach { StampedSourceFile.fromFile(it)?.update() }
+                .forEach { StampedFile.fromFile(it, false)?.updateStamp() }
     }
 })
