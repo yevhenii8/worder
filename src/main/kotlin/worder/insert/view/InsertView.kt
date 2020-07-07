@@ -4,33 +4,41 @@
  *
  * Name: <InsertView.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <06/07/2020, 10:20:40 PM>
- * Version: <203>
+ * Modified: <08/07/2020, 01:05:46 AM>
+ * Version: <342>
  */
 
 package worder.insert.view
 
 import javafx.geometry.HorizontalDirection
+import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Parent
-import javafx.scene.layout.VBox
+import javafx.scene.control.Label
+import javafx.scene.layout.BorderPane
+import javafx.scene.layout.GridPane
 import javafx.scene.paint.Color
 import javafx.stage.FileChooser.ExtensionFilter
 import tornadofx.View
 import tornadofx.addClass
 import tornadofx.borderpane
-import tornadofx.box
 import tornadofx.button
+import tornadofx.gridpane
 import tornadofx.hbox
 import tornadofx.label
+import tornadofx.onChange
 import tornadofx.paddingAll
+import tornadofx.progressindicator
 import tornadofx.px
 import tornadofx.replaceChildren
+import tornadofx.row
+import tornadofx.separator
 import tornadofx.stackpane
 import tornadofx.style
 import tornadofx.vbox
 import worder.core.styles.WorderDefaultStyles
 import worder.core.view.DragAndDropFragment
+import worder.core.view.worderStatusLabel
 import worder.database.DatabaseController
 import worder.database.DatabaseEventListener
 import worder.database.model.WorderDB
@@ -74,82 +82,136 @@ class InsertView : View("Insert"), DatabaseEventListener {
 class InsertUploadedView : View() {
     private val insertController: InsertController by inject()
     private var insertModel: InsertModel = insertController.currentInsertModel!!
+    private val gridPane: GridPane = GridPane().apply {
+        addRow(0, Label("row1"), Label("column1"), Label("column2"), Label("column3"))
+        addRow(1, Label("row2"), Label("column1"), Label("column2"), Label("column3"))
+        isGridLinesVisible = true
+        vgap = 20.0
+        hgap = 20.0
+    }
 
 
     override val root: Parent = borderpane {
         paddingAll = 15
 
-        left = vbox(alignment = Pos.BASELINE_CENTER, spacing = 25) {
+        left = vbox(alignment = Pos.BASELINE_CENTER) {
             label("UNCOMMITTED UNITS").style { fontSize = 20.px }
+            separator()
+
+            // BLOCK CONTENT
             add(find<InsertUnitsContainerFragment>(
                     "units" to insertModel.uncommittedUnitsProperty,
                     "direction" to HorizontalDirection.LEFT
             ))
         }
 
-        center = vbox(alignment = Pos.BASELINE_CENTER, spacing = 25) {
+        center = vbox(alignment = Pos.BASELINE_CENTER, spacing = 15) {
+            BorderPane.setMargin(this, Insets(0.0, 10.0, 0.0, 10.0))
             addClass(WorderDefaultStyles.insertModel)
-            label("INSERT MODEL").style { fontSize = 20.px }
+            label("INSERT MODEL")
+            separator()
 
-            hbox {
-                label("Received Raw Data")
-                label("==>")
-                vbox(alignment = Pos.BASELINE_RIGHT) {
-                    label("${insertModel.observableStats.totalValidWordsProperty.name}: ")
-                    label("${insertModel.observableStats.totalInvalidWordsProperty.name}: ")
-                }
-                vbox(alignment = Pos.BASELINE_LEFT) {
-                    label(insertModel.observableStats.totalValidWordsProperty)
-                    label(insertModel.observableStats.totalInvalidWordsProperty)
-                }
-            }
+//            gridpane {
+//                vgap = 40.0
+//                isGridLinesVisible = true
+//
+//                row("Received Data Stats") {
+//                    label("==>").gridpaneConstraints {
+//                        marginLeft = 40.0
+//                        marginRight = 40.0
+//                    }
+//                    vbox(alignment = Pos.BASELINE_RIGHT) {
+//                        label("${insertModel.observableStats.totalValidWordsProperty.name}: ")
+//                        label("${insertModel.observableStats.totalInvalidWordsProperty.name}: ")
+//                    }
+//                    vbox(alignment = Pos.BASELINE_LEFT) {
+//                        label(insertModel.observableStats.totalValidWordsProperty)
+//                        label(insertModel.observableStats.totalInvalidWordsProperty)
+//                    }
+//                }
+//                row("Processed Data Stats") {
+//                    label("==>").gridpaneConstraints {
+//                        marginLeft = 40.0
+//                        marginRight = 40.0
+//                    }
+//                    vbox(alignment = Pos.BASELINE_RIGHT) {
+//                        label("${insertModel.observableStats.totalProcessedProperty.name}: ")
+//                        label("${insertModel.observableStats.insertedProperty.name}: ")
+//                        label("${insertModel.observableStats.resetProperty.name}: ")
+//                    }
+//                    vbox(alignment = Pos.BASELINE_LEFT) {
+//                        label(insertModel.observableStats.totalProcessedProperty)
+//                        label(insertModel.observableStats.insertedProperty)
+//                        label(insertModel.observableStats.resetProperty)
+//                    }
+//                }
+//            }
 
-            hbox {
-                label("Primary Processed Data")
-                label("==>")
-                vbox(alignment = Pos.BASELINE_RIGHT) {
-                    label("${insertModel.observableStats.totalProcessedProperty.name}: ")
-                    label("${insertModel.observableStats.insertedProperty.name}: ")
-                    label("${insertModel.observableStats.resetProperty.name}: ")
-                }
-                vbox(alignment = Pos.BASELINE_LEFT) {
-                    label(insertModel.observableStats.totalProcessedProperty)
-                    label(insertModel.observableStats.insertedProperty)
-                    label(insertModel.observableStats.resetProperty)
-                }
-            }
+//            hbox {
+//                gridpane {
+//                    isGridLinesVisible = true
+//                    vgap = 20.0
+//                    hgap = 20.0
+//
+//                    row("row1") {
+//                        label("column1")
+//                        label("column2")
+//                        label("column3")
+//                    }
+//                    row("row2") {
+//                        label("column1")
+//                        label("column2")
+//                        label("column3")
+//                    }
+//                }
+//            }
+            add(gridPane)
+            hbox(spacing = 150) {
+                hbox {
+                    vbox(alignment = Pos.BASELINE_RIGHT) {
+                        label("${insertModel.observableStats.generatedUnitsProperty.name}: ")
+                        label("${insertModel.observableStats.uncommittedUnitsProperty.name}: ")
+                        label("${insertModel.observableStats.committedUnitsProperty.name}: ")
+                        label("${insertModel.observableStats.excludedUnitsProperty.name}: ")
+                        label("${insertModel.observableStats.actionNeededUnitsProperty.name}: ")
+                    }
 
-            hbox(spacing = 25) {
-                button("<<  Reset This Model")
-                button("Commit All Units  >>") {
-                    setOnAction {
-                        println("width: ${(this@borderpane.left as VBox).width}")
-                        println("minWidth: ${(this@borderpane.left as VBox).minWidth}")
-                        println("maxWidth: ${(this@borderpane.left as VBox).maxWidth}")
-                        println("prefWidth: ${(this@borderpane.left as VBox).prefWidth}")
-                        println("")
-                        println("width: ${(this@borderpane.right as VBox).width}")
-                        println("minWidth: ${(this@borderpane.right as VBox).minWidth}")
-                        println("maxWidth: ${(this@borderpane.right as VBox).maxWidth}")
-                        println("prefWidth: ${(this@borderpane.right as VBox).prefWidth}")
-                        println("")
-                        println("")
+                    vbox(alignment = Pos.BASELINE_LEFT) {
+                        label(insertModel.observableStats.generatedUnitsProperty)
+                        label(insertModel.observableStats.uncommittedUnitsProperty)
+                        label(insertModel.observableStats.committedUnitsProperty)
+                        label(insertModel.observableStats.excludedUnitsProperty)
+                        label(insertModel.observableStats.actionNeededUnitsProperty)
                     }
                 }
+                vbox(spacing = 15, alignment = Pos.CENTER) {
+                    progressindicator {
+                        insertModel.observableStats.committedUnitsProperty.onChange {
+                            progress = it.toDouble() / insertModel.observableStats.generatedUnits
+                        }
+                    }
+                    worderStatusLabel(insertModel.modelStatusProperty)
+                }
+            }
+            hbox(spacing = 150) {
+                button("<<  Reset This Model")
+                button("Commit All Units  >>")
             }
 
-            children.style { borderColor += box(Color.GRAY) }
+            children.style { backgroundColor += Color.RED }
+            style { backgroundColor += Color.GREEN }
         }
 
-        right = vbox(alignment = Pos.BASELINE_CENTER, spacing = 25) {
+        right = vbox(alignment = Pos.BASELINE_CENTER) {
             label("COMMITTED UNITS").style { fontSize = 20.px }
+            separator()
+
+            // BLOCK CONTENT
             add(find<InsertUnitsContainerFragment>(
                     "units" to insertModel.committedUnitsProperty,
                     "direction" to HorizontalDirection.RIGHT
             ))
         }
-
-        children.style { borderColor += box(Color.GRAY) }
     }
 
 
