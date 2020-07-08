@@ -4,8 +4,8 @@
  *
  * Name: <InsertUnitsContainerFragment.kt>
  * Created: <05/07/2020, 06:50:42 PM>
- * Modified: <06/07/2020, 10:15:39 PM>
- * Version: <35>
+ * Modified: <09/07/2020, 12:16:57 AM>
+ * Version: <40>
  */
 
 package worder.insert.view
@@ -98,7 +98,7 @@ class InsertUnitsContainerFragment : Fragment() {
             spacing = 15.0
             paddingTop = 200
             imageview("/images/empty-box.png")
-            label("No units here :(")
+            label("NO UNITS HERE :(")
         }
     }
 }

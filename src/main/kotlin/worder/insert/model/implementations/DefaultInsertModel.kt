@@ -4,8 +4,8 @@
  *
  * Name: <DefaultInsertModel.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <06/07/2020, 07:25:08 PM>
- * Version: <4>
+ * Modified: <09/07/2020, 12:30:32 AM>
+ * Version: <6>
  */
 
 package worder.insert.model.implementations
@@ -80,6 +80,8 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
                 generatedUnits++
             }
         }
+
+        observableStats.totalWords = observableStats.totalInvalidWords + observableStats.totalValidWords
     }
 
 

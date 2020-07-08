@@ -4,8 +4,8 @@
  *
  * Name: <ObservableInsertModelStats.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <06/07/2020, 07:25:08 PM>
- * Version: <4>
+ * Modified: <09/07/2020, 12:29:12 AM>
+ * Version: <5>
  */
 
 package worder.insert.model
@@ -37,6 +37,8 @@ interface ObservableInsertModelStats : ObservableStats {
     /**
      * Contains stats values related to processed files
      */
+    val totalWordsProperty: ReadOnlyIntegerProperty
+    val totalWords: Int
 
     val totalValidWordsProperty: ReadOnlyIntegerProperty
     val totalValidWords: Int

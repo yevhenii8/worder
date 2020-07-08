@@ -4,8 +4,8 @@
  *
  * Name: <WorderDefaultStyles.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <06/07/2020, 10:29:06 PM>
- * Version: <60>
+ * Modified: <08/07/2020, 09:54:50 PM>
+ * Version: <68>
  */
 
 package worder.core.styles
@@ -49,10 +49,15 @@ class WorderDefaultStyles : Stylesheet() {
         }
 
         separator {
-            padding = box(25.px, 0.px, 20.px, 0.px)
             line {
                 effect = DropShadow()
             }
+        }
+
+        button {
+            padding = box(8.px)
+            backgroundInsets += box(0.px)
+            backgroundRadius += box(0.px)
         }
 
         statBlock {
@@ -75,13 +80,6 @@ class WorderDefaultStyles : Stylesheet() {
             backgroundColor += Color.TRANSPARENT
 
             insertUnit {
-                unitButton {
-                    maxWidth = infinity
-                    padding = box(6.px)
-                    backgroundInsets += box(0.px)
-                    backgroundRadius += box(0.px)
-                }
-
                 padding = box(10.px)
                 borderColor += box(Color.GRAY)
             }

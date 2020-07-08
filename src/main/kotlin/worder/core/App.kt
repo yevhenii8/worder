@@ -4,8 +4,8 @@
  *
  * Name: <App.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <06/07/2020, 07:25:08 PM>
- * Version: <20>
+ * Modified: <08/07/2020, 11:42:38 PM>
+ * Version: <24>
  */
 
 package worder.core
@@ -76,13 +76,13 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class) {
                     )
             )
 
-            CoroutineScope(Dispatchers.Default).launch {
-                find<InsertController>().currentInsertModel!!
-                        .uncommittedUnits
-                        .filter { it.source != "words4.txt" && it.statusProperty.value == InsertUnit.InsertUnitStatus.READY_TO_COMMIT }
-                        .take(6)
-                        .forEach { it.commit() }
-            }
+//            CoroutineScope(Dispatchers.Default).launch {
+//                find<InsertController>().currentInsertModel!!
+//                        .uncommittedUnits
+//                        .filter { it.source != "words4.txt" && it.statusProperty.value == InsertUnit.InsertUnitStatus.READY_TO_COMMIT }
+//                        .take(6)
+//                        .forEach { it.commit() }
+//            }
         }
     }
 

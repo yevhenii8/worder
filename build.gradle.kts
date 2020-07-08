@@ -17,6 +17,7 @@ dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("no.tornado:tornadofx:2.0.0-SNAPSHOT")
+    implementation("eu.hansolo:tilesfx:11.41")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:1.3.7")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.7")
