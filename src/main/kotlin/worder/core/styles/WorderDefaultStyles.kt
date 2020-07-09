@@ -4,8 +4,8 @@
  *
  * Name: <WorderDefaultStyles.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <08/07/2020, 09:54:50 PM>
- * Version: <68>
+ * Modified: <09/07/2020, 09:11:37 PM>
+ * Version: <81>
  */
 
 package worder.core.styles
@@ -15,6 +15,8 @@ import javafx.scene.effect.DropShadow
 import javafx.scene.layout.BackgroundPosition
 import javafx.scene.layout.BackgroundRepeat
 import javafx.scene.paint.Color
+import tornadofx.DrawerStyles
+import tornadofx.DrawerStyles.Companion.buttonArea
 import tornadofx.DrawerStyles.Companion.drawer
 import tornadofx.DrawerStyles.Companion.drawerItem
 import tornadofx.Stylesheet
@@ -103,11 +105,14 @@ class WorderDefaultStyles : Stylesheet() {
             drawerItem {
                 backgroundColor += c("#f4f4f4")
             }
-        }
 
-        statusBar {
-            text {
-                fontSize = 14.px
+            buttonArea {
+                toggleButton {
+                    padding = box(8.px)
+                }
+                text {
+                    fontSize = 18.px
+                }
             }
         }
     }

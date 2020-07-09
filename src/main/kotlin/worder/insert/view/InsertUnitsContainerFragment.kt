@@ -4,8 +4,8 @@
  *
  * Name: <InsertUnitsContainerFragment.kt>
  * Created: <05/07/2020, 06:50:42 PM>
- * Modified: <09/07/2020, 12:16:57 AM>
- * Version: <40>
+ * Modified: <10/07/2020, 12:14:06 AM>
+ * Version: <59>
  */
 
 package worder.insert.view
@@ -17,6 +17,7 @@ import javafx.geometry.Pos
 import javafx.scene.Parent
 import javafx.scene.control.ScrollBar
 import javafx.scene.control.ScrollPane
+import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
 import tornadofx.Fragment
 import tornadofx.addClass
@@ -49,44 +50,44 @@ class InsertUnitsContainerFragment : Fragment() {
     }
 
 
-    override val root = vbox(alignment = Pos.BASELINE_CENTER) {
-        hbox {
-            if (direction == HorizontalDirection.LEFT) {
-                paddingRight = scrollBar.width
-                add(scrollBar)
+    override val root = hbox {
+        setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE)
+
+        if (direction == HorizontalDirection.LEFT) {
+            paddingRight = scrollBar.width
+            add(scrollBar)
+        }
+
+        val scrollPane = scrollpane {
+            addClass(WorderDefaultStyles.insertUnits)
+
+            content = if (units.isEmpty()) find<EmptyUnitsContainer>().root else unitsUI
+            alignment = Pos.CENTER
+            vbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
+            hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
+
+            scrollBar.apply {
+                orientation = Orientation.VERTICAL
+                minProperty().bind(vminProperty())
+                maxProperty().bind(vmaxProperty())
+                visibleAmountProperty().bind(heightProperty().divide(unitsUI.heightProperty()))
             }
 
-            val scrollPane = scrollpane {
-                addClass(WorderDefaultStyles.insertUnits)
-
-                content = if (units.isEmpty()) find<EmptyUnitsContainer>().root else unitsUI
-                alignment = Pos.CENTER
-                vbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
-                hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
-
-                scrollBar.apply {
-                    orientation = Orientation.VERTICAL
-                    minProperty().bind(vminProperty())
-                    maxProperty().bind(vmaxProperty())
-                    visibleAmountProperty().bind(heightProperty().divide(unitsUI.heightProperty()))
-                }
-
-                vvalueProperty().bindBidirectional(scrollBar.valueProperty())
-                unitsUI.setOnScroll {
-                    vvalue -= it.deltaY * 0.01
-                }
+            vvalueProperty().bindBidirectional(scrollBar.valueProperty())
+            unitsUI.setOnScroll {
+                vvalue -= it.deltaY * 0.007
             }
+        }
 
-            if (direction == HorizontalDirection.RIGHT) {
-                paddingLeft = scrollBar.width
-                add(scrollBar)
-            }
+        if (direction == HorizontalDirection.RIGHT) {
+            paddingLeft = scrollBar.width
+            add(scrollBar)
+        }
 
-            unitsUI.children.onChange {
-                when (it.list.size) {
-                    0 -> scrollPane.content = find<EmptyUnitsContainer>().root
-                    1 -> scrollPane.content = unitsUI
-                }
+        unitsUI.children.onChange {
+            when (it.list.size) {
+                0 -> scrollPane.content = find<EmptyUnitsContainer>().root
+                1 -> scrollPane.content = unitsUI
             }
         }
     }

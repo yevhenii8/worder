@@ -4,8 +4,8 @@
  *
  * Name: <ComponentsExt.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <06/07/2020, 07:25:08 PM>
- * Version: <4>
+ * Modified: <09/07/2020, 10:43:11 PM>
+ * Version: <5>
  */
 
 package worder.tornadofx
@@ -17,7 +17,6 @@ import tornadofx.SetConversionListener
 import tornadofx.UIComponent
 import tornadofx.bind
 import tornadofx.getChildList
-import tornadofx.plusAssign
 
 /*
 There's no extension function for bindComponents(ObservableList): [ISSUE IS NEEDED]
@@ -37,5 +36,13 @@ inline fun <reified T> EventTarget.bindComponents(
     "Unable to extract child nodes from $this"
 }
 
-fun EventTarget.addAll(uiComponents: Collection<UIComponent>) =
-        uiComponents.forEach { plusAssign(it.root) }
+
+/**
+ * Replaces Node's children with provided UI Components
+ * Analogue of fun EventTarget.add(uiComponent: UIComponent) = plusAssign(uiComponent.root)
+ */
+fun EventTarget.replaceChildren(vararg uiComponent: UIComponent) {
+    val children = requireNotNull(getChildList()) { "This node doesn't have a child list" }
+    children.clear()
+    children.addAll(uiComponent.map { it.root })
+}

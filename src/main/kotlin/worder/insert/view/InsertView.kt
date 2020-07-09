@@ -4,60 +4,27 @@
  *
  * Name: <InsertView.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <09/07/2020, 12:29:12 AM>
- * Version: <432>
+ * Modified: <09/07/2020, 10:43:11 PM>
+ * Version: <454>
  */
 
 package worder.insert.view
 
-import eu.hansolo.tilesfx.Tile
-import eu.hansolo.tilesfx.TileBuilder
-import eu.hansolo.tilesfx.skins.CircularProgressTileSkin
-import eu.hansolo.tilesfx.tools.Helper
-import javafx.geometry.HorizontalDirection
-import javafx.geometry.Insets
-import javafx.geometry.Orientation
-import javafx.geometry.Pos
 import javafx.scene.Parent
-import javafx.scene.layout.BorderPane
-import javafx.scene.layout.Region
-import javafx.scene.layout.VBox
-import javafx.scene.paint.Color
-import javafx.scene.text.Text
 import javafx.stage.FileChooser.ExtensionFilter
 import tornadofx.View
-import tornadofx.addClass
-import tornadofx.borderpane
-import tornadofx.button
-import tornadofx.fitToParentHeight
-import tornadofx.gridpane
-import tornadofx.gridpaneConstraints
-import tornadofx.hbox
-import tornadofx.label
-import tornadofx.onChange
-import tornadofx.paddingAll
-import tornadofx.px
-import tornadofx.replaceChildren
-import tornadofx.row
-import tornadofx.separator
 import tornadofx.stackpane
-import tornadofx.style
-import tornadofx.vbox
-import tornadofx.wrapIn
-import worder.core.styles.WorderDefaultStyles
 import worder.core.view.DragAndDropFragment
-import worder.core.view.worderStatusLabel
 import worder.database.DatabaseController
 import worder.database.DatabaseEventListener
 import worder.database.model.WorderDB
 import worder.database.view.NoConnectionFragment
 import worder.insert.InsertController
 import worder.insert.model.InsertModel
+import worder.tornadofx.replaceChildren
 import java.io.File
-import java.lang.Double.max
 
 class InsertView : View("Insert"), DatabaseEventListener {
-    private val insertUploadedView: InsertUploadedView by inject()
     private val insertController: InsertController by inject()
     private val notConnectedFragment = find<NoConnectionFragment>()
     private val notUploadedFragment = find<DragAndDropFragment>(
@@ -67,6 +34,7 @@ class InsertView : View("Insert"), DatabaseEventListener {
             "action" to { files: List<File> -> insertController.generateInsertModel(files) },
             "allowMultiselect" to true
     )
+
 
     override val root: Parent = stackpane()
 
@@ -78,167 +46,10 @@ class InsertView : View("Insert"), DatabaseEventListener {
 
     override fun onDatabaseConnection(db: WorderDB) = toNotUploadedState()
 
-    override fun onDatabaseDisconnection() = toNotConnectedState()
+    override fun onDatabaseDisconnection() = root.replaceChildren(notConnectedFragment)
 
 
-    fun toNotConnectedState() = root.replaceChildren(notConnectedFragment.root)
+    fun toNotUploadedState() = root.replaceChildren(notUploadedFragment)
 
-    fun toNotUploadedState() = root.replaceChildren(notUploadedFragment.root)
-
-    fun toUploadedState() = root.replaceChildren(insertUploadedView.root)
-}
-
-class InsertUploadedView : View() {
-    private val insertController: InsertController by inject()
-    private var insertModel: InsertModel = insertController.currentInsertModel!!
-
-
-    override val root: Parent = borderpane {
-        paddingAll = 15
-
-        left = vbox(spacing = 20, alignment = Pos.BASELINE_CENTER) {
-            label("UNCOMMITTED UNITS").style { fontSize = 20.px }
-            separator()
-            add(find<InsertUnitsContainerFragment>(
-                    "units" to insertModel.uncommittedUnitsProperty,
-                    "direction" to HorizontalDirection.LEFT
-            ))
-        }
-
-        center = vbox(spacing = 20, alignment = Pos.BASELINE_CENTER) {
-            BorderPane.setMargin(this, Insets(0.0, 10.0, 0.0, 10.0))
-            addClass(WorderDefaultStyles.insertModel)
-            label("INSERT MODEL")
-            separator()
-
-            vbox(spacing = 50, alignment = Pos.CENTER) {
-                fitToParentHeight()
-
-                hbox {
-                    setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE)
-                    gridpane {
-                        vgap = 40.0
-
-                        row("Received Data Stats") {
-                            label("==>").gridpaneConstraints {
-                                marginLeft = 40.0
-                                marginRight = 40.0
-                            }
-                            vbox(alignment = Pos.BASELINE_RIGHT) {
-                                label("${insertModel.observableStats.totalWordsProperty.name}: ")
-                                label("${insertModel.observableStats.totalValidWordsProperty.name}: ")
-                                label("${insertModel.observableStats.totalInvalidWordsProperty.name}: ")
-                            }
-                            vbox(alignment = Pos.BASELINE_LEFT) {
-                                label(insertModel.observableStats.totalWordsProperty)
-                                label(insertModel.observableStats.totalValidWordsProperty)
-                                label(insertModel.observableStats.totalInvalidWordsProperty)
-                            }
-                        }
-                        row("Processed Data Stats") {
-                            label("==>").gridpaneConstraints {
-                                marginLeft = 40.0
-                                marginRight = 40.0
-                            }
-                            vbox(alignment = Pos.BASELINE_RIGHT) {
-                                label("${insertModel.observableStats.totalProcessedProperty.name}: ")
-                                label("${insertModel.observableStats.insertedProperty.name}: ")
-                                label("${insertModel.observableStats.resetProperty.name}: ")
-                            }
-                            vbox(alignment = Pos.BASELINE_LEFT) {
-                                label(insertModel.observableStats.totalProcessedProperty)
-                                label(insertModel.observableStats.insertedProperty)
-                                label(insertModel.observableStats.resetProperty)
-                            }
-                        }
-                    }
-                }
-                separator()
-                hbox(spacing = 75) {
-                    setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE)
-                    hbox {
-                        vbox(alignment = Pos.BASELINE_RIGHT) {
-                            label("${insertModel.observableStats.generatedUnitsProperty.name}: ")
-                            label("${insertModel.observableStats.uncommittedUnitsProperty.name}: ")
-                            label("${insertModel.observableStats.committedUnitsProperty.name}: ")
-                            label("${insertModel.observableStats.excludedUnitsProperty.name}: ")
-                            label("${insertModel.observableStats.actionNeededUnitsProperty.name}: ")
-                        }
-
-                        vbox(alignment = Pos.BASELINE_LEFT) {
-                            label(insertModel.observableStats.generatedUnitsProperty)
-                            label(insertModel.observableStats.uncommittedUnitsProperty)
-                            label(insertModel.observableStats.committedUnitsProperty)
-                            label(insertModel.observableStats.excludedUnitsProperty)
-                            label(insertModel.observableStats.actionNeededUnitsProperty)
-                        }
-                    }
-                    separator(Orientation.VERTICAL) {
-                        this.fitToParentHeight()
-                    }
-                    vbox(spacing = 15, alignment = Pos.CENTER) {
-                        val tile = Tile(Tile.SkinType.CUSTOM).apply {
-                            this.setPrefSize(100.0, 100.0)
-
-                            this.backgroundColor = Color.TRANSPARENT
-                            this.valueColor = Color.BLACK
-                            this.unitColor = Color.BLACK
-                            this.barBackgroundColor = Color.LIGHTGRAY
-                            this.isValueVisible = false
-                            this.skin = object : CircularProgressTileSkin(this) {
-                                init {
-                                    val percentageUnitTextField = CircularProgressTileSkin::class.java.getDeclaredField("percentageUnitText")
-                                    val percentageValueTextField = CircularProgressTileSkin::class.java.getDeclaredField("percentageValueText")
-
-                                    percentageUnitTextField.isAccessible = true
-                                    percentageValueTextField.isAccessible = true
-
-                                    val percentageUnitText = percentageUnitTextField.get(this) as Text
-                                    val percentageValueText = percentageValueTextField.get(this) as Text
-
-                                    percentageUnitText.fontProperty().onChange {
-                                        percentageUnitText.font = percentageValueText.font
-                                    }
-                                }
-                            }
-
-                            value = (insertModel.observableStats.committedUnits.toDouble() / insertModel.observableStats.generatedUnits) * 100
-                            insertModel.observableStats.committedUnitsProperty.onChange {
-                                value = (it.toDouble() / insertModel.observableStats.generatedUnits) * 100
-                            }
-                        }
-                        add(tile)
-                        worderStatusLabel(insertModel.modelStatusProperty)
-                    }
-                }
-                separator()
-                hbox(spacing = 150) {
-                    setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE)
-                    button("Reset This Model")
-                    button("Commit All Units")
-                }
-
-//                children.style { backgroundColor += Color.RED }
-//                style { backgroundColor += Color.GREEN }
-            }
-//            style { backgroundColor += Color.ORANGE }
-        }
-
-        right = vbox(spacing = 20, alignment = Pos.BASELINE_CENTER) {
-            label("COMMITTED UNITS").style { fontSize = 20.px }
-            separator()
-            add(find<InsertUnitsContainerFragment>(
-                    "units" to insertModel.committedUnitsProperty,
-                    "direction" to HorizontalDirection.RIGHT
-            ))
-        }
-
-        (right as VBox).minWidthProperty().bind((left as VBox).widthProperty())
-        (left as VBox).minWidthProperty().bind((right as VBox).widthProperty())
-    }
-
-
-    override fun onDock() {
-        insertModel = insertController.currentInsertModel!!
-    }
+    fun toUploadedState(insertModel: InsertModel) = root.replaceChildren(find<InsertModelFragment>("insertModel" to insertModel))
 }

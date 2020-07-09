@@ -4,8 +4,8 @@
  *
  * Name: <Words.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <06/07/2020, 07:25:08 PM>
- * Version: <3>
+ * Modified: <09/07/2020, 04:41:16 PM>
+ * Version: <4>
  */
 
 package worder.core.model
@@ -16,13 +16,6 @@ open class BareWord(val name: String) {
     companion object {
         private val wordPattern = "([a-zA-Z\\-']+)|(([a-zA-Z\\-']+ [a-zA-Z\\-']+)+( [a-zA-Z\\-']+)?)".toRegex()
         val wordValidator: (word: String) -> Boolean = { word -> word.matches(wordPattern) }
-    }
-
-
-    init {
-        require(wordValidator.invoke(name)) {
-            "Invalid word's name: $name"
-        }
     }
 
 

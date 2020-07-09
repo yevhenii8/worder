@@ -4,8 +4,8 @@
  *
  * Name: <App.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <08/07/2020, 11:42:38 PM>
- * Version: <24>
+ * Modified: <09/07/2020, 11:14:16 PM>
+ * Version: <25>
  */
 
 package worder.core
@@ -61,12 +61,6 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class) {
             find<InsertController>().generateInsertModel(
                     listOf
                     (
-                            File("$samplePath/inserting/words0.txt"),
-                            File("$samplePath/inserting/words1.txt"),
-                            File("$samplePath/inserting/words2.txt"),
-                            File("$samplePath/inserting/words3.txt"),
-                            File("$samplePath/inserting/words4.txt"),
-                            File("$samplePath/inserting/words5.txt"),
                             File("$samplePath/inserting/words0.txt"),
                             File("$samplePath/inserting/words1.txt"),
                             File("$samplePath/inserting/words2.txt"),

@@ -4,8 +4,8 @@
  *
  * Name: <InsertController.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <06/07/2020, 07:25:08 PM>
- * Version: <4>
+ * Modified: <09/07/2020, 10:43:11 PM>
+ * Version: <5>
  */
 
 package worder.insert
@@ -21,16 +21,13 @@ class InsertController : Controller() {
     private val insertView: InsertView by inject()
     private val databaseController: DatabaseController by inject()
 
-    var currentInsertModel: InsertModel? = null
-
 
     fun generateInsertModel(files: List<File>) {
-        currentInsertModel = DefaultInsertModel.createInstance(databaseController.db!!.inserter, files)
-        insertView.toUploadedState()
+        val insertModel = DefaultInsertModel.createInstance(databaseController.db!!.inserter, files)
+        insertView.toUploadedState(insertModel)
     }
 
     fun releaseInsertModel() {
-        currentInsertModel = null
         insertView.toNotUploadedState()
     }
 }
