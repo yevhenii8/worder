@@ -4,8 +4,8 @@
  *
  * Name: <WorderDefaultStyles.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <09/07/2020, 09:11:37 PM>
- * Version: <81>
+ * Modified: <10/07/2020, 08:14:57 PM>
+ * Version: <85>
  */
 
 package worder.core.styles
@@ -15,7 +15,6 @@ import javafx.scene.effect.DropShadow
 import javafx.scene.layout.BackgroundPosition
 import javafx.scene.layout.BackgroundRepeat
 import javafx.scene.paint.Color
-import tornadofx.DrawerStyles
 import tornadofx.DrawerStyles.Companion.buttonArea
 import tornadofx.DrawerStyles.Companion.drawer
 import tornadofx.DrawerStyles.Companion.drawerItem
@@ -23,15 +22,11 @@ import tornadofx.Stylesheet
 import tornadofx.box
 import tornadofx.c
 import tornadofx.cssclass
-import tornadofx.infinity
 import tornadofx.px
 
 class WorderDefaultStyles : Stylesheet() {
     companion object {
-        val statBlock by cssclass()
-        val title by cssclass()
-        val names by cssclass()
-
+        val stats by cssclass()
         val insertUnit by cssclass()
         val insertUnits by cssclass()
         val insertModel by cssclass()
@@ -40,6 +35,7 @@ class WorderDefaultStyles : Stylesheet() {
         val dragDropField by cssclass()
         val statusBar by cssclass()
     }
+
 
     init {
         text {
@@ -62,20 +58,12 @@ class WorderDefaultStyles : Stylesheet() {
             backgroundRadius += box(0.px)
         }
 
-        statBlock {
+        stats {
             alignment = Pos.TOP_CENTER
             padding = box(15.px)
             borderInsets += box(15.px)
             borderRadius += box(15.px)
             borderColor += box(Color.GRAY)
-
-            title {
-                padding = box(0.px, 0.px, 15.px, 0.px)
-            }
-
-            names {
-                padding = box(0.px, 15.px, 0.px, 0.px)
-            }
         }
 
         insertUnits {

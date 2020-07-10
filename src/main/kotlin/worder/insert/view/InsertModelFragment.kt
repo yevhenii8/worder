@@ -4,48 +4,41 @@
  *
  * Name: <InsertModelFragment.kt>
  * Created: <09/07/2020, 10:43:11 PM>
- * Modified: <10/07/2020, 12:13:08 AM>
- * Version: <34>
+ * Modified: <11/07/2020, 12:17:46 AM>
+ * Version: <84>
  */
 
 package worder.insert.view
 
-import javafx.beans.binding.Bindings
 import javafx.geometry.HorizontalDirection
 import javafx.geometry.Insets
-import javafx.geometry.Orientation
 import javafx.geometry.Pos
 import javafx.scene.Parent
 import javafx.scene.layout.BorderPane
-import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import org.pdfsam.ui.RingProgressIndicator
 import tornadofx.Fragment
 import tornadofx.addClass
 import tornadofx.borderpane
-import tornadofx.button
-import tornadofx.fitToParentHeight
-import tornadofx.gridpane
-import tornadofx.gridpaneConstraints
-import tornadofx.hbox
 import tornadofx.label
 import tornadofx.onChange
 import tornadofx.paddingAll
 import tornadofx.px
-import tornadofx.row
 import tornadofx.separator
 import tornadofx.style
 import tornadofx.vbox
 import worder.core.styles.WorderDefaultStyles
-import worder.core.view.worderStatusLabel
-import worder.insert.InsertController
 import worder.insert.model.InsertModel
-import kotlin.math.max
 import kotlin.math.roundToInt
 
 class InsertModelFragment : Fragment() {
     private val insertModel: InsertModel by param()
+    private val progressIndicator = RingProgressIndicator().apply {
+        insertModel.observableStats.totalProcessedProperty.onChange {
+            this.progress = ((it.toDouble() / insertModel.observableStats.totalWords) * 100).roundToInt()
+        }
+    }
     private val uncommittedUnits = find<InsertUnitsContainerFragment>(
             "units" to insertModel.uncommittedUnitsProperty,
             "direction" to HorizontalDirection.LEFT
@@ -67,97 +60,52 @@ class InsertModelFragment : Fragment() {
         }
 
         center = vbox(spacing = 20, alignment = Pos.BASELINE_CENTER) {
+            style { backgroundColor += Color.ORANGE }
+
             BorderPane.setMargin(this, Insets(0.0, 10.0, 0.0, 10.0))
             addClass(WorderDefaultStyles.insertModel)
             label("INSERT MODEL")
             separator()
 
-            vbox(spacing = 50, alignment = Pos.CENTER) {
-                fitToParentHeight()
-
-                hbox {
-                    setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE)
-                    gridpane {
-                        vgap = 40.0
-
-                        row("Received Data Stats") {
-                            label("==>").gridpaneConstraints {
-                                marginLeft = 40.0
-                                marginRight = 40.0
-                            }
-                            vbox(alignment = Pos.BASELINE_RIGHT) {
-                                label("${insertModel.observableStats.totalWordsProperty.name}: ")
-                                label("${insertModel.observableStats.totalValidWordsProperty.name}: ")
-                                label("${insertModel.observableStats.totalInvalidWordsProperty.name}: ")
-                            }
-                            vbox(alignment = Pos.BASELINE_LEFT) {
-                                label(insertModel.observableStats.totalWordsProperty)
-                                label(insertModel.observableStats.totalValidWordsProperty)
-                                label(insertModel.observableStats.totalInvalidWordsProperty)
-                            }
-                        }
-                        row("Processed Data Stats") {
-                            label("==>").gridpaneConstraints {
-                                marginLeft = 40.0
-                                marginRight = 40.0
-                            }
-                            vbox(alignment = Pos.BASELINE_RIGHT) {
-                                label("${insertModel.observableStats.totalProcessedProperty.name}: ")
-                                label("${insertModel.observableStats.insertedProperty.name}: ")
-                                label("${insertModel.observableStats.resetProperty.name}: ")
-                            }
-                            vbox(alignment = Pos.BASELINE_LEFT) {
-                                label(insertModel.observableStats.totalProcessedProperty)
-                                label(insertModel.observableStats.insertedProperty)
-                                label(insertModel.observableStats.resetProperty)
-                            }
-                        }
-                    }
-                }
-                separator()
-                hbox(spacing = 75) {
-                    setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE)
-                    separator(Orientation.VERTICAL) {
-                        this.fitToParentHeight()
-                    }
-                    vbox(spacing = 15, alignment = Pos.CENTER) {
-                        val progressIndicator = RingProgressIndicator().apply {
-                            insertModel.observableStats.totalProcessedProperty.onChange {
-                                this.progress = ((it.toDouble() / insertModel.observableStats.totalWords) * 100).roundToInt()
-                            }
-                        }
-                        add(progressIndicator)
-                        worderStatusLabel(insertModel.modelStatusProperty)
-                    }
-                }
-                separator()
-                hbox(spacing = 150) {
-                    setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE)
-                    button("Reset This Model") {
-                        setOnAction {
-                            find<InsertController>().releaseInsertModel()
-                        }
-                    }
-                    button("Commit All Units") {
-                        setOnAction {
-                            val maxWidth: Double = max(uncommittedUnits.widthProperty().value, committedUnits.widthProperty().value)
-
-                            println("")
-                            println(uncommittedUnits.widthProperty().toString())
-                            println(committedUnits.widthProperty().toString())
-                            println(" new common min width ==> $maxWidth")
-                            println("")
-
-                            (left as VBox).minWidth = maxWidth
-                            (right as VBox).minWidth = maxWidth
-                        }
-                    }
-                }
-
-//                children.style { backgroundColor += Color.RED }
-//                style { backgroundColor += Color.GREEN }
+            vbox(spacing = 50) {
+                label("hell1")
+                label("hell2")
+                label("hell3")
             }
-//            style { backgroundColor += Color.ORANGE }
+
+//            vbox(spacing = 50) {
+//                label("hell")
+//                label("hell")
+//                label("hell")
+//                add(progressIndicator)
+//                worderStatusLabel(insertModel.modelStatusProperty)
+//                separator()
+//                hbox {
+//                    add(observableStats(
+//                            blockTitle = "Uploaded Data Stats",
+//                            statsProperties = listOf(
+//                                    insertModel.observableStats.totalWordsProperty,
+//                                    insertModel.observableStats.totalValidWordsProperty,
+//                                    insertModel.observableStats.totalInvalidWordsProperty
+//                            )))
+//                }
+//                separator()
+//                hbox(spacing = 150) {
+//                    button("Reset This Model") {
+//                        setOnAction {
+//                            find<InsertController>().releaseInsertModel()
+//                        }
+//                    }
+//                    button("Commit All Units") {
+//                        setOnAction {
+//                            CoroutineScope(Dispatchers.Default).launch { insertModel.commitAllUnits() }
+//                        }
+//                    }
+//                }
+//
+//            }
+
+            children.style {  backgroundColor += Color.GREEN }
         }
 
         right = vbox(spacing = 20, alignment = Pos.BASELINE_CENTER) {
@@ -169,17 +117,5 @@ class InsertModelFragment : Fragment() {
 
         (left as VBox).minWidthProperty().bind(committedUnits.widthProperty())
         (right as VBox).minWidthProperty().bind(uncommittedUnits.widthProperty())
-
-//        uncommittedUnits.widthProperty().onChange {
-//            val maxWidth: Double = max(it, committedUnits.width)
-//            (left as VBox).minWidth = maxWidth
-//            (right as VBox).minWidth = maxWidth
-//        }
-//
-//        committedUnits.widthProperty().onChange {
-//            val maxWidth: Double = max(it, uncommittedUnits.width)
-//            (left as VBox).minWidth = maxWidth
-//            (right as VBox).minWidth = maxWidth
-//        }
     }
 }

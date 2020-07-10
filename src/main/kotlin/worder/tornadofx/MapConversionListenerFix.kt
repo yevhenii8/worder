@@ -4,8 +4,8 @@
  *
  * Name: <MapConversionListenerFix.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <06/07/2020, 07:25:08 PM>
- * Version: <3>
+ * Modified: <10/07/2020, 10:35:52 PM>
+ * Version: <4>
  */
 
 package worder.tornadofx
@@ -69,7 +69,7 @@ fun <SourceTypeKey, SourceTypeValue, TargetType> MutableList<TargetType>.bind(
 class MapConversionListener<SourceTypeKey, SourceTypeValue, TargetType>(
         targetList: MutableList<TargetType>,
         sourceMap: ObservableMap<SourceTypeKey, SourceTypeValue>,
-        val converter: (SourceTypeKey, SourceTypeValue) -> TargetType
+        private val converter: (SourceTypeKey, SourceTypeValue) -> TargetType
 ) : MapChangeListener<SourceTypeKey, SourceTypeValue>, WeakListener {
     internal val targetRef: WeakReference<MutableList<TargetType>> = WeakReference(targetList)
     private val sourceToTarget: MutableMap<SourceTypeKey, TargetType> = sourceMap

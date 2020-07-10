@@ -4,8 +4,8 @@
  *
  * Name: <DashboardView.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <06/07/2020, 07:25:08 PM>
- * Version: <5>
+ * Modified: <10/07/2020, 10:49:09 PM>
+ * Version: <15>
  */
 
 package worder.core.view
@@ -20,6 +20,7 @@ import worder.database.model.WorderDB
 class DashboardView : View(), DatabaseEventListener {
     private val databaseController: DatabaseController by inject()
 
+
     override val root = hbox(alignment = Pos.TOP_CENTER)
 
 
@@ -29,15 +30,18 @@ class DashboardView : View(), DatabaseEventListener {
 
 
     override fun onDatabaseConnection(db: WorderDB) {
-        root.add(find<ObservableStatsFragment>(
-                "observableStats" to databaseController.observableStats,
-                "valueMutators" to mapOf("Data source" to { ds: Any? -> ds.toString().substringAfterLast("/") })
-        ))
+        root.add(
+                observableStats(
+                        stats = databaseController.observableStats,
+                        valueMutators = mapOf("Data source" to { value: Any? -> value.toString().substringAfterLast("/") })
+                )
 
-        root.add(find<ObservableStatsFragment>("observableStats" to db.observableSummaryStats).root)
-        root.add(find<ObservableStatsFragment>("observableStats" to db.observableTrackStats).root)
-        root.add(find<ObservableStatsFragment>("observableStats" to db.inserter.observableInserterStats).root)
-        root.add(find<ObservableStatsFragment>("observableStats" to db.updater.observableUpdaterStats))
+        )
+
+        root.add(observableStats(db.observableSummaryStats))
+        root.add(observableStats(db.observableTrackStats))
+        root.add(observableStats(db.inserter.observableInserterStats))
+        root.add(observableStats(db.updater.observableUpdaterStats))
     }
 
     override fun onDatabaseDisconnection() {
