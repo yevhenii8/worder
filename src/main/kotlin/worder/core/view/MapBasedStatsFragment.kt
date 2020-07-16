@@ -4,8 +4,8 @@
  *
  * Name: <MapBasedStatsFragment.kt>
  * Created: <10/07/2020, 09:03:31 PM>
- * Modified: <10/07/2020, 10:49:09 PM>
- * Version: <9>
+ * Modified: <16/07/2020, 09:35:08 PM>
+ * Version: <10>
  */
 
 package worder.core.view
@@ -43,6 +43,6 @@ class MapBasedStatsFragment : Fragment() {
             }
         }
 
-        addClass(WorderDefaultStyles.stats)
+        addClass(WorderDefaultStyles.statsBlock)
     }
 }

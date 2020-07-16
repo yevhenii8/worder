@@ -37,14 +37,28 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
     }
 
 
-    override val modelStatusProperty: ObjectProperty<InsertModelStatus> = SimpleObjectProperty(InsertModelStatus.CREATED)
-    override var modelStatus: InsertModelStatus by modelStatusProperty
+    // ALL THE UNITS, SPLIT BY THEIR STATUS
+
+    override val uncommittedUnitsProperty: SetProperty<InsertUnit> = SimpleSetProperty(observableSetOf())
+    override val uncommittedUnits: MutableSet<InsertUnit> by uncommittedUnitsProperty
+
+    override val uncommittedUnitsProperty: SetProperty<InsertUnit> = SimpleSetProperty(observableSetOf())
+    override val uncommittedUnits: MutableSet<InsertUnit> by uncommittedUnitsProperty
+
+    override val uncommittedUnitsProperty: SetProperty<InsertUnit> = SimpleSetProperty(observableSetOf())
+    override val uncommittedUnits: MutableSet<InsertUnit> by uncommittedUnitsProperty
 
     override val uncommittedUnitsProperty: SetProperty<InsertUnit> = SimpleSetProperty(observableSetOf())
     override val uncommittedUnits: MutableSet<InsertUnit> by uncommittedUnitsProperty
 
     override val committedUnitsProperty: SetProperty<InsertUnit> = SimpleSetProperty(observableSetOf())
     override val committedUnits: MutableSet<InsertUnit> by committedUnitsProperty
+
+
+    // THE REST MODEL PROPERTIES
+
+    override val modelStatusProperty: ObjectProperty<InsertModelStatus> = SimpleObjectProperty(InsertModelStatus.ACTION_NEEDED)
+    override var modelStatus: InsertModelStatus by modelStatusProperty
 
     override val observableStats: SimpleInsertModelStats = SimpleInsertModelStats().apply {
         uncommittedUnitsProperty.bind(this@DefaultInsertModel.uncommittedUnitsProperty.sizeProperty())
@@ -53,6 +67,10 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
 
 
     init {
+        require(files.isNotEmpty()) {
+            "InsertModel can't be initialized without a file!"
+        }
+
         files.forEach {
             require(it.isFile && it.canRead()) {
                 "Please provide correct readable file! passed: ${it.name}"
@@ -185,6 +203,8 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
                 unitState = pickUpState(newUnitStatus)
                 unitStatus = newUnitStatus
                 unitState.onAttach()
+
+                updateModelStatus()
             }
 
 
@@ -242,9 +262,7 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
                 }
 
                 override fun onAttach() {
-                    if (invalidWords.isEmpty())
-                        updateModelStatus()
-                    else
+                    if (invalidWords.isNotEmpty())
                         changeState(InsertUnitStatus.ACTION_NEEDED)
                 }
             }

@@ -4,8 +4,8 @@
  *
  * Name: <ObservableInsertModelStats.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <09/07/2020, 12:29:12 AM>
- * Version: <5>
+ * Modified: <16/07/2020, 07:55:20 PM>
+ * Version: <6>
  */
 
 package worder.insert.model
@@ -15,7 +15,7 @@ import worder.core.model.ObservableStats
 
 interface ObservableInsertModelStats : ObservableStats {
     /**
-     * Contains stats values related to units
+     * Contains stats values related to units / insert progress
      */
 
     val generatedUnitsProperty: ReadOnlyIntegerProperty
@@ -35,7 +35,7 @@ interface ObservableInsertModelStats : ObservableStats {
 
 
     /**
-     * Contains stats values related to processed files
+     * Contains stats values related to uploaded data
      */
     val totalWordsProperty: ReadOnlyIntegerProperty
     val totalWords: Int
@@ -48,7 +48,7 @@ interface ObservableInsertModelStats : ObservableStats {
 
 
     /**
-     * Contains stats values related to InsertModel itself
+     * Contains stats values related to processed data
      */
 
     val totalProcessedProperty: ReadOnlyIntegerProperty

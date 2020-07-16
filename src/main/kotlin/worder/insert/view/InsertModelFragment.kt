@@ -4,31 +4,46 @@
  *
  * Name: <InsertModelFragment.kt>
  * Created: <09/07/2020, 10:43:11 PM>
- * Modified: <11/07/2020, 12:17:46 AM>
- * Version: <84>
+ * Modified: <16/07/2020, 09:45:30 PM>
+ * Version: <152>
  */
 
 package worder.insert.view
 
+import javafx.geometry.HPos
 import javafx.geometry.HorizontalDirection
 import javafx.geometry.Insets
 import javafx.geometry.Pos
+import javafx.geometry.VPos
 import javafx.scene.Parent
+import javafx.scene.layout.Border
 import javafx.scene.layout.BorderPane
+import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.pdfsam.ui.RingProgressIndicator
 import tornadofx.Fragment
 import tornadofx.addClass
 import tornadofx.borderpane
+import tornadofx.box
+import tornadofx.button
+import tornadofx.gridpane
+import tornadofx.gridpaneConstraints
 import tornadofx.label
 import tornadofx.onChange
 import tornadofx.paddingAll
 import tornadofx.px
+import tornadofx.row
 import tornadofx.separator
 import tornadofx.style
 import tornadofx.vbox
 import worder.core.styles.WorderDefaultStyles
+import worder.core.view.observableStats
+import worder.core.view.worderStatusLabel
+import worder.insert.InsertController
 import worder.insert.model.InsertModel
 import kotlin.math.roundToInt
 
@@ -53,62 +68,105 @@ class InsertModelFragment : Fragment() {
         paddingAll = 15
 
 
-        left = vbox(spacing = 20, alignment = Pos.BASELINE_CENTER) {
+        left = vbox(spacing = 20, alignment = Pos.TOP_CENTER) {
             label("UNCOMMITTED UNITS").style { fontSize = 20.px }
             separator()
             add(uncommittedUnits)
         }
 
-        center = vbox(spacing = 20, alignment = Pos.BASELINE_CENTER) {
-            style { backgroundColor += Color.ORANGE }
-
+        center = vbox(spacing = 20, alignment = Pos.TOP_CENTER) {
             BorderPane.setMargin(this, Insets(0.0, 10.0, 0.0, 10.0))
             addClass(WorderDefaultStyles.insertModel)
             label("INSERT MODEL")
             separator()
 
-            vbox(spacing = 50) {
-                label("hell1")
-                label("hell2")
-                label("hell3")
+            /**
+             * Can't use another VBox due to the JavaFX bug.
+             * For some reasons It doesn't process nested containers correctly.
+             * Issue in JDK bug tracker created -> waiting for response.
+             */
+
+            gridpane {
+                alignment = Pos.CENTER
+                hgap = 30.0
+                vgap = 60.0
+
+
+                row {
+                    val insertProgressStats = observableStats(
+                            blockTitle = "Insert Model Progress",
+                            statsProperties = listOf(
+                                    insertModel.observableStats.generatedUnitsProperty,
+                                    insertModel.observableStats.uncommittedUnitsProperty,
+                                    insertModel.observableStats.committedUnitsProperty,
+                                    insertModel.observableStats.excludedUnitsProperty,
+                                    insertModel.observableStats.actionNeededUnitsProperty
+                            )).root.apply {
+                        style {
+                            borderColor += box(Color.TRANSPARENT)
+                        }
+                    }
+
+                    add(insertProgressStats)
+                    vbox {
+                        setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE)
+                        add(progressIndicator)
+                        worderStatusLabel(insertModel.modelStatusProperty)
+                    }
+                }
+                row {
+                    separator {
+                        gridpaneConstraints {
+                            columnSpan = 2
+                        }
+                    }
+                }
+                row {
+                    add(observableStats(
+                            blockTitle = "Uploaded Data Stats",
+                            statsProperties = listOf(
+                                    insertModel.observableStats.totalWordsProperty,
+                                    insertModel.observableStats.totalValidWordsProperty,
+                                    insertModel.observableStats.totalInvalidWordsProperty
+                            )))
+                    add(observableStats(
+                            blockTitle = "Processed Data Stats",
+                            statsProperties = listOf(
+                                    insertModel.observableStats.totalProcessedProperty,
+                                    insertModel.observableStats.insertedProperty,
+                                    insertModel.observableStats.resetProperty
+                            )))
+                }
+                row {
+                    separator {
+                        gridpaneConstraints {
+                            columnSpan = 2
+                        }
+                    }
+                }
+                row {
+                    button("Reset This Model") {
+                        setOnAction {
+                            find<InsertController>().releaseInsertModel()
+                        }
+                    }
+                    button("Commit All Units") {
+                        setOnAction {
+                            CoroutineScope(Dispatchers.Default).launch { insertModel.commitAllUnits() }
+                        }
+                    }
+                }
+
+                children.forEach {
+                    it.gridpaneConstraints {
+                        this.hAlignment = HPos.CENTER
+                        this.vAlignment = VPos.CENTER
+                    }
+                }
             }
-
-//            vbox(spacing = 50) {
-//                label("hell")
-//                label("hell")
-//                label("hell")
-//                add(progressIndicator)
-//                worderStatusLabel(insertModel.modelStatusProperty)
-//                separator()
-//                hbox {
-//                    add(observableStats(
-//                            blockTitle = "Uploaded Data Stats",
-//                            statsProperties = listOf(
-//                                    insertModel.observableStats.totalWordsProperty,
-//                                    insertModel.observableStats.totalValidWordsProperty,
-//                                    insertModel.observableStats.totalInvalidWordsProperty
-//                            )))
-//                }
-//                separator()
-//                hbox(spacing = 150) {
-//                    button("Reset This Model") {
-//                        setOnAction {
-//                            find<InsertController>().releaseInsertModel()
-//                        }
-//                    }
-//                    button("Commit All Units") {
-//                        setOnAction {
-//                            CoroutineScope(Dispatchers.Default).launch { insertModel.commitAllUnits() }
-//                        }
-//                    }
-//                }
-//
-//            }
-
-            children.style {  backgroundColor += Color.GREEN }
         }
 
-        right = vbox(spacing = 20, alignment = Pos.BASELINE_CENTER) {
+        right = vbox(spacing = 20, alignment = Pos.TOP_CENTER) {
             label("COMMITTED UNITS").style { fontSize = 20.px }
             separator()
             add(committedUnits)

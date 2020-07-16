@@ -5,7 +5,7 @@ plugins {
     application
 
     id("org.jetbrains.kotlin.jvm") version "1.3.72"
-    id("org.openjfx.javafxplugin") version "0.0.8"
+    id("org.openjfx.javafxplugin") version "0.0.9"
 }
 
 repositories {

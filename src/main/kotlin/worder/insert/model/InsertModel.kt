@@ -32,9 +32,10 @@ interface InsertModel {
 
 
     enum class InsertModelStatus(override val description: String, override val color: Color) : Status {
-        CREATED("InsertModel has just been created", Color.DIMGRAY),
-        READY_TO_COMMIT("There're units that can be committed == have READY_TO_COMMIT status", Color.GREEN),
-        COMMITTED("All of the produced units are committed == have COMMITTED status", Color.DIMGRAY),
-        PARTIALLY_COMMITTED("There're no units to commit now, but there're already committed unit(s)", Color.DARKORANGE);
+        READY_TO_COMMIT("There are units that can be committed", Color.GREEN),
+        ACTION_NEEDED("There are only units with ACTION_NEEDED status", Color.RED),
+        COMMITTING("Some of the units are committing now", Color.DARKORANGE),
+        COMMITTED("All the units have been committed", Color.DIMGRAY),
+        PARTIALLY_COMMITTED("All the units except for excluded ones have been committed", Color.DIMGRAY);
     }
 }

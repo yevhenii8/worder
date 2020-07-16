@@ -4,8 +4,8 @@
  *
  * Name: <WorderDefaultStyles.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <10/07/2020, 08:14:57 PM>
- * Version: <85>
+ * Modified: <16/07/2020, 09:42:44 PM>
+ * Version: <90>
  */
 
 package worder.core.styles
@@ -26,7 +26,7 @@ import tornadofx.px
 
 class WorderDefaultStyles : Stylesheet() {
     companion object {
-        val stats by cssclass()
+        val statsBlock by cssclass()
         val insertUnit by cssclass()
         val insertUnits by cssclass()
         val insertModel by cssclass()
@@ -58,10 +58,9 @@ class WorderDefaultStyles : Stylesheet() {
             backgroundRadius += box(0.px)
         }
 
-        stats {
+        statsBlock {
             alignment = Pos.TOP_CENTER
             padding = box(15.px)
-            borderInsets += box(15.px)
             borderRadius += box(15.px)
             borderColor += box(Color.GRAY)
         }
