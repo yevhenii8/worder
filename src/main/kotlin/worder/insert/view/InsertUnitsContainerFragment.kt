@@ -4,13 +4,13 @@
  *
  * Name: <InsertUnitsContainerFragment.kt>
  * Created: <05/07/2020, 06:50:42 PM>
- * Modified: <10/07/2020, 12:14:06 AM>
- * Version: <59>
+ * Modified: <16/07/2020, 10:57:19 PM>
+ * Version: <61>
  */
 
 package worder.insert.view
 
-import javafx.beans.property.ReadOnlySetProperty
+import javafx.collections.ObservableList
 import javafx.geometry.HorizontalDirection
 import javafx.geometry.Orientation
 import javafx.geometry.Pos
@@ -21,6 +21,7 @@ import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
 import tornadofx.Fragment
 import tornadofx.addClass
+import tornadofx.bindComponents
 import tornadofx.hbox
 import tornadofx.imageview
 import tornadofx.label
@@ -33,10 +34,9 @@ import tornadofx.vbox
 import tornadofx.visibleWhen
 import worder.core.styles.WorderDefaultStyles
 import worder.insert.model.InsertUnit
-import worder.tornadofx.bindComponents
 
 class InsertUnitsContainerFragment : Fragment() {
-    private val units: ReadOnlySetProperty<InsertUnit> by param()
+    private val units: ObservableList<InsertUnit> by param()
     private val direction: HorizontalDirection by param()
     private val scrollBar: ScrollBar = ScrollBar().apply {
         visibleWhen {

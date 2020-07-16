@@ -4,14 +4,16 @@
  *
  * Name: <DefaultInsertModel.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <09/07/2020, 12:30:32 AM>
- * Version: <6>
+ * Modified: <17/07/2020, 12:04:13 AM>
+ * Version: <11>
  */
 
 package worder.insert.model.implementations
 
+import javafx.beans.property.ListProperty
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SetProperty
+import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleSetProperty
 import kotlinx.coroutines.Dispatchers
@@ -19,7 +21,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.withContext
 import tornadofx.getValue
-import tornadofx.observableSetOf
+import tornadofx.observableListOf
 import tornadofx.setValue
 import tornadofx.toObservable
 import worder.core.model.BareWord
@@ -37,31 +39,33 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
     }
 
 
-    // ALL THE UNITS, SPLIT BY THEIR STATUS
+    // ALL THE UNITS, SPLIT BY THEIR CURRENT STATUS
 
-    override val uncommittedUnitsProperty: SetProperty<InsertUnit> = SimpleSetProperty(observableSetOf())
-    override val uncommittedUnits: MutableSet<InsertUnit> by uncommittedUnitsProperty
+    override val readyToCommitUnitsProperty: ListProperty<InsertUnit> = SimpleListProperty(observableListOf())
+    override val readyToCommitUnits: MutableList<InsertUnit> by readyToCommitUnitsProperty
 
-    override val uncommittedUnitsProperty: SetProperty<InsertUnit> = SimpleSetProperty(observableSetOf())
-    override val uncommittedUnits: MutableSet<InsertUnit> by uncommittedUnitsProperty
+    override val actionNeededUnitsProperty: ListProperty<InsertUnit> = SimpleListProperty(observableListOf())
+    override val actionNeededUnits: MutableList<InsertUnit> by actionNeededUnitsProperty
 
-    override val uncommittedUnitsProperty: SetProperty<InsertUnit> = SimpleSetProperty(observableSetOf())
-    override val uncommittedUnits: MutableSet<InsertUnit> by uncommittedUnitsProperty
+    override val excludedUnitsProperty: ListProperty<InsertUnit> = SimpleListProperty(observableListOf())
+    override val excludedUnits: MutableList<InsertUnit> by excludedUnitsProperty
 
-    override val uncommittedUnitsProperty: SetProperty<InsertUnit> = SimpleSetProperty(observableSetOf())
-    override val uncommittedUnits: MutableSet<InsertUnit> by uncommittedUnitsProperty
+    override val committingUnitsProperty: ListProperty<InsertUnit> = SimpleListProperty(observableListOf())
+    override val committingUnits: MutableList<InsertUnit> by committingUnitsProperty
 
-    override val committedUnitsProperty: SetProperty<InsertUnit> = SimpleSetProperty(observableSetOf())
-    override val committedUnits: MutableSet<InsertUnit> by committedUnitsProperty
+    override val committedUnitsProperty: ListProperty<InsertUnit> = SimpleListProperty(observableListOf())
+    override val committedUnits: MutableList<InsertUnit> by committedUnitsProperty
 
 
-    // THE REST MODEL PROPERTIES
+    // OTHER MODEL PROPERTIES
 
     override val modelStatusProperty: ObjectProperty<InsertModelStatus> = SimpleObjectProperty(InsertModelStatus.ACTION_NEEDED)
     override var modelStatus: InsertModelStatus by modelStatusProperty
 
     override val observableStats: SimpleInsertModelStats = SimpleInsertModelStats().apply {
-        uncommittedUnitsProperty.bind(this@DefaultInsertModel.uncommittedUnitsProperty.sizeProperty())
+        readyToCommitUnitsProperty.bind(this@DefaultInsertModel.readyToCommitUnitsProperty.sizeProperty())
+        actionNeededUnitsProperty.bind(this@DefaultInsertModel.actionNeededUnitsProperty.sizeProperty())
+        excludedUnitsProperty.bind(this@DefaultInsertModel.excludedUnitsProperty.sizeProperty())
         committedUnitsProperty.bind(this@DefaultInsertModel.committedUnitsProperty.sizeProperty())
     }
 
@@ -73,7 +77,7 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
 
         files.forEach {
             require(it.isFile && it.canRead()) {
-                "Please provide correct readable file! passed: ${it.name}"
+                "Please provide correct readable file! passed file: ${it.name}"
             }
         }
 
@@ -83,14 +87,12 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
                     .map { it.trim() }
                     .partition { BareWord.wordValidator.invoke(it) }
 
-            val newUnit = SimpleInsertUnit(
+            SimpleInsertUnit(
                     id = "Unit_$index",
                     source = file.name,
                     validWords = validWords,
                     invalidWords = invalidWords
             )
-
-            uncommittedUnits.add(newUnit)
 
             observableStats.apply {
                 totalValidWords += validWords.size
@@ -105,26 +107,21 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
 
     override suspend fun commitAllUnits() {
         supervisorScope {
-            uncommittedUnits
-                    .filter { it.statusProperty.value == InsertUnitStatus.READY_TO_COMMIT }
+            val toCommitUnits = ArrayList(readyToCommitUnits)
+            toCommitUnits
                     .forEach { launch { it.commit() } }
         }
     }
 
 
     private fun updateModelStatus() {
-        when {
-            uncommittedUnits.any { it.statusProperty.value == InsertUnitStatus.READY_TO_COMMIT } -> {
-                modelStatus = InsertModelStatus.READY_TO_COMMIT
-            }
-
-            uncommittedUnits.isEmpty() -> {
-                modelStatus = InsertModelStatus.COMMITTED
-            }
-
-            committedUnits.isNotEmpty() && uncommittedUnits.isNotEmpty() -> {
-                modelStatus = InsertModelStatus.PARTIALLY_COMMITTED
-            }
+        modelStatus = when {
+            committingUnits.isNotEmpty() -> InsertModelStatus.COMMITTING
+            readyToCommitUnits.isNotEmpty() -> InsertModelStatus.READY_TO_COMMIT
+            actionNeededUnits.isNotEmpty() -> InsertModelStatus.ACTION_NEEDED
+            committedUnits.size == observableStats.generatedUnits -> InsertModelStatus.COMMITTED
+            excludedUnits.size == observableStats.generatedUnits -> InsertModelStatus.FULL_EXCLUDE
+            else -> InsertModelStatus.PARTIALLY_COMMITTED
         }
     }
 
@@ -190,6 +187,7 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
             init {
                 unitStatus = initUnitStatus
                 unitState.onAttach()
+                updateModelStatus()
             }
 
 
@@ -203,7 +201,6 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
                 unitState = pickUpState(newUnitStatus)
                 unitStatus = newUnitStatus
                 unitState.onAttach()
-
                 updateModelStatus()
             }
 
@@ -264,6 +261,12 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
                 override fun onAttach() {
                     if (invalidWords.isNotEmpty())
                         changeState(InsertUnitStatus.ACTION_NEEDED)
+                    else
+                        readyToCommitUnits.add(this@SimpleInsertUnit)
+                }
+
+                override fun onDetach() {
+                    readyToCommitUnits.remove(this@SimpleInsertUnit)
                 }
             }
 
@@ -273,11 +276,11 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
                 }
 
                 override fun onAttach() {
-                    observableStats.actionNeededUnits++
+                    actionNeededUnits.add(this@SimpleInsertUnit)
                 }
 
                 override fun onDetach() {
-                    observableStats.actionNeededUnits--
+                    actionNeededUnits.remove(this@SimpleInsertUnit)
                 }
             }
 
@@ -287,19 +290,26 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
                 }
 
                 override fun onAttach() {
-                    observableStats.excludedUnits++
+                    excludedUnits.add(this@SimpleInsertUnit)
                 }
 
                 override fun onDetach() {
-                    observableStats.excludedUnits--
+                    excludedUnits.remove(this@SimpleInsertUnit)
                 }
             }
 
-            private inner class CommittingState : UnitState()
+            private inner class CommittingState : UnitState() {
+                override fun onAttach() {
+                    committingUnits.add(this@SimpleInsertUnit)
+                }
+
+                override fun onDetach() {
+                    committingUnits.remove(this@SimpleInsertUnit)
+                }
+            }
 
             private inner class CommittedState : UnitState() {
                 override fun onAttach() {
-                    uncommittedUnits.remove(this@SimpleInsertUnit)
                     committedUnits.add(this@SimpleInsertUnit)
                 }
             }

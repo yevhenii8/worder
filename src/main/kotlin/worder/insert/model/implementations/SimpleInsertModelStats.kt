@@ -4,8 +4,8 @@
  *
  * Name: <SimpleInsertModelStats.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <09/07/2020, 12:29:12 AM>
- * Version: <5>
+ * Modified: <16/07/2020, 11:37:40 PM>
+ * Version: <8>
  */
 
 package worder.insert.model.implementations
@@ -21,7 +21,7 @@ class SimpleInsertModelStats(
         origin: String = "Insert Model Stats",
 
         generatedUnits: Int = 0,
-        uncommittedUnits: Int = 0,
+        readyToCommitUnits: Int = 0,
         committedUnits: Int = 0,
         excludedUnits: Int = 0,
         actionNeededUnits: Int = 0,
@@ -37,8 +37,8 @@ class SimpleInsertModelStats(
     override val generatedUnitsProperty: IntegerProperty = SimpleIntegerProperty(null, "Generated units", generatedUnits)
     override var generatedUnits: Int by bindToPropertyAndStats(generatedUnitsProperty)
 
-    override val uncommittedUnitsProperty: IntegerProperty = SimpleIntegerProperty(null, "Uncommitted units", uncommittedUnits)
-    override var uncommittedUnits: Int by bindToPropertyAndStats(uncommittedUnitsProperty)
+    override val readyToCommitUnitsProperty: IntegerProperty = SimpleIntegerProperty(null, "Ready to commit units", readyToCommitUnits)
+    override var readyToCommitUnits: Int by bindToPropertyAndStats(readyToCommitUnitsProperty)
 
     override val committedUnitsProperty: IntegerProperty = SimpleIntegerProperty(null, "Committed units", committedUnits)
     override var committedUnits: Int by bindToPropertyAndStats(committedUnitsProperty)
@@ -50,7 +50,7 @@ class SimpleInsertModelStats(
     override var actionNeededUnits: Int by bindToPropertyAndStats(actionNeededUnitsProperty)
 
 
-    override val totalWordsProperty: IntegerProperty = SimpleIntegerProperty(null, "Total words", totalWords)
+    override val totalWordsProperty: IntegerProperty = SimpleIntegerProperty(null, "Total uploaded", totalWords)
     override var totalWords: Int by bindToPropertyAndStats(totalWordsProperty)
 
     override val totalValidWordsProperty: IntegerProperty = SimpleIntegerProperty(null, "Total valid words", totalValidWords)
@@ -60,7 +60,7 @@ class SimpleInsertModelStats(
     override var totalInvalidWords: Int by bindToPropertyAndStats(totalInvalidWordsProperty)
 
 
-    override val totalProcessedProperty: IntegerProperty = SimpleIntegerProperty(null, "Total processed words", totalProcessed)
+    override val totalProcessedProperty: IntegerProperty = SimpleIntegerProperty(null, "Total processed", totalProcessed)
     override var totalProcessed: Int by bindToPropertyAndStats(totalProcessedProperty)
 
     override val insertedProperty: IntegerProperty = SimpleIntegerProperty(null, "Inserted words", inserted)

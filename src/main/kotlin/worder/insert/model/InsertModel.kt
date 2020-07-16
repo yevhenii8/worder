@@ -4,14 +4,14 @@
  *
  * Name: <InsertModel.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <06/07/2020, 07:25:08 PM>
- * Version: <3>
+ * Modified: <16/07/2020, 11:14:21 PM>
+ * Version: <6>
  */
 
 package worder.insert.model
 
+import javafx.beans.property.ReadOnlyListProperty
 import javafx.beans.property.ReadOnlyProperty
-import javafx.beans.property.ReadOnlySetProperty
 import javafx.scene.paint.Color
 import worder.core.model.Status
 
@@ -21,11 +21,20 @@ interface InsertModel {
 
     val observableStats: ObservableInsertModelStats
 
-    val uncommittedUnitsProperty: ReadOnlySetProperty<InsertUnit>
-    val uncommittedUnits: Set<InsertUnit>
+    val readyToCommitUnitsProperty: ReadOnlyListProperty<InsertUnit>
+    val readyToCommitUnits: List<InsertUnit>
 
-    val committedUnitsProperty: ReadOnlySetProperty<InsertUnit>
-    val committedUnits: Set<InsertUnit>
+    val actionNeededUnitsProperty: ReadOnlyListProperty<InsertUnit>
+    val actionNeededUnits: List<InsertUnit>
+
+    val excludedUnitsProperty: ReadOnlyListProperty<InsertUnit>
+    val excludedUnits: List<InsertUnit>
+
+    val committingUnitsProperty: ReadOnlyListProperty<InsertUnit>
+    val committingUnits: List<InsertUnit>
+
+    val committedUnitsProperty: ReadOnlyListProperty<InsertUnit>
+    val committedUnits: List<InsertUnit>
 
 
     suspend fun commitAllUnits()
@@ -35,7 +44,8 @@ interface InsertModel {
         READY_TO_COMMIT("There are units that can be committed", Color.GREEN),
         ACTION_NEEDED("There are only units with ACTION_NEEDED status", Color.RED),
         COMMITTING("Some of the units are committing now", Color.DARKORANGE),
-        COMMITTED("All the units have been committed", Color.DIMGRAY),
-        PARTIALLY_COMMITTED("All the units except for excluded ones have been committed", Color.DIMGRAY);
+        COMMITTED("All the units have been committed", Color.GREEN),
+        FULL_EXCLUDE("All the units have been excluded", Color.DIMGRAY),
+        PARTIALLY_COMMITTED("All the units except for excluded ones have been committed", Color.DARKORANGE);
     }
 }

@@ -4,8 +4,8 @@
  *
  * Name: <TornadofxExt.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <10/07/2020, 11:31:16 PM>
- * Version: <14>
+ * Modified: <16/07/2020, 11:40:53 PM>
+ * Version: <15>
  */
 
 package worder.core.view
@@ -49,8 +49,8 @@ fun Component.observableStats(
 )
 
 fun Component.observableStats(
-        blockTitle: String,
         statsProperties: List<ReadOnlyProperty<*>>,
+        blockTitle: String? = null,
         nameMutators: Map<String, String.() -> String> = emptyMap(),
         valueMutators: Map<String, Any?.() -> String> = emptyMap()
 ) = find<ListBasedStatsFragment>(

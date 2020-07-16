@@ -4,19 +4,20 @@
  *
  * Name: <InsertModelFragment.kt>
  * Created: <09/07/2020, 10:43:11 PM>
- * Modified: <16/07/2020, 09:45:30 PM>
- * Version: <152>
+ * Modified: <16/07/2020, 11:47:31 PM>
+ * Version: <165>
  */
 
 package worder.insert.view
 
+import javafx.collections.ListChangeListener
+import javafx.collections.ObservableList
 import javafx.geometry.HPos
 import javafx.geometry.HorizontalDirection
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.geometry.VPos
 import javafx.scene.Parent
-import javafx.scene.layout.Border
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
@@ -33,6 +34,7 @@ import tornadofx.button
 import tornadofx.gridpane
 import tornadofx.gridpaneConstraints
 import tornadofx.label
+import tornadofx.observableListOf
 import tornadofx.onChange
 import tornadofx.paddingAll
 import tornadofx.px
@@ -45,20 +47,33 @@ import worder.core.view.observableStats
 import worder.core.view.worderStatusLabel
 import worder.insert.InsertController
 import worder.insert.model.InsertModel
+import worder.insert.model.InsertUnit
 import kotlin.math.roundToInt
 
 class InsertModelFragment : Fragment() {
     private val insertModel: InsertModel by param()
+    private val uncommittedUnits: ObservableList<InsertUnit> = insertModel.run {
+        val res = observableListOf(
+                readyToCommitUnits + actionNeededUnits + excludedUnits + committedUnits + committingUnits
+        )
+
+        committedUnitsProperty.onChange { op: ListChangeListener.Change<out InsertUnit> ->
+            if (op.next() && op.wasAdded())
+                res.removeAll(op.addedSubList)
+        }
+
+        res
+    }
     private val progressIndicator = RingProgressIndicator().apply {
         insertModel.observableStats.totalProcessedProperty.onChange {
             this.progress = ((it.toDouble() / insertModel.observableStats.totalWords) * 100).roundToInt()
         }
     }
-    private val uncommittedUnits = find<InsertUnitsContainerFragment>(
-            "units" to insertModel.uncommittedUnitsProperty,
+    private val uncommittedUnitsUI = find<InsertUnitsContainerFragment>(
+            "units" to uncommittedUnits,
             "direction" to HorizontalDirection.LEFT
     ).root
-    private val committedUnits = find<InsertUnitsContainerFragment>(
+    private val committedUnitsUI = find<InsertUnitsContainerFragment>(
             "units" to insertModel.committedUnitsProperty,
             "direction" to HorizontalDirection.RIGHT
     ).root
@@ -71,21 +86,15 @@ class InsertModelFragment : Fragment() {
         left = vbox(spacing = 20, alignment = Pos.TOP_CENTER) {
             label("UNCOMMITTED UNITS").style { fontSize = 20.px }
             separator()
-            add(uncommittedUnits)
+            add(uncommittedUnitsUI)
         }
 
         center = vbox(spacing = 20, alignment = Pos.TOP_CENTER) {
             BorderPane.setMargin(this, Insets(0.0, 10.0, 0.0, 10.0))
             addClass(WorderDefaultStyles.insertModel)
+
             label("INSERT MODEL")
             separator()
-
-            /**
-             * Can't use another VBox due to the JavaFX bug.
-             * For some reasons It doesn't process nested containers correctly.
-             * Issue in JDK bug tracker created -> waiting for response.
-             */
-
             gridpane {
                 alignment = Pos.CENTER
                 hgap = 30.0
@@ -94,21 +103,21 @@ class InsertModelFragment : Fragment() {
 
                 row {
                     val insertProgressStats = observableStats(
-                            blockTitle = "Insert Model Progress",
                             statsProperties = listOf(
                                     insertModel.observableStats.generatedUnitsProperty,
-                                    insertModel.observableStats.uncommittedUnitsProperty,
-                                    insertModel.observableStats.committedUnitsProperty,
+                                    insertModel.observableStats.readyToCommitUnitsProperty,
+                                    insertModel.observableStats.actionNeededUnitsProperty,
                                     insertModel.observableStats.excludedUnitsProperty,
-                                    insertModel.observableStats.actionNeededUnitsProperty
+                                    insertModel.observableStats.committedUnitsProperty
                             )).root.apply {
+                        setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE)
                         style {
                             borderColor += box(Color.TRANSPARENT)
                         }
                     }
 
                     add(insertProgressStats)
-                    vbox {
+                    vbox(spacing = 10, alignment = Pos.BASELINE_CENTER) {
                         setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE)
                         add(progressIndicator)
                         worderStatusLabel(insertModel.modelStatusProperty)
@@ -169,11 +178,11 @@ class InsertModelFragment : Fragment() {
         right = vbox(spacing = 20, alignment = Pos.TOP_CENTER) {
             label("COMMITTED UNITS").style { fontSize = 20.px }
             separator()
-            add(committedUnits)
+            add(committedUnitsUI)
         }
 
 
-        (left as VBox).minWidthProperty().bind(committedUnits.widthProperty())
-        (right as VBox).minWidthProperty().bind(uncommittedUnits.widthProperty())
+        (left as VBox).minWidthProperty().bind(committedUnitsUI.widthProperty())
+        (right as VBox).minWidthProperty().bind(uncommittedUnitsUI.widthProperty())
     }
 }

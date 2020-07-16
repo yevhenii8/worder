@@ -4,8 +4,8 @@
  *
  * Name: <ObservableInsertModelStats.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <16/07/2020, 07:55:20 PM>
- * Version: <6>
+ * Modified: <16/07/2020, 10:43:10 PM>
+ * Version: <7>
  */
 
 package worder.insert.model
@@ -21,17 +21,17 @@ interface ObservableInsertModelStats : ObservableStats {
     val generatedUnitsProperty: ReadOnlyIntegerProperty
     val generatedUnits: Int
 
-    val uncommittedUnitsProperty: ReadOnlyIntegerProperty
-    val uncommittedUnits: Int
+    val readyToCommitUnitsProperty: ReadOnlyIntegerProperty
+    val readyToCommitUnits: Int
 
-    val committedUnitsProperty: ReadOnlyIntegerProperty
-    val committedUnits: Int
+    val actionNeededUnitsProperty: ReadOnlyIntegerProperty
+    val actionNeededUnits: Int
 
     val excludedUnitsProperty: ReadOnlyIntegerProperty
     val excludedUnits: Int
 
-    val actionNeededUnitsProperty: ReadOnlyIntegerProperty
-    val actionNeededUnits: Int
+    val committedUnitsProperty: ReadOnlyIntegerProperty
+    val committedUnits: Int
 
 
     /**

@@ -4,14 +4,15 @@
  *
  * Name: <ListBasedStatsFragment.kt>
  * Created: <10/07/2020, 09:03:31 PM>
- * Modified: <16/07/2020, 09:35:08 PM>
- * Version: <8>
+ * Modified: <16/07/2020, 11:47:31 PM>
+ * Version: <11>
  */
 
 package worder.core.view
 
 import javafx.beans.property.ReadOnlyProperty
 import javafx.geometry.Pos
+import javafx.scene.layout.Region
 import javafx.util.StringConverter
 import tornadofx.Fragment
 import tornadofx.addClass
@@ -22,16 +23,17 @@ import tornadofx.vbox
 import worder.core.styles.WorderDefaultStyles
 
 class ListBasedStatsFragment : Fragment() {
-    private val blockTitle: String by param()
+    private val blockTitle: String? by param()
     private val statsProperties: List<ReadOnlyProperty<*>> by param()
     private val nameMutators: Map<String, String.() -> String> by param(emptyMap())
     private val valueMutators: Map<String, Any?.() -> String> by param(emptyMap())
 
 
     override val root = vbox {
-        label(blockTitle) {
-            paddingBottom = 15
-        }
+        if (blockTitle != null)
+            label(blockTitle!!) {
+                paddingBottom = 15
+            }
 
         hbox {
             vbox(alignment = Pos.BASELINE_RIGHT) {
