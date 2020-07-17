@@ -4,8 +4,8 @@
  *
  * Name: <InsertUnitsContainerFragment.kt>
  * Created: <05/07/2020, 06:50:42 PM>
- * Modified: <16/07/2020, 10:57:19 PM>
- * Version: <61>
+ * Modified: <17/07/2020, 02:44:24 PM>
+ * Version: <63>
  */
 
 package worder.insert.view
@@ -39,6 +39,7 @@ class InsertUnitsContainerFragment : Fragment() {
     private val units: ObservableList<InsertUnit> by param()
     private val direction: HorizontalDirection by param()
     private val scrollBar: ScrollBar = ScrollBar().apply {
+        orientation = Orientation.VERTICAL
         visibleWhen {
             visibleAmountProperty().lessThan(1.0)
         }
@@ -62,20 +63,15 @@ class InsertUnitsContainerFragment : Fragment() {
             addClass(WorderDefaultStyles.insertUnits)
 
             content = if (units.isEmpty()) find<EmptyUnitsContainer>().root else unitsUI
-            alignment = Pos.CENTER
             vbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
             hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
+            alignment = Pos.CENTER
 
             scrollBar.apply {
-                orientation = Orientation.VERTICAL
                 minProperty().bind(vminProperty())
                 maxProperty().bind(vmaxProperty())
                 visibleAmountProperty().bind(heightProperty().divide(unitsUI.heightProperty()))
-            }
-
-            vvalueProperty().bindBidirectional(scrollBar.valueProperty())
-            unitsUI.setOnScroll {
-                vvalue -= it.deltaY * 0.007
+                vvalueProperty().bindBidirectional(valueProperty())
             }
         }
 
