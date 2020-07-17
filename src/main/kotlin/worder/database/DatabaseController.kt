@@ -4,8 +4,8 @@
  *
  * Name: <DatabaseController.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <17/07/2020, 07:38:49 PM>
- * Version: <16>
+ * Modified: <17/07/2020, 09:41:28 PM>
+ * Version: <25>
  */
 
 package worder.database
@@ -15,6 +15,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import tornadofx.Controller
+import worder.core.formatGrouped
 import worder.core.model.BaseObservableStats
 import worder.database.model.WorderDB
 import worder.database.model.implementations.SQLiteFile
@@ -47,7 +48,7 @@ class DatabaseController : Controller(), DatabaseEventProducer {
 
     fun connectToSqlLiteFile(file: File) {
         currentDB = file
-        dbFileSize = "${file.length() / 1024} KiB"
+        dbFileSize = "${(currentDB!!.length() / 1024).formatGrouped()} KiB"
         connect(SQLiteFile.createInstance(file))
     }
 
@@ -95,12 +96,12 @@ class DatabaseController : Controller(), DatabaseEventProducer {
             delay(1000L)
             seconds++
 
-            val h = seconds / 3600
-            val m = seconds % 3600 / 60
-            val s = seconds % 60
+            val h = "${seconds / 3600}".padStart(2, '0')
+            val m = "${seconds % 3600 / 60}".padStart(2, '0')
+            val s = "${seconds % 60}".padStart(2, '0')
 
-            timerValue = "${if (h < 10) "0$h" else h.toString()}:${if (m < 10) "0$m" else m.toString()}:${if (s < 10) "0$s" else s.toString()}"
-            dbFileSize = "${currentDB!!.length() / 1024} KiB"
+            timerValue = "$h:$m:$s"
+            dbFileSize = "${(currentDB!!.length() / 1024).formatGrouped()} KiB"
         }
     }
 }

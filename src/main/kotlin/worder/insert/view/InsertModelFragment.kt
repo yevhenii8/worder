@@ -4,8 +4,8 @@
  *
  * Name: <InsertModelFragment.kt>
  * Created: <09/07/2020, 10:43:11 PM>
- * Modified: <17/07/2020, 03:05:09 PM>
- * Version: <167>
+ * Modified: <17/07/2020, 10:50:37 PM>
+ * Version: <169>
  */
 
 package worder.insert.view
@@ -43,8 +43,9 @@ import tornadofx.row
 import tornadofx.separator
 import tornadofx.style
 import tornadofx.vbox
+import worder.core.formatGrouped
 import worder.core.styles.WorderDefaultStyles
-import worder.core.view.observableStats
+import worder.core.view.listBasedStats
 import worder.core.view.worderStatusLabel
 import worder.insert.InsertController
 import worder.insert.model.InsertModel
@@ -101,14 +102,16 @@ class InsertModelFragment : Fragment() {
 
 
                 row {
-                    val insertProgressStats = observableStats(
+                    val insertProgressStats = listBasedStats(
                             statsProperties = listOf(
                                     insertModel.observableStats.generatedUnitsProperty,
                                     insertModel.observableStats.readyToCommitUnitsProperty,
                                     insertModel.observableStats.actionNeededUnitsProperty,
                                     insertModel.observableStats.excludedUnitsProperty,
                                     insertModel.observableStats.committedUnitsProperty
-                            )).root.apply {
+                            ),
+                            commonValueMutator = { (this as Int).formatGrouped() }
+                    ).root.apply {
                         setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE)
                         style {
                             borderColor += box(Color.TRANSPARENT)
@@ -130,20 +133,24 @@ class InsertModelFragment : Fragment() {
                     }
                 }
                 row {
-                    add(observableStats(
+                    add(listBasedStats(
                             blockTitle = "Uploaded Data Stats",
                             statsProperties = listOf(
                                     insertModel.observableStats.totalWordsProperty,
                                     insertModel.observableStats.totalValidWordsProperty,
                                     insertModel.observableStats.totalInvalidWordsProperty
-                            )))
-                    add(observableStats(
+                            ),
+                            commonValueMutator = { (this as Int).formatGrouped() }
+                    ))
+                    add(listBasedStats(
                             blockTitle = "Processed Data Stats",
                             statsProperties = listOf(
                                     insertModel.observableStats.totalProcessedProperty,
                                     insertModel.observableStats.insertedProperty,
                                     insertModel.observableStats.resetProperty
-                            )))
+                            ),
+                            commonValueMutator = { (this as Int).formatGrouped() }
+                    ))
                 }
                 row {
                     separator {

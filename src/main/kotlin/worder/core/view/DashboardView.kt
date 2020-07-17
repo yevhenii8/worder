@@ -4,8 +4,8 @@
  *
  * Name: <DashboardView.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <17/07/2020, 05:56:47 PM>
- * Version: <19>
+ * Modified: <17/07/2020, 10:45:35 PM>
+ * Version: <22>
  */
 
 package worder.core.view
@@ -14,6 +14,7 @@ import javafx.geometry.Pos
 import tornadofx.View
 import tornadofx.hbox
 import tornadofx.paddingVertical
+import worder.core.formatGrouped
 import worder.database.DatabaseController
 import worder.database.DatabaseEventListener
 import worder.database.model.WorderDB
@@ -35,16 +36,16 @@ class DashboardView : View(), DatabaseEventListener {
     override fun onDatabaseConnection(db: WorderDB) {
         root.add(
                 observableStats(
-                        stats = databaseController.controllerStats,
+                        observableStats = databaseController.controllerStats,
                         valueMutators = mapOf("Data source" to { value: Any? -> value.toString().substringAfterLast("/") })
                 )
 
         )
 
-        root.add(observableStats(db.observableSummaryStats))
-        root.add(observableStats(db.observableTrackStats))
-        root.add(observableStats(db.inserter.observableInserterStats))
-        root.add(observableStats(db.updater.observableUpdaterStats))
+        root.add(observableStats(db.observableSummaryStats, commonValueMutator = { (this as Int).formatGrouped() }))
+        root.add(observableStats(db.observableTrackStats, commonValueMutator = { (this as Int).formatGrouped() }))
+        root.add(observableStats(db.inserter.observableInserterStats, commonValueMutator = { (this as Int).formatGrouped() }))
+        root.add(observableStats(db.updater.observableUpdaterStats, commonValueMutator = { (this as Int).formatGrouped() }))
     }
 
     override fun onDatabaseDisconnection() {

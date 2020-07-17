@@ -4,14 +4,15 @@
  *
  * Name: <TornadofxExt.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <16/07/2020, 11:40:53 PM>
- * Version: <15>
+ * Modified: <17/07/2020, 10:46:37 PM>
+ * Version: <19>
  */
 
 package worder.core.view
 
 import javafx.beans.property.ReadOnlyProperty
 import javafx.beans.value.ObservableValue
+import javafx.collections.ObservableMap
 import javafx.event.EventTarget
 import javafx.scene.control.Label
 import tornadofx.Component
@@ -38,24 +39,48 @@ inline fun EventTarget.worderStatusLabel(
 }
 
 fun Component.observableStats(
-        stats: ObservableStats,
-        nameMutators: Map<String, String.() -> String> = emptyMap(),
-        valueMutators: Map<String, Any?.() -> String> = emptyMap()
+        observableStats: ObservableStats,
+        commonNameMutator: (String.() -> String)? = null,
+        commonValueMutator: (Any?.() -> String)? = null,
+        nameMutators: Map<String, String.() -> String>? = null,
+        valueMutators: Map<String, Any?.() -> String>? = null
+) = mapBasedStats(
+        blockTitle = observableStats.origin,
+        stats = observableStats.asTitledMapProperty,
+        commonNameMutator = commonNameMutator,
+        commonValueMutator = commonValueMutator,
+        nameMutators = nameMutators,
+        valueMutators = valueMutators
+)
+
+fun Component.mapBasedStats(
+        stats: ObservableMap<String, Any?>,
+        blockTitle: String? = null,
+        commonNameMutator: (String.() -> String)? = null,
+        commonValueMutator: (Any?.() -> String)? = null,
+        nameMutators: Map<String, String.() -> String>? = null,
+        valueMutators: Map<String, Any?.() -> String>? = null
 ) = find<MapBasedStatsFragment>(
-        "blockTitle" to stats.origin,
-        "statsProperties" to stats.asTitledMapProperty,
+        "blockTitle" to blockTitle,
+        "stats" to stats,
+        "commonNameMutator" to commonNameMutator,
+        "commonValueMutator" to commonValueMutator,
         "nameMutators" to nameMutators,
         "valueMutators" to valueMutators
 )
 
-fun Component.observableStats(
+fun Component.listBasedStats(
         statsProperties: List<ReadOnlyProperty<*>>,
         blockTitle: String? = null,
-        nameMutators: Map<String, String.() -> String> = emptyMap(),
-        valueMutators: Map<String, Any?.() -> String> = emptyMap()
+        commonNameMutator: (String.() -> String)? = null,
+        commonValueMutator: (Any?.() -> String)? = null,
+        nameMutators: Map<String, String.() -> String>? = null,
+        valueMutators: Map<String, Any?.() -> String>? = null
 ) = find<ListBasedStatsFragment>(
         "blockTitle" to blockTitle,
-        "statsProperties" to statsProperties,
+        "stats" to statsProperties,
+        "commonNameMutator" to commonNameMutator,
+        "commonValueMutator" to commonValueMutator,
         "nameMutators" to nameMutators,
         "valueMutators" to valueMutators
 )
