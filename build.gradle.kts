@@ -22,9 +22,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.7")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.3.7")
 
-    implementation("org.xerial:sqlite-jdbc:3.30.1")
-    implementation("org.jetbrains.exposed:exposed-core:0.23.1")
-    implementation("org.jetbrains.exposed:exposed-jdbc:0.23.1")
+    implementation("org.xerial:sqlite-jdbc:3.32.3.1")
+    implementation("org.jetbrains.exposed:exposed-core:0.26.1")
+    implementation("org.jetbrains.exposed:exposed-jdbc:0.26.1")
 
     testImplementation("io.kotest:kotest-runner-junit5-jvm:4.1.1")
     testImplementation("io.mockk:mockk:1.10.0")
@@ -46,8 +46,8 @@ tasks {
 
     withType<Test> {
         useJUnitPlatform()
-        //testLogging.setEvents(listOf("passed", "skipped", "failed"))
-        //testLogging.showStandardStreams = true
+        testLogging.setEvents(listOf("passed", "skipped", "failed"))
+        testLogging.showStandardStreams = true
     }
 
     withType<Wrapper> {
