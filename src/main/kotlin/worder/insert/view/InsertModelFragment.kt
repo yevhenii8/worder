@@ -4,8 +4,8 @@
  *
  * Name: <InsertModelFragment.kt>
  * Created: <09/07/2020, 10:43:11 PM>
- * Modified: <16/07/2020, 11:47:31 PM>
- * Version: <165>
+ * Modified: <17/07/2020, 02:20:34 PM>
+ * Version: <166>
  */
 
 package worder.insert.view
@@ -31,6 +31,7 @@ import tornadofx.addClass
 import tornadofx.borderpane
 import tornadofx.box
 import tornadofx.button
+import tornadofx.confirm
 import tornadofx.gridpane
 import tornadofx.gridpaneConstraints
 import tornadofx.label
@@ -156,7 +157,12 @@ class InsertModelFragment : Fragment() {
                 row {
                     button("Reset This Model") {
                         setOnAction {
-                            find<InsertController>().releaseInsertModel()
+                            if (uncommittedUnits.isNotEmpty())
+                                confirm("There are uncommitted units here. Are you sure you want to reset this model ?") {
+                                    find<InsertController>().releaseInsertModel()
+                                }
+                            else
+                                find<InsertController>().releaseInsertModel()
                         }
                     }
                     button("Commit All Units") {
