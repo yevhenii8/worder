@@ -4,8 +4,8 @@
  *
  * Name: <SimpleDatabaseStats.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <06/07/2020, 07:25:08 PM>
- * Version: <3>
+ * Modified: <17/07/2020, 07:21:45 PM>
+ * Version: <7>
  */
 
 package worder.database.model.implementations
@@ -24,10 +24,10 @@ open class SimpleWorderTrackStats(
         totalReset: Int = 0,
         totalUpdated: Int = 0
 ) : BaseObservableStats(origin), ObservableWorderTrackStats {
-    override var totalAffected: Int by bindToStats(initValue = totalAffected, defaultTitle = "Total affected")
-    override var totalInserted: Int by bindToStats(initValue = totalInserted, defaultTitle = "Total inserted")
-    override var totalReset: Int by bindToStats(initValue = totalReset, defaultTitle = "Total reset")
-    override var totalUpdated: Int by bindToStats(initValue = totalUpdated, defaultTitle = "Total updated")
+    override var totalAffected: Int by bindThroughValue(initValue = totalAffected, propertyTitle = "Total affected")
+    override var totalInserted: Int by bindThroughValue(initValue = totalInserted, propertyTitle = "Total inserted")
+    override var totalReset: Int by bindThroughValue(initValue = totalReset, propertyTitle = "Total reset")
+    override var totalUpdated: Int by bindThroughValue(initValue = totalUpdated, propertyTitle = "Total updated")
 }
 
 open class SimpleWorderSummaryStats(
@@ -37,9 +37,9 @@ open class SimpleWorderSummaryStats(
         unlearned: Int = 0,
         learned: Int = 0
 ) : BaseObservableStats(origin), ObservableWorderSummaryStats {
-    override var totalAmount: Int by bindToStats(initValue = totalAmount, defaultTitle = "Total amount")
-    override var unlearned: Int by bindToStats(initValue = unlearned, defaultTitle = "Unlearned")
-    override var learned: Int by bindToStats(initValue = learned, defaultTitle = "Learned")
+    override var totalAmount: Int by bindThroughValue(initValue = totalAmount, propertyTitle = "Total amount")
+    override var unlearned: Int by bindThroughValue(initValue = unlearned, propertyTitle = "Unlearned")
+    override var learned: Int by bindThroughValue(initValue = learned, propertyTitle = "Learned")
 }
 
 open class SimpleUpdaterStats(
@@ -51,11 +51,11 @@ open class SimpleUpdaterStats(
         skipped: Int = 0,
         learned: Int = 0
 ) : BaseObservableStats(origin), ObservableUpdaterStats {
-    override var totalProcessed: Int by bindToStats(initValue = totalProcessed, defaultTitle = "Total processed")
-    override var removed: Int by bindToStats(initValue = removed, defaultTitle = "Removed")
-    override var updated: Int by bindToStats(initValue = updated, defaultTitle = "Updated")
-    override var skipped: Int by bindToStats(initValue = skipped, defaultTitle = "Skipped")
-    override var learned: Int by bindToStats(initValue = learned, defaultTitle = "Learned")
+    override var totalProcessed: Int by bindThroughValue(initValue = totalProcessed, propertyTitle = "Total processed")
+    override var removed: Int by bindThroughValue(initValue = removed, propertyTitle = "Removed")
+    override var updated: Int by bindThroughValue(initValue = updated, propertyTitle = "Updated")
+    override var skipped: Int by bindThroughValue(initValue = skipped, propertyTitle = "Skipped")
+    override var learned: Int by bindThroughValue(initValue = learned, propertyTitle = "Learned")
 
 }
 
@@ -66,7 +66,7 @@ open class SimpleInserterStats(
         inserted: Int = 0,
         reset: Int = 0
 ) : BaseObservableStats(origin), ObservableInserterStats {
-    override var totalProcessed: Int by bindToStats(initValue = totalProcessed, defaultTitle = "Total processed")
-    override var inserted: Int by bindToStats(initValue = inserted, defaultTitle = "Inserted")
-    override var reset: Int by bindToStats(initValue = reset, defaultTitle = "Reset")
+    override var totalProcessed: Int by bindThroughValue(initValue = totalProcessed, propertyTitle = "Total processed")
+    override var inserted: Int by bindThroughValue(initValue = inserted, propertyTitle = "Inserted")
+    override var reset: Int by bindThroughValue(initValue = reset, propertyTitle = "Reset")
 }

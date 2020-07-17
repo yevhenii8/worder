@@ -4,8 +4,8 @@
  *
  * Name: <Words.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <09/07/2020, 04:41:16 PM>
- * Version: <4>
+ * Modified: <17/07/2020, 03:03:32 PM>
+ * Version: <5>
  */
 
 package worder.core.model
@@ -14,7 +14,7 @@ import java.util.*
 
 open class BareWord(val name: String) {
     companion object {
-        private val wordPattern = "([a-zA-Z\\-']+)|(([a-zA-Z\\-']+ [a-zA-Z\\-']+)+( [a-zA-Z\\-']+)?)".toRegex()
+        private val wordPattern = "[a-zA-Z\\-' ]+".toRegex()
         val wordValidator: (word: String) -> Boolean = { word -> word.matches(wordPattern) }
     }
 

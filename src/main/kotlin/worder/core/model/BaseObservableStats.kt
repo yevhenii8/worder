@@ -4,8 +4,8 @@
  *
  * Name: <BaseObservableStats.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <06/07/2020, 07:25:08 PM>
- * Version: <3>
+ * Modified: <17/07/2020, 07:33:23 PM>
+ * Version: <16>
  */
 
 package worder.core.model
@@ -21,12 +21,29 @@ import tornadofx.onChange
 import worder.tornadofx.observableMapOf
 import kotlin.reflect.KProperty
 
-open class BaseObservableStats(override val origin: String) : ObservableStats {
-    private val mutableTitleMapping: MutableMap<String, String> = mutableMapOf()
+open class BaseObservableStats(
+        override val origin: String,
+        titlesOrderPriority: List<String> = emptyList()
+) : ObservableStats {
+    private val titlesMapping: MutableMap<String, String> = mutableMapOf()
+
     private val mapProperty: MapProperty<String, Any?> = SimpleMapProperty(observableMapOf())
     private val map: MutableMap<String, Any?> by mapProperty
+
     private val titledMapProperty: MapProperty<String, Any?> = SimpleMapProperty(observableMapOf())
     private val titledMap: MutableMap<String, Any?> by titledMapProperty
+
+
+    init {
+        titlesOrderPriority.forEach {
+            titledMap[it] = null
+        }
+    }
+
+
+    /**
+     * ObservableStats interface implementation
+     */
 
     override val asMapProperty: ReadOnlyMapProperty<String, Any?> = mapProperty
     override val asMap: Map<String, Any?> = map
@@ -34,94 +51,85 @@ open class BaseObservableStats(override val origin: String) : ObservableStats {
     override val asTitledMap: Map<String, Any?> = titledMap
 
 
+    /**
+     * delegating itself.
+     * these methods are called when a property is accessed.
+     */
+
     @Suppress("UNCHECKED_CAST")
     operator fun <T : Any?> getValue(thisRef: Any?, property: KProperty<*>): T = map[property.name] as T
 
     operator fun <T : Any?> setValue(thisRef: Any?, property: KProperty<*>, value: T) = updatePropertyValue(property.name, value)
 
 
-    fun bindToStats(
+    /**
+     * ways to register a new property and therefore provide delegate for.
+     */
+
+    fun bindThroughValue(
             initValue: Any?,
-            defaultTitle: String? = null
-    ): BaseObservableStatsDelegate = BaseObservableStatsDelegate(initValue, defaultTitle)
+            propertyTitle: String? = null
+    ): ValueDelegate = ValueDelegate(initValue, propertyTitle)
 
-//    fun <T> bindToPropertyAndStats(
-//            source: Property<T>,
-//            defaultTitle: String? = null,
-//            usePropertyNameAsTitle: Boolean = false
-//    ): BasePropertyDelegate<T> = BasePropertyDelegate(source, defaultTitle, usePropertyNameAsTitle)
-
-    fun bindToPropertyAndStats(
+    fun bindThroughIntegerProperty(
             source: IntegerProperty,
-            defaultTitle: String? = null,
+            propertyTitle: String? = null,
             usePropertyNameAsTitle: Boolean = true
-    ): IntegerPropertyDelegate = IntegerPropertyDelegate(source, defaultTitle, usePropertyNameAsTitle)
+    ): IntegerPropertyDelegate = IntegerPropertyDelegate(source, propertyTitle, usePropertyNameAsTitle)
 
+
+    /**
+     * inner methods that abstract class work
+     */
 
     private fun updatePropertyValue(propertyName: String, value: Any?) {
-        val title: String = mutableTitleMapping[propertyName]!!
+        val title: String = titlesMapping[propertyName]!!
 
         map[propertyName] = value
         titledMap[title] = value
     }
 
-    private fun initPropertyTitle(propertyName: String, defaultTitle: String?): String {
-        val title: String = defaultTitle ?: mutableTitleMapping[propertyName] ?: propertyName
-        val titleMapping = mutableTitleMapping.entries.find { it.value == title }?.key
+    private fun initPropertyTitle(propertyName: String, propertyTitle: String?): String {
+        val newTitle: String = propertyTitle ?: titlesMapping[propertyName] ?: propertyName
+        val currentMapping = titlesMapping.entries.find { it.value == newTitle }?.key
 
-        // handling properties overriding and ensures that title is unique
-        require(titleMapping == null || propertyName == titleMapping) {
-            "Can't bind new property! Title [$title] is already presented! " +
-                    "Current bound: [$title -> $titleMapping] " +
-                    "Proposed bound: [$title -> $propertyName]"
+        // handling properties overriding and ensuring that new title is unique
+        require(currentMapping == null || propertyName == currentMapping) {
+            "Can't register new property! Property title [$newTitle] is already occupied! " +
+                    "Current bound: [$newTitle -> $currentMapping] " +
+                    "Proposed bound: [$newTitle -> $propertyName]"
         }
 
-        mutableTitleMapping[propertyName] = title
-        return title
+        titlesMapping[propertyName] = newTitle
+        return newTitle
     }
 
 
-    inner class BaseObservableStatsDelegate(
+    /**
+     * BaseObservableStats is delegate by itself. All properties requests\accesses are proceeded with its getValue\setValue methods
+     * Classes below are used for initial initialization of properties and some other stuff.
+     */
+
+    inner class ValueDelegate(
             private val initValue: Any?,
-            private val defaultTitle: String?
+            private val propertyTitle: String?
     ) {
         operator fun provideDelegate(thisRef: Any?, property: KProperty<*>): BaseObservableStats {
-            initPropertyTitle(property.name, defaultTitle)
+            initPropertyTitle(property.name, propertyTitle)
             updatePropertyValue(property.name, initValue)
             return this@BaseObservableStats
         }
     }
 
-//    inner class BasePropertyDelegate<T>(
-//            private val source: Property<T>,
-//            private val defaultTitle: String?,
-//            private val usePropertyNameAsTitle: Boolean
-//    ) {
-//        operator fun provideDelegate(thisRef: Any?, property: KProperty<*>): Property<T> {
-//            initPropertyTitle(
-//                    property.name,
-//                    if (usePropertyNameAsTitle && source.name.isNotBlank()) source.name else defaultTitle
-//            )
-//
-//            updatePropertyValue(property.name, source.value)
-//
-//            source.onChange {
-//                updatePropertyValue(property.name, it)
-//            }
-//
-//            return source
-//        }
-//    }
-
     inner class IntegerPropertyDelegate(
             private val source: IntegerProperty,
-            private val defaultTitle: String?,
+            private val propertyTitle: String?,
             private val usePropertyNameAsTitle: Boolean
     ) {
         operator fun provideDelegate(thisRef: Any?, property: KProperty<*>): IntegerProperty {
             initPropertyTitle(
                     property.name,
-                    if (usePropertyNameAsTitle && source.name.isNotBlank()) source.name else defaultTitle
+                    if (usePropertyNameAsTitle && source.name.isNotBlank()) source.name else propertyTitle
             )
 
             updatePropertyValue(property.name, source.value)
@@ -134,6 +142,10 @@ open class BaseObservableStats(override val origin: String) : ObservableStats {
         }
     }
 }
+
+/**
+ * stats objects from the beginning were meant to be used in UI components.
+ */
 
 suspend inline fun <T : BaseObservableStats> T.applyWithMainUI(crossinline block: suspend T.() -> Unit): T {
     MainScope().launch {

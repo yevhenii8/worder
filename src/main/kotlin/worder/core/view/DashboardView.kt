@@ -4,8 +4,8 @@
  *
  * Name: <DashboardView.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <16/07/2020, 09:43:34 PM>
- * Version: <18>
+ * Modified: <17/07/2020, 05:56:47 PM>
+ * Version: <19>
  */
 
 package worder.core.view
@@ -35,7 +35,7 @@ class DashboardView : View(), DatabaseEventListener {
     override fun onDatabaseConnection(db: WorderDB) {
         root.add(
                 observableStats(
-                        stats = databaseController.observableStats,
+                        stats = databaseController.controllerStats,
                         valueMutators = mapOf("Data source" to { value: Any? -> value.toString().substringAfterLast("/") })
                 )
 

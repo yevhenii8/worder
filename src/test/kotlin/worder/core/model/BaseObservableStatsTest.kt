@@ -4,8 +4,8 @@
  *
  * Name: <BaseObservableStatsTest.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <06/07/2020, 07:25:08 PM>
- * Version: <3>
+ * Modified: <17/07/2020, 07:21:19 PM>
+ * Version: <6>
  */
 
 package worder.core.model
@@ -22,7 +22,7 @@ class BaseObservableStatsTest : ShouldSpec({
     should("perform concurrent operation synchronized") {
         val times = 100_000
         val stats = object : BaseObservableStats("Testing Stats Object") {
-            var counter: Int by bindToStats(0)
+            var counter: Int by bindThroughValue(0)
         }
 
         runBlocking(Dispatchers.Default) {

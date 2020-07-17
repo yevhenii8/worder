@@ -4,8 +4,8 @@
  *
  * Name: <DatabaseController.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <06/07/2020, 07:25:08 PM>
- * Version: <3>
+ * Modified: <17/07/2020, 07:38:49 PM>
+ * Version: <16>
  */
 
 package worder.database
@@ -21,40 +21,42 @@ import worder.database.model.implementations.SQLiteFile
 import java.io.File
 
 class DatabaseController : Controller(), DatabaseEventProducer {
-    val observableStats: BaseObservableStats = BaseObservableStats("Database Controller")
-
-    var db: WorderDB? by observableStats.bindToStats(
-            initValue = null,
-            defaultTitle = "Data source"
+    val controllerStats: BaseObservableStats = BaseObservableStats(
+            origin = "Database Controller",
+            titlesOrderPriority = listOf(
+                    "Data source",
+                    "Database size",
+                    "Session duration"
+            )
     )
-        private set
-
-    var isConnected: Boolean by observableStats.bindToStats(
-            initValue = false,
-            defaultTitle = "Connected"
-    )
-        private set
-
 
     private val listeners = mutableListOf<DatabaseEventListener>()
-    private var timerJob: Job? = null
-    private var timerValue: String by observableStats.bindToStats(
-            initValue = "00:00:00",
-            defaultTitle = "Session duration"
-    )
+    private var timerValue: String by controllerStats.bindThroughValue(initValue = "00:00:00", propertyTitle = "Session duration")
+    private var dbFileSize: String by controllerStats.bindThroughValue(initValue = "0 KiB", propertyTitle = "Database size")
+    private var isConnected: Boolean = false
+    private var currentDB: File? = null
+    private var secTicker: Job? = null
+
+    var db: WorderDB? by controllerStats.bindThroughValue(initValue = null, propertyTitle = "Data source")
+        private set
 
 
     /*
     Public Controller's API
      */
 
-    fun connectToSqlLiteFile(file: File) = connect(SQLiteFile.createInstance(file))
+    fun connectToSqlLiteFile(file: File) {
+        currentDB = file
+        dbFileSize = "${file.length() / 1024} KiB"
+        connect(SQLiteFile.createInstance(file))
+    }
 
     fun disconnect() {
         if (isConnected) {
             db = null
             isConnected = false
-            timerJob?.cancel()
+            secTicker?.cancel()
+            currentDB = null
             listeners.forEach { it.onDatabaseDisconnection() }
         }
     }
@@ -83,11 +85,11 @@ class DatabaseController : Controller(), DatabaseEventProducer {
 
         db = otherDB
         isConnected = true
-        timerJob = MainScope().launch { clockUpdater() }
+        secTicker = MainScope().launch { tickerJob() }
         listeners.forEach { it.onDatabaseConnection(db!!) }
     }
 
-    private suspend fun clockUpdater() {
+    private suspend fun tickerJob() {
         var seconds = 0
         while (true) {
             delay(1000L)
@@ -98,6 +100,7 @@ class DatabaseController : Controller(), DatabaseEventProducer {
             val s = seconds % 60
 
             timerValue = "${if (h < 10) "0$h" else h.toString()}:${if (m < 10) "0$m" else m.toString()}:${if (s < 10) "0$s" else s.toString()}"
+            dbFileSize = "${currentDB!!.length() / 1024} KiB"
         }
     }
 }

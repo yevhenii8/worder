@@ -4,8 +4,8 @@
  *
  * Name: <SimpleInsertModelStats.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <16/07/2020, 11:37:40 PM>
- * Version: <8>
+ * Modified: <17/07/2020, 05:56:47 PM>
+ * Version: <9>
  */
 
 package worder.insert.model.implementations
@@ -35,37 +35,37 @@ class SimpleInsertModelStats(
         inserted: Int = 0
 ) : BaseObservableStats(origin), ObservableInsertModelStats {
     override val generatedUnitsProperty: IntegerProperty = SimpleIntegerProperty(null, "Generated units", generatedUnits)
-    override var generatedUnits: Int by bindToPropertyAndStats(generatedUnitsProperty)
+    override var generatedUnits: Int by bindThroughIntegerProperty(generatedUnitsProperty)
 
     override val readyToCommitUnitsProperty: IntegerProperty = SimpleIntegerProperty(null, "Ready to commit units", readyToCommitUnits)
-    override var readyToCommitUnits: Int by bindToPropertyAndStats(readyToCommitUnitsProperty)
+    override var readyToCommitUnits: Int by bindThroughIntegerProperty(readyToCommitUnitsProperty)
 
     override val committedUnitsProperty: IntegerProperty = SimpleIntegerProperty(null, "Committed units", committedUnits)
-    override var committedUnits: Int by bindToPropertyAndStats(committedUnitsProperty)
+    override var committedUnits: Int by bindThroughIntegerProperty(committedUnitsProperty)
 
     override val excludedUnitsProperty: IntegerProperty = SimpleIntegerProperty(null, "Excluded units", excludedUnits)
-    override var excludedUnits: Int by bindToPropertyAndStats(excludedUnitsProperty)
+    override var excludedUnits: Int by bindThroughIntegerProperty(excludedUnitsProperty)
 
     override val actionNeededUnitsProperty: IntegerProperty = SimpleIntegerProperty(null, "Action needed units", actionNeededUnits)
-    override var actionNeededUnits: Int by bindToPropertyAndStats(actionNeededUnitsProperty)
+    override var actionNeededUnits: Int by bindThroughIntegerProperty(actionNeededUnitsProperty)
 
 
     override val totalWordsProperty: IntegerProperty = SimpleIntegerProperty(null, "Total uploaded", totalWords)
-    override var totalWords: Int by bindToPropertyAndStats(totalWordsProperty)
+    override var totalWords: Int by bindThroughIntegerProperty(totalWordsProperty)
 
     override val totalValidWordsProperty: IntegerProperty = SimpleIntegerProperty(null, "Total valid words", totalValidWords)
-    override var totalValidWords: Int by bindToPropertyAndStats(totalValidWordsProperty)
+    override var totalValidWords: Int by bindThroughIntegerProperty(totalValidWordsProperty)
 
     override val totalInvalidWordsProperty: IntegerProperty = SimpleIntegerProperty(null, "Total invalid words", totalInvalidWords)
-    override var totalInvalidWords: Int by bindToPropertyAndStats(totalInvalidWordsProperty)
+    override var totalInvalidWords: Int by bindThroughIntegerProperty(totalInvalidWordsProperty)
 
 
     override val totalProcessedProperty: IntegerProperty = SimpleIntegerProperty(null, "Total processed", totalProcessed)
-    override var totalProcessed: Int by bindToPropertyAndStats(totalProcessedProperty)
+    override var totalProcessed: Int by bindThroughIntegerProperty(totalProcessedProperty)
 
     override val insertedProperty: IntegerProperty = SimpleIntegerProperty(null, "Inserted words", inserted)
-    override var inserted: Int by bindToPropertyAndStats(insertedProperty)
+    override var inserted: Int by bindThroughIntegerProperty(insertedProperty)
 
     override val resetProperty: IntegerProperty = SimpleIntegerProperty(null, "Reset words", reset)
-    override var reset: Int by bindToPropertyAndStats(resetProperty)
+    override var reset: Int by bindThroughIntegerProperty(resetProperty)
 }

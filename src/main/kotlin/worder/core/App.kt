@@ -4,29 +4,24 @@
  *
  * Name: <App.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <17/07/2020, 02:20:34 PM>
- * Version: <30>
+ * Modified: <17/07/2020, 04:21:45 PM>
+ * Version: <31>
  */
 
 package worder.core
 
 import javafx.stage.Stage
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import tornadofx.App
 import tornadofx.FX
-import tornadofx.dumpStylesheets
 import tornadofx.find
 import worder.core.styles.WorderDefaultStyles
 import worder.core.view.MainView
 import worder.database.DatabaseController
 import worder.insert.InsertController
-import worder.insert.model.InsertUnit
 import java.io.File
+import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.streams.toList
 
 class AppEntry : App(MainView::class, WorderDefaultStyles::class) {
     companion object {
@@ -58,28 +53,22 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class) {
 
         fun runDevInsert() = withSampleDB { samplePath ->
             find<MainView>().switchToInsertTab()
-            find<InsertController>().generateInsertModel(
-                    listOf
-                    (
-                            File("$samplePath/inserting/words0.txt"),
-                            File("$samplePath/inserting/words1.txt"),
-                            File("$samplePath/inserting/words2.txt"),
-                            File("$samplePath/inserting/words3.txt"),
-                            File("$samplePath/inserting/words4.txt"),
-                            File("$samplePath/inserting/words5.txt"),
-
-                            File("$samplePath/inserting/words0.txt"),
-                            File("$samplePath/inserting/words1.txt"),
-                            File("$samplePath/inserting/words2.txt"),
-                            File("$samplePath/inserting/words3.txt"),
-                            File("$samplePath/inserting/words4.txt"),
-                            File("$samplePath/inserting/words5.txt")
-                    )
-            )
+            find<InsertController>().generateInsertModel(Files.list(Path.of("/home/yevhenii/Other/inserter")).map { it.toFile() }.toList())
+//            find<InsertController>().generateInsertModel(
+//                    listOf
+//                    (
+//                            File("$samplePath/inserting/words0.txt"),
+//                            File("$samplePath/inserting/words1.txt"),
+//                            File("$samplePath/inserting/words2.txt"),
+//                            File("$samplePath/inserting/words3.txt"),
+//                            File("$samplePath/inserting/words4.txt"),
+//                            File("$samplePath/inserting/words5.txt")
+//                    )
+//            )
         }
     }
 
-    
+
     override fun start(stage: Stage) {
         stage.apply {
             icons += resources.image("/icons/worder-icon_512x512.png")

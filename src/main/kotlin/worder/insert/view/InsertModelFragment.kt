@@ -4,8 +4,8 @@
  *
  * Name: <InsertModelFragment.kt>
  * Created: <09/07/2020, 10:43:11 PM>
- * Modified: <17/07/2020, 02:20:34 PM>
- * Version: <166>
+ * Modified: <17/07/2020, 03:05:09 PM>
+ * Version: <167>
  */
 
 package worder.insert.view
@@ -54,9 +54,7 @@ import kotlin.math.roundToInt
 class InsertModelFragment : Fragment() {
     private val insertModel: InsertModel by param()
     private val uncommittedUnits: ObservableList<InsertUnit> = insertModel.run {
-        val res = observableListOf(
-                readyToCommitUnits + actionNeededUnits + excludedUnits + committedUnits + committingUnits
-        )
+        val res = observableListOf(actionNeededUnits + readyToCommitUnits)
 
         committedUnitsProperty.onChange { op: ListChangeListener.Change<out InsertUnit> ->
             if (op.next() && op.wasAdded())
