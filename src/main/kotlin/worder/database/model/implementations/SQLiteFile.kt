@@ -4,13 +4,12 @@
  *
  * Name: <SQLiteFile.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <17/07/2020, 04:41:02 PM>
- * Version: <7>
+ * Modified: <17/07/2020, 08:12:29 PM>
+ * Version: <11>
  */
 
 package worder.database.model.implementations
 
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.Column
@@ -40,7 +39,7 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 import org.sqlite.SQLiteConfig
-import org.sqlite.SQLiteConfig.TransactionMode.IMMEDIATE
+import org.sqlite.SQLiteConfig.TransactionMode.EXCLUSIVE
 import worder.core.model.BareWord
 import worder.core.model.applyWithMainUI
 import worder.database.model.DatabaseWord
@@ -123,12 +122,13 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
 
     private val sqlLiteCfg: SQLiteConfig = SQLiteConfig().apply {
         setJournalMode(SQLiteConfig.JournalMode.OFF)
-        transactionMode = IMMEDIATE
+        transactionMode = EXCLUSIVE
+        busyTimeout = Int.MAX_VALUE
     }
     private val connection: Database = Database.connect({
         sqlLiteCfg.createConnection("jdbc:sqlite:${file.absolutePath}")
     }).also {
-        // workaround for Exposed SQLite Driver && Suspended transactions
+        // workaround for JDBC SQLite Driver
         TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
     }
     private val dictionaryId: Int = sqlLiteTransaction {
@@ -212,14 +212,11 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
     }
 
     private suspend fun <T> sqlLiteTransactionAsync(statement: suspend Transaction.() -> T): T = newSuspendedTransaction(
-            context = Dispatchers.Default,
             db = connection,
             statement = statement
     )
 
     private fun <T> sqlLiteTransaction(statement: Transaction.() -> T): T = transaction(
-            transactionIsolation = Connection.TRANSACTION_SERIALIZABLE,
-            repetitionAttempts = 1,
             db = connection,
             statement = statement
     )
