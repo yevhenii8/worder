@@ -14,7 +14,7 @@
           <option value="--tests=ConcurrentCommitTest" />
         </list>
       </option>
-      <option name="vmOptions" value="" />
+      <option name="vmOptions" value="-Dkotlinx.coroutines.debug" />
     </ExternalSystemSettings>
     <GradleScriptDebugEnabled>true</GradleScriptDebugEnabled>
     <method v="2" />

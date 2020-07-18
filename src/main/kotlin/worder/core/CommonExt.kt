@@ -4,11 +4,13 @@
  *
  * Name: <CommonExt.kt>
  * Created: <17/07/2020, 09:32:24 PM>
- * Modified: <17/07/2020, 09:43:51 PM>
- * Version: <5>
+ * Modified: <18/07/2020, 09:21:16 PM>
+ * Version: <6>
  */
 
 package worder.core
+
+import kotlin.math.round
 
 fun Number.formatGrouped(): String {
     val num = this.toString()
@@ -25,4 +27,10 @@ fun Number.formatGrouped(): String {
     }
 
     return res.toString()
+}
+
+fun Double.round(decimals: Int): Double {
+    var multiplier = 1.0
+    repeat(decimals) { multiplier *= 10 }
+    return round(this * multiplier) / multiplier
 }

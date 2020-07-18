@@ -4,8 +4,8 @@
  *
  * Name: <SQLiteFile.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <18/07/2020, 12:39:35 AM>
- * Version: <12>
+ * Modified: <18/07/2020, 09:48:00 PM>
+ * Version: <17>
  */
 
 package worder.database.model.implementations
@@ -364,12 +364,14 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
      */
 
     private suspend fun containsWord(bareWord: BareWord): Boolean = sqlLiteTransactionAsync {
+//        println("[${Thread.currentThread().name}] containsWord()")
         WordTable.select((WordTable.name eq bareWord.name) and (WordTable.dictionaryId eq dictionaryId))
                 .count()
     } > 0
 
     private suspend fun insertWord(bareWord: BareWord): WorderInsertDB.ResolveRes {
         sqlLiteTransactionAsync {
+//            println("[${Thread.currentThread().name}] insertWord()")
             WordTable.insert {
                 it[name] = bareWord.name
                 it[dictionaryId] = this@SQLiteFile.dictionaryId
@@ -381,6 +383,7 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
     }
 
     private suspend fun resetWord(bareWord: BareWord): WorderInsertDB.ResolveRes {
+//        println("[${Thread.currentThread().name}] resetWord()")
         sqlLiteTransactionAsync {
             WordTable.update({ (WordTable.name eq bareWord.name) and (WordTable.dictionaryId eq dictionaryId) })
             {
