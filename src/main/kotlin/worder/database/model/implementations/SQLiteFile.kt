@@ -4,12 +4,14 @@
  *
  * Name: <SQLiteFile.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <18/07/2020, 09:48:00 PM>
- * Version: <17>
+ * Modified: <18/07/2020, 11:10:21 PM>
+ * Version: <24>
  */
 
 package worder.database.model.implementations
 
+import kotlinx.coroutines.ExecutorCoroutineDispatcher
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.Column
@@ -39,7 +41,7 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 import org.sqlite.SQLiteConfig
-import org.sqlite.SQLiteConfig.TransactionMode.EXCLUSIVE
+import org.sqlite.SQLiteConfig.TransactionMode.IMMEDIATE
 import worder.core.model.BareWord
 import worder.core.model.applyWithMainUI
 import worder.database.model.DatabaseWord
@@ -54,6 +56,7 @@ import worder.database.model.WorderUpdateDB.SelectOrder.RANDOM
 import java.io.File
 import java.sql.Connection
 import java.time.Instant
+import java.util.concurrent.Executors
 
 class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, WorderInsertDB {
     companion object {
@@ -120,10 +123,10 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
     }
 
 
+    private val sqliteContext: ExecutorCoroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
     private val sqlLiteCfg: SQLiteConfig = SQLiteConfig().apply {
         setJournalMode(SQLiteConfig.JournalMode.OFF)
-        transactionMode = EXCLUSIVE
-        busyTimeout = Int.MAX_VALUE
+        transactionMode = IMMEDIATE
     }
     private val connection: Database = Database.connect({
         sqlLiteCfg.createConnection("jdbc:sqlite:${file.absolutePath}")
@@ -212,6 +215,7 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
     }
 
     private suspend fun <T> sqlLiteTransactionAsync(statement: suspend Transaction.() -> T): T = newSuspendedTransaction(
+            context = sqliteContext,
             db = connection,
             statement = statement
     )
@@ -364,14 +368,12 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
      */
 
     private suspend fun containsWord(bareWord: BareWord): Boolean = sqlLiteTransactionAsync {
-//        println("[${Thread.currentThread().name}] containsWord()")
         WordTable.select((WordTable.name eq bareWord.name) and (WordTable.dictionaryId eq dictionaryId))
                 .count()
     } > 0
 
     private suspend fun insertWord(bareWord: BareWord): WorderInsertDB.ResolveRes {
         sqlLiteTransactionAsync {
-//            println("[${Thread.currentThread().name}] insertWord()")
             WordTable.insert {
                 it[name] = bareWord.name
                 it[dictionaryId] = this@SQLiteFile.dictionaryId
@@ -383,7 +385,6 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
     }
 
     private suspend fun resetWord(bareWord: BareWord): WorderInsertDB.ResolveRes {
-//        println("[${Thread.currentThread().name}] resetWord()")
         sqlLiteTransactionAsync {
             WordTable.update({ (WordTable.name eq bareWord.name) and (WordTable.dictionaryId eq dictionaryId) })
             {

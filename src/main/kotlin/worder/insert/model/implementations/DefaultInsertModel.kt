@@ -4,8 +4,8 @@
  *
  * Name: <DefaultInsertModel.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <18/07/2020, 09:48:00 PM>
- * Version: <15>
+ * Modified: <18/07/2020, 10:44:32 PM>
+ * Version: <17>
  */
 
 package worder.insert.model.implementations
@@ -239,7 +239,6 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
                         changeState(InsertUnitStatus.COMMITTING)
                     }
 
-//                    println("[${Thread.currentThread().name}] Resolving words from $source!")
                     val (reset, inserted) = database.resolveWords(validWords)
                             .entries
                             .partition { it.value == WorderInsertDB.ResolveRes.RESET }

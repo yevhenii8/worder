@@ -4,8 +4,8 @@
  *
  * Name: <ConcurrentCommitTest.kt>
  * Created: <17/07/2020, 11:29:59 PM>
- * Modified: <18/07/2020, 09:48:00 PM>
- * Version: <26>
+ * Modified: <18/07/2020, 10:44:32 PM>
+ * Version: <30>
  */
 
 package worder.insert.model
@@ -50,7 +50,7 @@ class ConcurrentCommitTest : ShouldSpec({
     @Suppress("BlockingMethodInNonBlockingContext")
     should("compare multi/single thread performance with sqlite").config(timeout = Duration.INFINITE) {
         val filesCounts = listOf(40, 20, 10, 5, 1)
-        val runs = 5
+        val runs = 3
 
         filesCounts.forEach { filesCount ->
             val singleRes = mutableListOf<Long>()
