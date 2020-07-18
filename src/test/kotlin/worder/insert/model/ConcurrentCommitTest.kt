@@ -4,8 +4,8 @@
  *
  * Name: <ConcurrentCommitTest.kt>
  * Created: <17/07/2020, 11:29:59 PM>
- * Modified: <18/07/2020, 10:44:32 PM>
- * Version: <30>
+ * Modified: <19/07/2020, 12:40:32 AM>
+ * Version: <32>
  */
 
 package worder.insert.model
@@ -48,7 +48,7 @@ class ConcurrentCommitTest : ShouldSpec({
 
 
     @Suppress("BlockingMethodInNonBlockingContext")
-    should("compare multi/single thread performance with sqlite").config(timeout = Duration.INFINITE) {
+    xshould("compare multi/single thread performance with sqlite").config(timeout = Duration.INFINITE) {
         val filesCounts = listOf(40, 20, 10, 5, 1)
         val runs = 3
 
@@ -100,6 +100,35 @@ class ConcurrentCommitTest : ShouldSpec({
             println("--------------------------------------------|---------")
             println("$singleAvg  --------------  $multiAvg | ~ $differsAvg%")
             println()
+            println()
+        }
+
+        sampleDB.delete()
+    }
+
+    should("compare multi thread performance with sqlite").config(timeout = Duration.INFINITE) {
+        val filesCounts = listOf(40, 20, 10, 5, 1)
+        val runs = 3
+
+        filesCounts.forEach { filesCount ->
+            val results = mutableListOf<Long>()
+
+            repeat(runs) {
+                val concurrentTime = measureTimeMillis {
+                    val job = launch(Dispatchers.Default) {
+                        concurrentCommit(filesCount)
+                    }
+                    job.join()
+                }
+
+                results.add(concurrentTime)
+            }
+
+
+            println("running $filesCount files $runs times")
+            results.forEach {
+                println(" * ${it.formatGrouped()} ms")
+            }
             println()
         }
 

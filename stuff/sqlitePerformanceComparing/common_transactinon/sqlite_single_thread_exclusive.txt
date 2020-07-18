@@ -1,0 +1,25 @@
+running 40 files 3 times
+ * 3 051 ms
+ * 1 539 ms
+ * 1 501 ms
+
+running 20 files 3 times
+ * 560 ms
+ * 556 ms
+ * 537 ms
+
+running 10 files 3 times
+ * 215 ms
+ * 230 ms
+ * 216 ms
+
+running 5 files 3 times
+ * 102 ms
+ * 102 ms
+ * 107 ms
+
+running 1 files 3 times
+ * 32 ms
+ * 27 ms
+ * 27 ms
+

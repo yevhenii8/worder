@@ -4,8 +4,8 @@
  *
  * Name: <DefaultInsertModel.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <18/07/2020, 10:44:32 PM>
- * Version: <17>
+ * Modified: <19/07/2020, 12:00:08 AM>
+ * Version: <19>
  */
 
 package worder.insert.model.implementations
@@ -17,8 +17,8 @@ import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleSetProperty
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.withContext
 import tornadofx.getValue
 import tornadofx.observableListOf
@@ -106,7 +106,7 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
 
 
     override suspend fun commitAllUnits() {
-        supervisorScope {
+        coroutineScope {
             val toCommitUnits = ArrayList(readyToCommitUnits)
             toCommitUnits
                     .forEach { launch { it.commit() } }

@@ -4,8 +4,8 @@
  *
  * Name: <InsertModelFragment.kt>
  * Created: <09/07/2020, 10:43:11 PM>
- * Modified: <17/07/2020, 10:50:37 PM>
- * Version: <169>
+ * Modified: <19/07/2020, 12:00:08 AM>
+ * Version: <171>
  */
 
 package worder.insert.view
@@ -172,7 +172,9 @@ class InsertModelFragment : Fragment() {
                     }
                     button("Commit All Units") {
                         setOnAction {
-                            CoroutineScope(Dispatchers.Default).launch { insertModel.commitAllUnits() }
+                            CoroutineScope(Dispatchers.Default).launch {
+                                insertModel.commitAllUnits()
+                            }
                         }
                     }
                 }

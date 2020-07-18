@@ -4,8 +4,8 @@
  *
  * Name: <App.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <17/07/2020, 11:29:59 PM>
- * Version: <32>
+ * Modified: <18/07/2020, 11:32:21 PM>
+ * Version: <33>
  */
 
 package worder.core
@@ -19,7 +19,9 @@ import worder.core.view.MainView
 import worder.database.DatabaseController
 import worder.insert.InsertController
 import java.io.File
+import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.streams.toList
 
 class AppEntry : App(MainView::class, WorderDefaultStyles::class) {
     companion object {
@@ -52,15 +54,16 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class) {
         fun runDevInsert() = withSampleDB { samplePath ->
             find<MainView>().switchToInsertTab()
             find<InsertController>().generateInsertModel(
-                    listOf
-                    (
-                            File("$samplePath/inserting/words0.txt"),
-                            File("$samplePath/inserting/words1.txt"),
-                            File("$samplePath/inserting/words2.txt"),
-                            File("$samplePath/inserting/words3.txt"),
-                            File("$samplePath/inserting/words4.txt"),
-                            File("$samplePath/inserting/words5.txt")
-                    )
+                    Files.list(Path.of("/home/yevhenii/Other/inserter")).map { it.toFile() }.toList()
+//                    listOf
+//                    (
+//                            File("$samplePath/inserting/words0.txt"),
+//                            File("$samplePath/inserting/words1.txt"),
+//                            File("$samplePath/inserting/words2.txt"),
+//                            File("$samplePath/inserting/words3.txt"),
+//                            File("$samplePath/inserting/words4.txt"),
+//                            File("$samplePath/inserting/words5.txt")
+//                    )
             )
         }
     }
