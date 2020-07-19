@@ -4,13 +4,15 @@
  *
  * Name: <WorderDB.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <18/07/2020, 12:39:35 AM>
- * Version: <4>
+ * Modified: <19/07/2020, 04:06:10 PM>
+ * Version: <5>
  */
 
 package worder.database.model
 
-interface WorderDB {
+import java.io.Closeable
+
+interface WorderDB : Closeable {
     val observableTrackStats: ObservableWorderTrackStats
     val observableSummaryStats: ObservableWorderSummaryStats
 

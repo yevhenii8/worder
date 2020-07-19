@@ -4,8 +4,8 @@
  *
  * Name: <App.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <18/07/2020, 11:32:21 PM>
- * Version: <33>
+ * Modified: <19/07/2020, 04:32:23 PM>
+ * Version: <40>
  */
 
 package worder.core
@@ -19,15 +19,21 @@ import worder.core.view.MainView
 import worder.database.DatabaseController
 import worder.insert.InsertController
 import java.io.File
-import java.nio.file.Files
 import java.nio.file.Path
-import kotlin.streams.toList
 
 class AppEntry : App(MainView::class, WorderDefaultStyles::class) {
     companion object {
         private val databaseController: DatabaseController = find()
         private val samplePath: Path = Path.of("stuff").resolve("sample")
         private val originalSampleDB: File = samplePath.resolve("sample-db.bck").toFile()
+        private val devInsertFiles: List<File> = listOf(
+                File("$samplePath/inserting/words0.txt"),
+                File("$samplePath/inserting/words1.txt"),
+                File("$samplePath/inserting/words2.txt"),
+                File("$samplePath/inserting/words3.txt"),
+                File("$samplePath/inserting/words4.txt"),
+                File("$samplePath/inserting/words5.txt")
+        )
 
         val sampleDB: File = samplePath.resolve("sample-db_TMP.bck").toFile()
         val isConnectedToSample: Boolean
@@ -51,20 +57,20 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class) {
 
         fun runDevSample() = withSampleDB { }
 
-        fun runDevInsert() = withSampleDB { samplePath ->
+        fun runDevInsert() = withSampleDB {
             find<MainView>().switchToInsertTab()
-            find<InsertController>().generateInsertModel(
-                    Files.list(Path.of("/home/yevhenii/Other/inserter")).map { it.toFile() }.toList()
-//                    listOf
-//                    (
-//                            File("$samplePath/inserting/words0.txt"),
-//                            File("$samplePath/inserting/words1.txt"),
-//                            File("$samplePath/inserting/words2.txt"),
-//                            File("$samplePath/inserting/words3.txt"),
-//                            File("$samplePath/inserting/words4.txt"),
-//                            File("$samplePath/inserting/words5.txt")
-//                    )
-            )
+            find<InsertController>().generateInsertModel(devInsertFiles)
+        }
+
+        fun runDevInsertHard() = withSampleDB {
+            val devInsertFilesMany = mutableListOf<File>().apply {
+                repeat(10) {
+                    addAll(devInsertFiles)
+                }
+            }
+
+            find<MainView>().switchToInsertTab()
+            find<InsertController>().generateInsertModel(devInsertFilesMany)
         }
     }
 
@@ -80,6 +86,8 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class) {
     }
 
     override fun stop() {
+        databaseController.disconnect()
+
         if (isConnectedToSample && !keepSample)
             sampleDB.delete()
 
@@ -102,6 +110,7 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class) {
     enum class WorderArgument(val value: String, val description: String, val action: () -> Unit) {
         DEV_DATABASE("--dev-sample", "Automatically connects to the sampleDB.", AppEntry.Companion::runDevSample),
         DEV_INSERT("--dev-insert", "Development stage for the Insert Tab.", AppEntry.Companion::runDevInsert),
+        DEV_INSERT_HARD("--dev-insert-hard", "Development stage for the Insert Tab with hard load.", AppEntry.Companion::runDevInsertHard),
         KEEP_SAMPLE_DB("--keep-sample-db", "Preserves sample-db-tmp file from removing at the end.", { withSampleDB { keepSample = true } });
 
 

@@ -4,8 +4,8 @@
  *
  * Name: <SQLiteFile.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <19/07/2020, 01:56:38 AM>
- * Version: <41>
+ * Modified: <19/07/2020, 04:15:29 PM>
+ * Version: <42>
  */
 
 package worder.database.model.implementations
@@ -57,6 +57,7 @@ import worder.database.model.WorderUpdateDB.SelectOrder.RANDOM
 import java.io.File
 import java.sql.Connection
 import java.time.Instant
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, WorderInsertDB {
@@ -124,7 +125,8 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
     }
 
 
-    private val sqliteContext: ExecutorCoroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+    private val sqliteExecutor: ExecutorService = Executors.newSingleThreadExecutor()
+    private val sqliteContext: ExecutorCoroutineDispatcher = sqliteExecutor.asCoroutineDispatcher()
     private val sqlLiteCfg: SQLiteConfig = SQLiteConfig().apply {
         setJournalMode(SQLiteConfig.JournalMode.OFF)
         transactionMode = EXCLUSIVE
@@ -459,8 +461,12 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
 
 
     /*
-    Any's Methods Overriding
+    Other Methods Overriding
      */
+
+    override fun close() {
+        sqliteExecutor.shutdown()
+    }
 
     override fun toString(): String = connection.url
 }

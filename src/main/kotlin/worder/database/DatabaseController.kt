@@ -4,8 +4,8 @@
  *
  * Name: <DatabaseController.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <17/07/2020, 09:41:28 PM>
- * Version: <25>
+ * Modified: <19/07/2020, 04:15:29 PM>
+ * Version: <26>
  */
 
 package worder.database
@@ -34,7 +34,6 @@ class DatabaseController : Controller(), DatabaseEventProducer {
     private val listeners = mutableListOf<DatabaseEventListener>()
     private var timerValue: String by controllerStats.bindThroughValue(initValue = "00:00:00", propertyTitle = "Session duration")
     private var dbFileSize: String by controllerStats.bindThroughValue(initValue = "0 KiB", propertyTitle = "Database size")
-    private var isConnected: Boolean = false
     private var currentDB: File? = null
     private var secTicker: Job? = null
 
@@ -53,9 +52,9 @@ class DatabaseController : Controller(), DatabaseEventProducer {
     }
 
     fun disconnect() {
-        if (isConnected) {
+        if (db != null) {
+            db!!.close()
             db = null
-            isConnected = false
             secTicker?.cancel()
             currentDB = null
             listeners.forEach { it.onDatabaseDisconnection() }
@@ -69,7 +68,7 @@ class DatabaseController : Controller(), DatabaseEventProducer {
     override fun subscribeAndRaise(eventListener: DatabaseEventListener) {
         subscribe(eventListener)
 
-        if (isConnected)
+        if (db != null)
             eventListener.onDatabaseConnection(db!!)
         else
             eventListener.onDatabaseDisconnection()
@@ -81,11 +80,10 @@ class DatabaseController : Controller(), DatabaseEventProducer {
      */
 
     private fun connect(otherDB: WorderDB) {
-        if (isConnected)
+        if (db != null)
             disconnect()
 
         db = otherDB
-        isConnected = true
         secTicker = MainScope().launch { tickerJob() }
         listeners.forEach { it.onDatabaseConnection(db!!) }
     }

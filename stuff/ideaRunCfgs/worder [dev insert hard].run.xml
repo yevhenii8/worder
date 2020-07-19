@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="worder [dev sample]" type="GradleRunConfiguration" factoryName="Gradle">
+  <configuration default="false" name="worder [dev insert hard]" type="GradleRunConfiguration" factoryName="Gradle">
     <ExternalSystemSettings>
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -11,7 +11,7 @@
       <option name="taskNames">
         <list>
           <option value="run" />
-          <option value="--args=&quot;--dev-sample&quot;" />
+          <option value="--args=&quot;--dev-insert-hard&quot;" />
         </list>
       </option>
       <option name="vmOptions" value="-Dkotlinx.coroutines.debug" />
