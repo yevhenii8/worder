@@ -4,8 +4,8 @@
  *
  * Name: <InsertModelFragment.kt>
  * Created: <09/07/2020, 10:43:11 PM>
- * Modified: <19/07/2020, 12:00:08 AM>
- * Version: <171>
+ * Modified: <19/07/2020, 04:53:09 PM>
+ * Version: <176>
  */
 
 package worder.insert.view
@@ -42,6 +42,7 @@ import tornadofx.px
 import tornadofx.row
 import tornadofx.separator
 import tornadofx.style
+import tornadofx.text
 import tornadofx.vbox
 import worder.core.formatGrouped
 import worder.core.styles.WorderDefaultStyles
@@ -50,11 +51,14 @@ import worder.core.view.worderStatusLabel
 import worder.insert.InsertController
 import worder.insert.model.InsertModel
 import worder.insert.model.InsertUnit
+import worder.insert.model.ObservableInsertModelStats
 import kotlin.math.roundToInt
 
 class InsertModelFragment : Fragment() {
-    private val insertModel: InsertModel by param()
-    private val uncommittedUnits: ObservableList<InsertUnit> = insertModel.run {
+    private val model: InsertModel by param()
+    private val stats: ObservableInsertModelStats = model.observableStats
+
+    private val uncommittedUnits: ObservableList<InsertUnit> = model.run {
         val res = observableListOf(actionNeededUnits + readyToCommitUnits)
 
         committedUnitsProperty.onChange { op: ListChangeListener.Change<out InsertUnit> ->
@@ -65,8 +69,8 @@ class InsertModelFragment : Fragment() {
         res
     }
     private val progressIndicator = RingProgressIndicator().apply {
-        insertModel.observableStats.totalProcessedProperty.onChange {
-            this.progress = ((it.toDouble() / insertModel.observableStats.totalWords) * 100).roundToInt()
+        stats.totalProcessedProperty.onChange {
+            this.progress = ((it.toDouble() / stats.totalWords) * 100).roundToInt()
         }
     }
     private val uncommittedUnitsUI = find<InsertUnitsContainerFragment>(
@@ -74,7 +78,7 @@ class InsertModelFragment : Fragment() {
             "direction" to HorizontalDirection.LEFT
     ).root
     private val committedUnitsUI = find<InsertUnitsContainerFragment>(
-            "units" to insertModel.committedUnitsProperty,
+            "units" to model.committedUnitsProperty,
             "direction" to HorizontalDirection.RIGHT
     ).root
 
@@ -100,15 +104,14 @@ class InsertModelFragment : Fragment() {
                 hgap = 30.0
                 vgap = 60.0
 
-
                 row {
                     val insertProgressStats = listBasedStats(
                             statsProperties = listOf(
-                                    insertModel.observableStats.generatedUnitsProperty,
-                                    insertModel.observableStats.readyToCommitUnitsProperty,
-                                    insertModel.observableStats.actionNeededUnitsProperty,
-                                    insertModel.observableStats.excludedUnitsProperty,
-                                    insertModel.observableStats.committedUnitsProperty
+                                    stats.generatedUnitsProperty,
+                                    stats.readyToCommitUnitsProperty,
+                                    stats.actionNeededUnitsProperty,
+                                    stats.excludedUnitsProperty,
+                                    stats.committedUnitsProperty
                             ),
                             commonValueMutator = { (this as Int).formatGrouped() }
                     ).root.apply {
@@ -119,10 +122,11 @@ class InsertModelFragment : Fragment() {
                     }
 
                     add(insertProgressStats)
+
                     vbox(spacing = 10, alignment = Pos.BASELINE_CENTER) {
                         setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE)
                         add(progressIndicator)
-                        worderStatusLabel(insertModel.modelStatusProperty)
+                        worderStatusLabel(model.modelStatusProperty)
                     }
                 }
                 row {
@@ -136,18 +140,18 @@ class InsertModelFragment : Fragment() {
                     add(listBasedStats(
                             blockTitle = "Uploaded Data Stats",
                             statsProperties = listOf(
-                                    insertModel.observableStats.totalWordsProperty,
-                                    insertModel.observableStats.totalValidWordsProperty,
-                                    insertModel.observableStats.totalInvalidWordsProperty
+                                    stats.totalWordsProperty,
+                                    stats.totalValidWordsProperty,
+                                    stats.totalInvalidWordsProperty
                             ),
                             commonValueMutator = { (this as Int).formatGrouped() }
                     ))
                     add(listBasedStats(
                             blockTitle = "Processed Data Stats",
                             statsProperties = listOf(
-                                    insertModel.observableStats.totalProcessedProperty,
-                                    insertModel.observableStats.insertedProperty,
-                                    insertModel.observableStats.resetProperty
+                                    stats.totalProcessedProperty,
+                                    stats.insertedProperty,
+                                    stats.resetProperty
                             ),
                             commonValueMutator = { (this as Int).formatGrouped() }
                     ))
@@ -161,6 +165,9 @@ class InsertModelFragment : Fragment() {
                 }
                 row {
                     button("Reset This Model") {
+                        model.modelStatusProperty.onChange {
+                            isDisable = it == InsertModel.InsertModelStatus.COMMITTING
+                        }
                         setOnAction {
                             if (uncommittedUnits.isNotEmpty())
                                 confirm("There are uncommitted units here. Are you sure you want to reset this model ?") {
@@ -171,9 +178,12 @@ class InsertModelFragment : Fragment() {
                         }
                     }
                     button("Commit All Units") {
+                        model.modelStatusProperty.onChange {
+                            isDisable = it == InsertModel.InsertModelStatus.COMMITTING
+                        }
                         setOnAction {
                             CoroutineScope(Dispatchers.Default).launch {
-                                insertModel.commitAllUnits()
+                                model.commitAllUnits()
                             }
                         }
                     }

@@ -4,8 +4,8 @@
  *
  * Name: <InsertView.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <09/07/2020, 10:43:11 PM>
- * Version: <454>
+ * Modified: <19/07/2020, 04:53:59 PM>
+ * Version: <455>
  */
 
 package worder.insert.view
@@ -51,5 +51,5 @@ class InsertView : View("Insert"), DatabaseEventListener {
 
     fun toNotUploadedState() = root.replaceChildren(notUploadedFragment)
 
-    fun toUploadedState(insertModel: InsertModel) = root.replaceChildren(find<InsertModelFragment>("insertModel" to insertModel))
+    fun toUploadedState(insertModel: InsertModel) = root.replaceChildren(find<InsertModelFragment>("model" to insertModel))
 }
