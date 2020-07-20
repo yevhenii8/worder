@@ -4,44 +4,49 @@
  *
  * Name: <WordBlock.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <06/07/2020, 07:25:08 PM>
- * Version: <3>
+ * Modified: <20/07/2020, 11:23:03 PM>
+ * Version: <4>
  */
 
-//package worder.model.insert.update
-//
-//import worder.model.DatabaseWord
-//
-//interface WordBlock {
-//    val dbWord: DatabaseWord
-//
-//    val definitions: Set<String>
-//    val examples: Set<String>
-//    val translations: Set<String>
-//    val transcriptions: Set<String>
-//
-//    var status: BlockStatus
-//    val serialNumber: Int
-//    val resolution: String?
-//
-//
-//    // returns false if it would be called when status == COMMITTED
-//
-//    fun skip() : Boolean
-//
-//    fun remove() : Boolean
-//
-//    fun learn() : Boolean
-//
-//    fun update(
-//        primaryDefinition: String,
-//        secondaryDefinition: String?,
-//        examples: Set<String>,
-//        transcription: String?
-//    ) : Boolean
-//
-//
-//    enum class BlockStatus {
-//        COMMITTED, READY_TO_COMMIT, WAITING_FOR_RESOLUTION, READY_FOR_RESOLUTION
-//    }
-//}
+package worder.update.model
+
+import javafx.scene.paint.Color
+import worder.core.model.WorderStatus
+import worder.database.model.DatabaseWord
+
+interface WordBlock {
+    val id: String
+    var status: WordBlockStatus
+    val resolution: WordBlockResolution
+    val originalWord: DatabaseWord
+
+    val definitions: List<String>
+    val examples: List<String>
+    val translations: List<String>
+    val transcriptions: List<String>
+
+
+    suspend fun commit()
+
+    fun update(
+            primaryDefinition: String,
+            secondaryDefinition: String?,
+            transcription: String,
+            examples: List<String>
+    )
+
+    fun remove()
+    fun learn()
+    fun skip()
+
+
+    enum class WordBlockStatus(override val description: String, override val color: Color) : WorderStatus {
+        RESOLUTION_NEEDED("User's action is needed to define a resolution", Color.RED),
+        READY_TO_COMMIT("Resolution has been received, but still can be changed", Color.ORANGE),
+        COMMITTED("Block has been committed to database, its resolution can NOT be changed", Color.DIMGRAY)
+    }
+
+    enum class WordBlockResolution {
+        SKIPPED, REMOVED, LEARNED, UPDATED
+    }
+}

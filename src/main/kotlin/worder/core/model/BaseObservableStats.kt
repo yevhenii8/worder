@@ -4,8 +4,8 @@
  *
  * Name: <BaseObservableStats.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <17/07/2020, 07:33:23 PM>
- * Version: <16>
+ * Modified: <20/07/2020, 11:23:03 PM>
+ * Version: <17>
  */
 
 package worder.core.model
@@ -68,14 +68,14 @@ open class BaseObservableStats(
 
     fun bindThroughValue(
             initValue: Any?,
-            propertyTitle: String? = null
-    ): ValueDelegate = ValueDelegate(initValue, propertyTitle)
+            title: String? = null
+    ): ValueDelegate = ValueDelegate(initValue, title)
 
     fun bindThroughIntegerProperty(
             source: IntegerProperty,
-            propertyTitle: String? = null,
+            title: String? = null,
             usePropertyNameAsTitle: Boolean = true
-    ): IntegerPropertyDelegate = IntegerPropertyDelegate(source, propertyTitle, usePropertyNameAsTitle)
+    ): IntegerPropertyDelegate = IntegerPropertyDelegate(source, title, usePropertyNameAsTitle)
 
 
     /**

@@ -4,11 +4,11 @@
  *
  * Name: <SimpleInsertModelStats.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <20/07/2020, 06:26:55 PM>
- * Version: <10>
+ * Modified: <20/07/2020, 11:23:03 PM>
+ * Version: <11>
  */
 
-package worder.insert.model.impls
+package worder.insert.model.impl
 
 import javafx.beans.property.IntegerProperty
 import javafx.beans.property.SimpleIntegerProperty

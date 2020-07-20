@@ -4,8 +4,8 @@
  *
  * Name: <TornadofxExt.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <20/07/2020, 06:26:55 PM>
- * Version: <20>
+ * Modified: <20/07/2020, 11:47:23 PM>
+ * Version: <22>
  */
 
 package worder.core
@@ -21,12 +21,12 @@ import tornadofx.onChange
 import tornadofx.stringBinding
 import tornadofx.tooltip
 import worder.core.model.ObservableStats
-import worder.core.model.Status
+import worder.core.model.WorderStatus
 import worder.core.ui.ListBasedStatsFragment
 import worder.core.ui.MapBasedStatsFragment
 
 inline fun EventTarget.worderStatusLabel(
-        status: ObservableValue<out Status>,
+        status: ObservableValue<out WorderStatus>,
         op: Label.() -> Unit = {}
 ) = Label().attachTo(this, op) { label ->
     label.textProperty().bind(status.stringBinding { "$it" })

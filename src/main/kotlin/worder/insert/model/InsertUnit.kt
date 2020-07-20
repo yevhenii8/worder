@@ -4,8 +4,8 @@
  *
  * Name: <InsertUnit.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <06/07/2020, 07:25:08 PM>
- * Version: <4>
+ * Modified: <20/07/2020, 11:23:03 PM>
+ * Version: <5>
  */
 
 package worder.insert.model
@@ -15,7 +15,7 @@ import javafx.beans.property.ReadOnlySetProperty
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
 import worder.core.model.BareWord
-import worder.core.model.Status
+import worder.core.model.WorderStatus
 
 interface InsertUnit {
     val id: String
@@ -39,7 +39,7 @@ interface InsertUnit {
     }
 
 
-    enum class InsertUnitStatus(override val description: String, override val color: Paint, val availableActions: Array<InsertUnitAction>) : Status {
+    enum class InsertUnitStatus(override val description: String, override val color: Paint, val availableActions: Array<InsertUnitAction>) : WorderStatus {
         READY_TO_COMMIT("Unit can be committed either by model or by itself", Color.GREEN, arrayOf(InsertUnitAction.COMMIT, InsertUnitAction.EXCLUDE)),
         ACTION_NEEDED("Invalid words should be rejected or substituted", Color.RED, arrayOf(InsertUnitAction.EXCLUDE)),
         EXCLUDED_FROM_COMMIT("Unit can not be committed", Color.DIMGRAY, arrayOf(InsertUnitAction.INCLUDE)),

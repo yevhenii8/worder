@@ -4,8 +4,8 @@
  *
  * Name: <DatabaseController.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <20/07/2020, 06:26:55 PM>
- * Version: <27>
+ * Modified: <20/07/2020, 11:23:03 PM>
+ * Version: <28>
  */
 
 package worder.database
@@ -18,7 +18,7 @@ import tornadofx.Controller
 import worder.core.formatGrouped
 import worder.core.model.BaseObservableStats
 import worder.database.model.WorderDB
-import worder.database.model.impls.SQLiteFile
+import worder.database.model.impl.SQLiteFile
 import java.io.File
 
 class DatabaseController : Controller(), DatabaseEventProducer {
@@ -32,12 +32,12 @@ class DatabaseController : Controller(), DatabaseEventProducer {
     )
 
     private val listeners = mutableListOf<DatabaseEventListener>()
-    private var timerValue: String by controllerStats.bindThroughValue(initValue = "00:00:00", propertyTitle = "Session duration")
-    private var dbFileSize: String by controllerStats.bindThroughValue(initValue = "0 KiB", propertyTitle = "Database size")
+    private var timerValue: String by controllerStats.bindThroughValue(initValue = "00:00:00", title = "Session duration")
+    private var dbFileSize: String by controllerStats.bindThroughValue(initValue = "0 KiB", title = "Database size")
     private var currentDB: File? = null
     private var secTicker: Job? = null
 
-    var db: WorderDB? by controllerStats.bindThroughValue(initValue = null, propertyTitle = "Data source")
+    var db: WorderDB? by controllerStats.bindThroughValue(initValue = null, title = "Data source")
         private set
 
 

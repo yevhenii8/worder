@@ -4,22 +4,33 @@
  *
  * Name: <UpdateModelFragment.kt>
  * Created: <20/07/2020, 06:26:55 PM>
- * Modified: <20/07/2020, 06:26:55 PM>
- * Version: <1>
+ * Modified: <20/07/2020, 11:49:09 PM>
+ * Version: <7>
  */
 
 package worder.update.ui
 
+import javafx.geometry.Pos
 import javafx.scene.Parent
 import tornadofx.Fragment
 import tornadofx.borderpane
+import tornadofx.label
+import tornadofx.vbox
+import worder.core.observableStats
 import worder.database.model.WorderUpdateDB
+import worder.update.model.Requester
 
 class UpdateModelFragment : Fragment() {
     private val db: WorderUpdateDB by param()
 
 
     override val root: Parent = borderpane {
+        right = vbox(spacing = 25, alignment = Pos.TOP_CENTER) {
+            label("Requesters")
 
+            Requester.defaultRequesters.forEach {
+                add(observableStats(it.observableStats))
+            }
+        }
     }
 }

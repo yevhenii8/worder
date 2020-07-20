@@ -4,8 +4,8 @@
  *
  * Name: <InsertModel.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <16/07/2020, 11:14:21 PM>
- * Version: <6>
+ * Modified: <20/07/2020, 11:23:03 PM>
+ * Version: <7>
  */
 
 package worder.insert.model
@@ -13,7 +13,7 @@ package worder.insert.model
 import javafx.beans.property.ReadOnlyListProperty
 import javafx.beans.property.ReadOnlyProperty
 import javafx.scene.paint.Color
-import worder.core.model.Status
+import worder.core.model.WorderStatus
 
 interface InsertModel {
     val modelStatusProperty: ReadOnlyProperty<InsertModelStatus>
@@ -40,7 +40,7 @@ interface InsertModel {
     suspend fun commitAllUnits()
 
 
-    enum class InsertModelStatus(override val description: String, override val color: Color) : Status {
+    enum class InsertModelStatus(override val description: String, override val color: Color) : WorderStatus {
         READY_TO_COMMIT("There are units that can be committed", Color.GREEN),
         ACTION_NEEDED("There are only units with ACTION_NEEDED status", Color.RED),
         COMMITTING("Some of the units are committing now", Color.DARKORANGE),

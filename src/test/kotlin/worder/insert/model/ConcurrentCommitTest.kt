@@ -4,8 +4,8 @@
  *
  * Name: <ConcurrentCommitTest.kt>
  * Created: <17/07/2020, 11:29:59 PM>
- * Modified: <20/07/2020, 06:26:55 PM>
- * Version: <33>
+ * Modified: <20/07/2020, 11:23:20 PM>
+ * Version: <34>
  */
 
 package worder.insert.model
@@ -16,8 +16,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import worder.core.formatGrouped
 import worder.core.round
-import worder.database.model.impls.SQLiteFile
-import worder.insert.model.impls.DefaultInsertModel
+import worder.database.model.impl.SQLiteFile
+import worder.insert.model.impl.DefaultInsertModel
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path

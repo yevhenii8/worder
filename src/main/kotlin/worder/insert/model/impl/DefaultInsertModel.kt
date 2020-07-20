@@ -4,11 +4,11 @@
  *
  * Name: <DefaultInsertModel.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <20/07/2020, 06:26:55 PM>
- * Version: <20>
+ * Modified: <20/07/2020, 11:23:03 PM>
+ * Version: <21>
  */
 
-package worder.insert.model.impls
+package worder.insert.model.impl
 
 import javafx.beans.property.ListProperty
 import javafx.beans.property.ObjectProperty
@@ -107,9 +107,9 @@ class DefaultInsertModel private constructor(private val database: WorderInsertD
 
     override suspend fun commitAllUnits() {
         coroutineScope {
-            val toCommitUnits = ArrayList(readyToCommitUnits)
-            toCommitUnits
-                    .forEach { launch { it.commit() } }
+            ArrayList(readyToCommitUnits).apply {
+                forEach { launch { it.commit() } }
+            }
         }
     }
 
