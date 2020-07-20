@@ -4,11 +4,11 @@
  *
  * Name: <InsertModelFragment.kt>
  * Created: <09/07/2020, 10:43:11 PM>
- * Modified: <19/07/2020, 04:53:09 PM>
- * Version: <176>
+ * Modified: <20/07/2020, 06:26:55 PM>
+ * Version: <177>
  */
 
-package worder.insert.view
+package worder.insert.ui
 
 import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
@@ -42,12 +42,11 @@ import tornadofx.px
 import tornadofx.row
 import tornadofx.separator
 import tornadofx.style
-import tornadofx.text
 import tornadofx.vbox
 import worder.core.formatGrouped
 import worder.core.styles.WorderDefaultStyles
-import worder.core.view.listBasedStats
-import worder.core.view.worderStatusLabel
+import worder.core.listBasedStats
+import worder.core.worderStatusLabel
 import worder.insert.InsertController
 import worder.insert.model.InsertModel
 import worder.insert.model.InsertUnit

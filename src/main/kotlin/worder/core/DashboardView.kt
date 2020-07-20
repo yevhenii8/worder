@@ -4,17 +4,16 @@
  *
  * Name: <DashboardView.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <17/07/2020, 10:45:35 PM>
- * Version: <22>
+ * Modified: <20/07/2020, 06:26:55 PM>
+ * Version: <23>
  */
 
-package worder.core.view
+package worder.core
 
 import javafx.geometry.Pos
 import tornadofx.View
 import tornadofx.hbox
 import tornadofx.paddingVertical
-import worder.core.formatGrouped
 import worder.database.DatabaseController
 import worder.database.DatabaseEventListener
 import worder.database.model.WorderDB

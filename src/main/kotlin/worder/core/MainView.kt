@@ -4,11 +4,11 @@
  *
  * Name: <MainView.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <09/07/2020, 09:10:52 PM>
- * Version: <5>
+ * Modified: <20/07/2020, 06:26:55 PM>
+ * Version: <7>
  */
 
-package worder.core.view
+package worder.core
 
 import javafx.geometry.Pos
 import tornadofx.Drawer
@@ -20,9 +20,9 @@ import tornadofx.drawer
 import tornadofx.hbox
 import tornadofx.hyperlink
 import worder.core.styles.WorderDefaultStyles
-import worder.database.view.DatabaseView
-import worder.insert.view.InsertView
-import worder.update.view.UpdateView
+import worder.database.DatabaseView
+import worder.insert.InsertView
+import worder.update.UpdateView
 
 class MainView : View("Worder GUI") {
     private val drawer: Drawer = drawer { }
@@ -54,5 +54,9 @@ class MainView : View("Worder GUI") {
 
     fun switchToInsertTab() {
         inserterTab.expanded = true
+    }
+
+    fun switchToUpdateTab() {
+        updaterTab.expanded = true
     }
 }

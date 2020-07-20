@@ -4,11 +4,11 @@
  *
  * Name: <DefaultInsertModel.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <19/07/2020, 12:00:08 AM>
- * Version: <19>
+ * Modified: <20/07/2020, 06:26:55 PM>
+ * Version: <20>
  */
 
-package worder.insert.model.implementations
+package worder.insert.model.impls
 
 import javafx.beans.property.ListProperty
 import javafx.beans.property.ObjectProperty

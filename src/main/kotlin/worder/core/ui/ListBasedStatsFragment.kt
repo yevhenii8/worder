@@ -4,11 +4,11 @@
  *
  * Name: <ListBasedStatsFragment.kt>
  * Created: <10/07/2020, 09:03:31 PM>
- * Modified: <17/07/2020, 10:50:37 PM>
- * Version: <15>
+ * Modified: <20/07/2020, 06:26:55 PM>
+ * Version: <16>
  */
 
-package worder.core.view
+package worder.core.ui
 
 import javafx.beans.property.ReadOnlyProperty
 import javafx.geometry.Pos

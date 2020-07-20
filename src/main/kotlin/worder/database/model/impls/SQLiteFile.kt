@@ -4,11 +4,11 @@
  *
  * Name: <SQLiteFile.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <19/07/2020, 04:15:29 PM>
- * Version: <42>
+ * Modified: <20/07/2020, 06:26:55 PM>
+ * Version: <43>
  */
 
-package worder.database.model.implementations
+package worder.database.model.impls
 
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.MainScope

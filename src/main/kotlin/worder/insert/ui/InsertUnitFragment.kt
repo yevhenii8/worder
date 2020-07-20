@@ -4,11 +4,11 @@
  *
  * Name: <InsertUnitFragment.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <09/07/2020, 11:04:19 PM>
- * Version: <28>
+ * Modified: <20/07/2020, 06:26:55 PM>
+ * Version: <29>
  */
 
-package worder.insert.view
+package worder.insert.ui
 
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.value.ObservableValue
@@ -38,7 +38,7 @@ import tornadofx.squeezebox
 import tornadofx.textfield
 import tornadofx.vbox
 import worder.core.styles.WorderDefaultStyles
-import worder.core.view.worderStatusLabel
+import worder.core.worderStatusLabel
 import worder.insert.model.InsertUnit
 
 class InsertUnitFragment : Fragment() {

@@ -4,11 +4,11 @@
  *
  * Name: <NoConnectionFragment.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <06/07/2020, 07:25:08 PM>
- * Version: <4>
+ * Modified: <20/07/2020, 06:26:55 PM>
+ * Version: <5>
  */
 
-package worder.database.view
+package worder.database.ui
 
 import javafx.geometry.Pos
 import javafx.scene.Parent
@@ -18,7 +18,7 @@ import tornadofx.hyperlink
 import tornadofx.imageview
 import tornadofx.label
 import tornadofx.vbox
-import worder.core.view.MainView
+import worder.core.MainView
 
 class NoConnectionFragment : Fragment() {
     override val root: Parent = hbox(alignment = Pos.CENTER) {

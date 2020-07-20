@@ -4,16 +4,15 @@
  *
  * Name: <InsertController.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <17/07/2020, 11:29:59 PM>
- * Version: <6>
+ * Modified: <20/07/2020, 06:26:55 PM>
+ * Version: <7>
  */
 
 package worder.insert
 
 import tornadofx.Controller
 import worder.database.DatabaseController
-import worder.insert.model.implementations.DefaultInsertModel
-import worder.insert.view.InsertView
+import worder.insert.model.impls.DefaultInsertModel
 import java.io.File
 
 class InsertController : Controller() {

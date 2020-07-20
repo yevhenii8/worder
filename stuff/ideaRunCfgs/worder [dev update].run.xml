@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="worder [dev sample &amp; keep]" type="GradleRunConfiguration" factoryName="Gradle">
+  <configuration default="false" name="worder [dev update]" type="GradleRunConfiguration" factoryName="Gradle">
     <ExternalSystemSettings>
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -11,10 +11,10 @@
       <option name="taskNames">
         <list>
           <option value="run" />
-          <option value="--args=&quot;--keep-sample-db&quot;" />
+          <option value="--args=&quot;--dev-update&quot;" />
         </list>
       </option>
-      <option name="vmOptions" value="" />
+      <option name="vmOptions" value="-Dkotlinx.coroutines.debug" />
     </ExternalSystemSettings>
     <GradleScriptDebugEnabled>true</GradleScriptDebugEnabled>
     <method v="2" />

@@ -4,11 +4,11 @@
  *
  * Name: <DatabaseView.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <06/07/2020, 07:25:08 PM>
- * Version: <15>
+ * Modified: <20/07/2020, 06:26:55 PM>
+ * Version: <16>
  */
 
-package worder.database.view
+package worder.database
 
 import javafx.geometry.Insets
 import javafx.geometry.Pos
@@ -16,7 +16,6 @@ import javafx.geometry.Pos.CENTER
 import javafx.scene.Parent
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
-import javafx.scene.text.FontWeight
 import javafx.stage.FileChooser.ExtensionFilter
 import tornadofx.View
 import tornadofx.action
@@ -26,11 +25,8 @@ import tornadofx.imageview
 import tornadofx.label
 import tornadofx.replaceChildren
 import tornadofx.stackpane
-import tornadofx.style
 import tornadofx.vbox
-import worder.core.view.DragAndDropFragment
-import worder.database.DatabaseController
-import worder.database.DatabaseEventListener
+import worder.core.ui.DragAndDropFragment
 import worder.database.model.WorderDB
 import java.io.File
 

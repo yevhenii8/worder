@@ -4,11 +4,11 @@
  *
  * Name: <TornadofxExt.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <17/07/2020, 10:46:37 PM>
- * Version: <19>
+ * Modified: <20/07/2020, 06:26:55 PM>
+ * Version: <20>
  */
 
-package worder.core.view
+package worder.core
 
 import javafx.beans.property.ReadOnlyProperty
 import javafx.beans.value.ObservableValue
@@ -22,6 +22,8 @@ import tornadofx.stringBinding
 import tornadofx.tooltip
 import worder.core.model.ObservableStats
 import worder.core.model.Status
+import worder.core.ui.ListBasedStatsFragment
+import worder.core.ui.MapBasedStatsFragment
 
 inline fun EventTarget.worderStatusLabel(
         status: ObservableValue<out Status>,

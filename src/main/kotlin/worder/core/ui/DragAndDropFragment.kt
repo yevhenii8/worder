@@ -4,11 +4,11 @@
  *
  * Name: <DragAndDropFragment.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <06/07/2020, 07:25:08 PM>
- * Version: <4>
+ * Modified: <20/07/2020, 06:26:55 PM>
+ * Version: <5>
  */
 
-package worder.core.view
+package worder.core.ui
 
 import javafx.geometry.Insets
 import javafx.geometry.Pos

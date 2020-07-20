@@ -4,23 +4,23 @@
  *
  * Name: <InsertView.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <19/07/2020, 04:53:59 PM>
- * Version: <455>
+ * Modified: <20/07/2020, 06:26:55 PM>
+ * Version: <456>
  */
 
-package worder.insert.view
+package worder.insert
 
 import javafx.scene.Parent
 import javafx.stage.FileChooser.ExtensionFilter
 import tornadofx.View
 import tornadofx.stackpane
-import worder.core.view.DragAndDropFragment
+import worder.core.ui.DragAndDropFragment
 import worder.database.DatabaseController
 import worder.database.DatabaseEventListener
 import worder.database.model.WorderDB
-import worder.database.view.NoConnectionFragment
-import worder.insert.InsertController
+import worder.database.ui.NoConnectionFragment
 import worder.insert.model.InsertModel
+import worder.insert.ui.InsertModelFragment
 import worder.tornadofx.replaceChildren
 import java.io.File
 

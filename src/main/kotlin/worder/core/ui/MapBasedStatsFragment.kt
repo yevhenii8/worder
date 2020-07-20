@@ -4,11 +4,11 @@
  *
  * Name: <MapBasedStatsFragment.kt>
  * Created: <10/07/2020, 09:03:31 PM>
- * Modified: <17/07/2020, 10:45:35 PM>
- * Version: <13>
+ * Modified: <20/07/2020, 06:26:55 PM>
+ * Version: <14>
  */
 
-package worder.core.view
+package worder.core.ui
 
 import javafx.collections.ObservableMap
 import javafx.geometry.Pos

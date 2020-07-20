@@ -4,8 +4,8 @@
  *
  * Name: <DatabaseController.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <19/07/2020, 04:15:29 PM>
- * Version: <26>
+ * Modified: <20/07/2020, 06:26:55 PM>
+ * Version: <27>
  */
 
 package worder.database
@@ -18,7 +18,7 @@ import tornadofx.Controller
 import worder.core.formatGrouped
 import worder.core.model.BaseObservableStats
 import worder.database.model.WorderDB
-import worder.database.model.implementations.SQLiteFile
+import worder.database.model.impls.SQLiteFile
 import java.io.File
 
 class DatabaseController : Controller(), DatabaseEventProducer {
