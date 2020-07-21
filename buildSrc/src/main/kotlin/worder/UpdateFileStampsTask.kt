@@ -22,22 +22,20 @@ open class UpdateFileStampsTask @Inject constructor(
 
     @TaskAction
     fun execute() {
-        val logger = logger
-
         val (valid, invalid) = sourcesDir.walk()
                 .filter { file -> sourcesFormats.any { file.name.endsWith(it) } }
-                .map { file -> file to StampedFile.fromFile(file, useTransit) }
-                .partition { it.second != null }
+                .map { file -> file to StampedFile(file, useTransit) }
+                .partition { it.second.isStampValid }
 
         if (invalid.isNotEmpty()) {
             invalid.forEach {
-                logger.error("Source file contains invalid Stamp: ${it.first}")
+                logger.error(it.second.validationResult)
             }
-            error("Invalid source file stamp(s) occurred! Source files' stamp updating has been cancelled!")
+            error("Invalid source file stamp(s) occurred! Source files' stamps updating has been cancelled!")
         }
 
         valid.forEach {
-            it.second?.updateStamp()
+            it.second.updateStamp()
         }
     }
 }

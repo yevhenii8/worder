@@ -6,17 +6,14 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.*
 
-class StampedFile private constructor(
+class StampedFile(
         private val sourceFile: File,
-        private val fileContent: String,
-        private val presentStamp: String?,
         private val useTransit: Boolean
 ) {
+    @Suppress("DuplicatedCode")
     companion object {
         private const val pathToStampPattern = "/sourceFileStampPattern.txt"
         private val stampPattern: String = String(this::class.java.getResourceAsStream(pathToStampPattern).readBytes())
-
-        @Suppress("DuplicatedCode")
         private val regexStampPattern: Regex = "^$stampPattern"
                 .replace("*", "\\*")
                 .replace("<[^<]*?_TIME>".toRegex(), "<\\\\d{2}/\\\\d{2}/\\\\d{4}, \\\\d{2}:\\\\d{2}:\\\\d{2} (AM|PM)>")
@@ -25,8 +22,6 @@ class StampedFile private constructor(
 
         private const val pathToStampPatternTransit = "/sourceFileStampPatternTransit.txt"
         private val stampPatternTransit: String = String(this::class.java.getResourceAsStream(pathToStampPatternTransit).readBytes())
-
-        @Suppress("DuplicatedCode")
         private val regexStampPatternTransit: Regex = "^$stampPatternTransit"
                 .replace("*", "\\*")
                 .replace("<[^<]*?_TIME>".toRegex(), "<\\\\d{2}/\\\\d{2}/\\\\d{4}, \\\\d{2}:\\\\d{2}:\\\\d{2} (AM|PM)>")
@@ -53,33 +48,20 @@ class StampedFile private constructor(
                 }
             }
         }
-
-
-        fun fromFile(sourceFile: File, useTransit: Boolean): StampedFile? {
-            val fileContent = sourceFile.readText()
-            val presentStamp = parseRawStamp(fileContent)
-            val isStampValid = presentStamp?.let { if (useTransit) isStampValidTransit(it) else isStampValid(it) }
-            return if (isStampValid == false) null else StampedFile(sourceFile, fileContent, presentStamp, useTransit)
-        }
-
-
-        private fun parseRawStamp(fileContent: String): String? =
-                if (fileContent.startsWith("/**")) fileContent.substringBefore("*/") + "*/\n" else null
-
-        private fun isStampValid(rawStamp: String): Boolean = rawStamp.matches(regexStampPattern)
-
-        private fun isStampValidTransit(rawStamp: String): Boolean = rawStamp.matches(regexStampPatternTransit)
-
-        private fun LocalDateTime.toStampDateTime(): String = format(DateTimeFormatter.ofPattern("dd/MM/yyyy, hh:mm:ss a"))
     }
 
 
-    fun updateStamp() {
-        // there are only two possible states for this object (enforced by static factory)
-        // 1) when a file doesn't have stamp and 2) when it has stamp
-        // this object can't be created for invalid stamp or some kind of leading comment
+    private val fileContent = sourceFile.readText()
+    private val presentStamp = parseRawStamp(fileContent)
+    private val properties = getProperties<StampProperty>()
 
-        val properties = getProperties<StampProperty>()
+    lateinit var validationResult: String
+    val isStampValid = presentStamp?.let { if (useTransit) isStampValidTransit(it) else isStampValid(it) } ?: false
+
+
+    fun updateStamp() {
+        if (!isStampValid)
+            error("Attempting to update invalid stamp!")
 
         if (useTransit) {
             val propertiesTransit = getProperties<StampPropertyTransit>()
@@ -112,11 +94,6 @@ class StampedFile private constructor(
                 properties[StampProperty.FILE_MODIFICATION_TIME] = now
                 properties[StampProperty.STAMP_LAST_MODIFIED_BY] = who
                 properties[StampProperty.FILE_VERSION_NUMBER] = (properties[StampProperty.FILE_VERSION_NUMBER]!!.toInt() + 1).toString()
-
-                check(properties[StampProperty.FILE_NAME] == sourceFile.name) {
-                    "Stamp's FILE_NAME property doesn't correspond to the actual file name!\n" +
-                            "Processed file: $sourceFile"
-                }
             }
 
             val newStamp = regexProperty.replace(stampPattern) { properties[StampProperty.valueOf(it.value)]!! }
@@ -150,6 +127,25 @@ class StampedFile private constructor(
     private fun transitAction(properties: MutableMap<StampProperty, String?>) {
         properties[StampProperty.FILE_NAME] = sourceFile.name
     }
+
+    private fun parseRawStamp(fileContent: String): String? =
+            if (fileContent.startsWith("/**")) fileContent.substringBefore("*/") + "*/\n" else null
+
+    private fun isStampValid(rawStamp: String): Boolean = when {
+        !rawStamp.matches(regexStampPattern) -> {
+            validationResult = "Invalid stamp format occurred: $sourceFile"
+            false
+        }
+        properties[StampProperty.FILE_NAME] != sourceFile.name -> {
+            validationResult = "Stamp's FILE_NAME property doesn't correspond to the actual file name: $sourceFile"
+            false
+        }
+        else -> true
+    }
+
+    private fun isStampValidTransit(rawStamp: String): Boolean = rawStamp.matches(regexStampPatternTransit)
+
+    private fun LocalDateTime.toStampDateTime(): String = format(DateTimeFormatter.ofPattern("dd/MM/yyyy, hh:mm:ss a"))
 
 
     enum class StampProperty {
