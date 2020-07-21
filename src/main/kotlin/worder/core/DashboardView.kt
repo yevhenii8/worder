@@ -4,8 +4,8 @@
  *
  * Name: <DashboardView.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <20/07/2020, 06:26:55 PM>
- * Version: <23>
+ * Modified: <21/07/2020, 09:53:24 PM>
+ * Version: <24>
  */
 
 package worder.core
@@ -33,18 +33,17 @@ class DashboardView : View(), DatabaseEventListener {
 
 
     override fun onDatabaseConnection(db: WorderDB) {
-        root.add(
-                observableStats(
-                        observableStats = databaseController.controllerStats,
-                        valueMutators = mapOf("Data source" to { value: Any? -> value.toString().substringAfterLast("/") })
-                )
+        root.apply {
+            observableStats(
+                    observableStats = databaseController.controllerStats,
+                    valueMutators = mapOf("Data source" to { value: Any? -> value.toString().substringAfterLast("/") })
+            )
 
-        )
-
-        root.add(observableStats(db.observableSummaryStats, commonValueMutator = { (this as Int).formatGrouped() }))
-        root.add(observableStats(db.observableTrackStats, commonValueMutator = { (this as Int).formatGrouped() }))
-        root.add(observableStats(db.inserter.observableInserterStats, commonValueMutator = { (this as Int).formatGrouped() }))
-        root.add(observableStats(db.updater.observableUpdaterStats, commonValueMutator = { (this as Int).formatGrouped() }))
+            observableStats(db.observableSummaryStats, commonValueMutator = { (this as Int).formatGrouped() })
+            observableStats(db.observableTrackStats, commonValueMutator = { (this as Int).formatGrouped() })
+            observableStats(db.inserter.observableInserterStats, commonValueMutator = { (this as Int).formatGrouped() })
+            observableStats(db.updater.observableUpdaterStats, commonValueMutator = { (this as Int).formatGrouped() })
+        }
     }
 
     override fun onDatabaseDisconnection() {

@@ -4,8 +4,8 @@
  *
  * Name: <ListBasedStatsFragment.kt>
  * Created: <10/07/2020, 09:03:31 PM>
- * Modified: <20/07/2020, 06:26:55 PM>
- * Version: <16>
+ * Modified: <21/07/2020, 10:10:15 PM>
+ * Version: <18>
  */
 
 package worder.core.ui

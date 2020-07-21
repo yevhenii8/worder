@@ -4,19 +4,19 @@
  *
  * Name: <TornadofxExt.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <20/07/2020, 11:47:23 PM>
- * Version: <22>
+ * Modified: <21/07/2020, 10:26:39 PM>
+ * Version: <26>
  */
 
 package worder.core
 
 import javafx.beans.property.ReadOnlyProperty
 import javafx.beans.value.ObservableValue
-import javafx.collections.ObservableMap
 import javafx.event.EventTarget
 import javafx.scene.control.Label
-import tornadofx.Component
+import javafx.scene.layout.VBox
 import tornadofx.attachTo
+import tornadofx.find
 import tornadofx.onChange
 import tornadofx.stringBinding
 import tornadofx.tooltip
@@ -40,49 +40,43 @@ inline fun EventTarget.worderStatusLabel(
     }
 }
 
-fun Component.observableStats(
+inline fun EventTarget.observableStats(
         observableStats: ObservableStats,
-        commonNameMutator: (String.() -> String)? = null,
-        commonValueMutator: (Any?.() -> String)? = null,
+        hideNullable: Boolean = false,
+        noinline commonNameMutator: (String.() -> String)? = null,
+        noinline commonValueMutator: (Any?.() -> String)? = null,
         nameMutators: Map<String, String.() -> String>? = null,
-        valueMutators: Map<String, Any?.() -> String>? = null
-) = mapBasedStats(
-        blockTitle = observableStats.origin,
-        stats = observableStats.asTitledMapProperty,
-        commonNameMutator = commonNameMutator,
-        commonValueMutator = commonValueMutator,
-        nameMutators = nameMutators,
-        valueMutators = valueMutators
-)
+        valueMutators: Map<String, Any?.() -> String>? = null,
+        op: VBox.() -> Unit = {}
+): VBox = find(
+        type = MapBasedStatsFragment::class,
+        params = mapOf(
+                "blockTitle" to observableStats.origin,
+                "stats" to observableStats.asTitledMap,
+                "hideNullable" to hideNullable,
+                "commonNameMutator" to commonNameMutator,
+                "commonValueMutator" to commonValueMutator,
+                "nameMutators" to nameMutators,
+                "valueMutators" to valueMutators
+        )
+).root.attachTo(this, op)
 
-fun Component.mapBasedStats(
-        stats: ObservableMap<String, Any?>,
+inline fun EventTarget.listBasedStats(
         blockTitle: String? = null,
-        commonNameMutator: (String.() -> String)? = null,
-        commonValueMutator: (Any?.() -> String)? = null,
-        nameMutators: Map<String, String.() -> String>? = null,
-        valueMutators: Map<String, Any?.() -> String>? = null
-) = find<MapBasedStatsFragment>(
-        "blockTitle" to blockTitle,
-        "stats" to stats,
-        "commonNameMutator" to commonNameMutator,
-        "commonValueMutator" to commonValueMutator,
-        "nameMutators" to nameMutators,
-        "valueMutators" to valueMutators
-)
-
-fun Component.listBasedStats(
         statsProperties: List<ReadOnlyProperty<*>>,
-        blockTitle: String? = null,
-        commonNameMutator: (String.() -> String)? = null,
-        commonValueMutator: (Any?.() -> String)? = null,
+        noinline commonNameMutator: (String.() -> String)? = null,
+        noinline commonValueMutator: (Any?.() -> String)? = null,
         nameMutators: Map<String, String.() -> String>? = null,
-        valueMutators: Map<String, Any?.() -> String>? = null
-) = find<ListBasedStatsFragment>(
-        "blockTitle" to blockTitle,
-        "stats" to statsProperties,
-        "commonNameMutator" to commonNameMutator,
-        "commonValueMutator" to commonValueMutator,
-        "nameMutators" to nameMutators,
-        "valueMutators" to valueMutators
-)
+        valueMutators: Map<String, Any?.() -> String>? = null,
+        op: VBox.() -> Unit = {}
+): VBox = find(
+        type = ListBasedStatsFragment::class,
+        params = mapOf(
+                "blockTitle" to blockTitle,
+                "stats" to statsProperties,
+                "commonNameMutator" to commonNameMutator,
+                "commonValueMutator" to commonValueMutator,
+                "nameMutators" to nameMutators,
+                "valueMutators" to valueMutators
+        )
+).root.attachTo(this, op)

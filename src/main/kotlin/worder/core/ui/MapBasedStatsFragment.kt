@@ -4,22 +4,27 @@
  *
  * Name: <MapBasedStatsFragment.kt>
  * Created: <10/07/2020, 09:03:31 PM>
- * Modified: <20/07/2020, 06:26:55 PM>
- * Version: <14>
+ * Modified: <21/07/2020, 10:35:05 PM>
+ * Version: <21>
  */
 
 package worder.core.ui
 
+import javafx.beans.property.MapProperty
+import javafx.beans.property.SimpleMapProperty
+import javafx.collections.MapChangeListener
 import javafx.collections.ObservableMap
 import javafx.geometry.Pos
 import tornadofx.Fragment
 import tornadofx.addClass
 import tornadofx.hbox
 import tornadofx.label
+import tornadofx.onChange
 import tornadofx.paddingBottom
 import tornadofx.vbox
 import worder.core.styles.WorderDefaultStyles
 import worder.tornadofx.bindChildren
+import worder.tornadofx.observableMapOf
 
 class MapBasedStatsFragment : Fragment() {
     private val nameMutators: Map<String, String.() -> String>? by param()
@@ -28,8 +33,10 @@ class MapBasedStatsFragment : Fragment() {
     private val commonNameMutator: (String.() -> String)? by param()
     private val commonValueMutator: (Any?.() -> String)? by param()
 
-    private val stats: ObservableMap<String, Any?> by param()
     private val blockTitle: String? by param()
+    private val stats: ObservableMap<String, Any?> by param()
+    private lateinit var filteredStats: MapProperty<String, Any?>
+    private val hideNullable: Boolean by param()
 
     private val nameConverter = when {
         nameMutators != null && commonNameMutator != null -> { name: String, _: Any? ->
@@ -65,6 +72,18 @@ class MapBasedStatsFragment : Fragment() {
     }
 
 
+    init {
+        if (hideNullable) {
+            filteredStats = SimpleMapProperty(observableMapOf())
+            filteredStats.onChange { op: MapChangeListener.Change<out String, out Any?> ->
+                if (op.valueAdded == null)
+                    filteredStats.remove(op.key)
+            }
+            filteredStats.bindContent(stats)
+        }
+    }
+
+
     override val root = vbox {
         if (blockTitle != null)
             label(blockTitle!!) {
@@ -72,8 +91,13 @@ class MapBasedStatsFragment : Fragment() {
             }
 
         hbox {
-            vbox(alignment = Pos.BASELINE_RIGHT).bindChildren(this@MapBasedStatsFragment.stats, nameConverter)
-            vbox(alignment = Pos.BASELINE_LEFT).bindChildren(this@MapBasedStatsFragment.stats, valueConverter)
+            if (hideNullable) {
+                vbox(alignment = Pos.BASELINE_RIGHT).bindChildren(this@MapBasedStatsFragment.filteredStats, nameConverter)
+                vbox(alignment = Pos.BASELINE_LEFT).bindChildren(this@MapBasedStatsFragment.filteredStats, valueConverter)
+            } else {
+                vbox(alignment = Pos.BASELINE_RIGHT).bindChildren(this@MapBasedStatsFragment.stats, nameConverter)
+                vbox(alignment = Pos.BASELINE_LEFT).bindChildren(this@MapBasedStatsFragment.stats, valueConverter)
+            }
         }
 
         addClass(WorderDefaultStyles.statsBlock)

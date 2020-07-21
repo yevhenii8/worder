@@ -4,8 +4,8 @@
  *
  * Name: <UpdateModelFragment.kt>
  * Created: <20/07/2020, 06:26:55 PM>
- * Modified: <20/07/2020, 11:49:09 PM>
- * Version: <7>
+ * Modified: <21/07/2020, 10:27:12 PM>
+ * Version: <9>
  */
 
 package worder.update.ui
@@ -29,7 +29,7 @@ class UpdateModelFragment : Fragment() {
             label("Requesters")
 
             Requester.defaultRequesters.forEach {
-                add(observableStats(it.observableStats))
+                observableStats(observableStats = it.observableStats, hideNullable = true)
             }
         }
     }

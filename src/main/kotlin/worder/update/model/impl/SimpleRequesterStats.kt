@@ -4,8 +4,8 @@
  *
  * Name: <SimpleRequesterStats.kt>
  * Created: <20/07/2020, 11:22:35 PM>
- * Modified: <21/07/2020, 06:45:17 PM>
- * Version: <2>
+ * Modified: <21/07/2020, 10:15:37 PM>
+ * Version: <3>
  */
 
 package worder.update.model.impl
@@ -21,7 +21,7 @@ open class SimpleRequesterStats(
         totalTranslations: Int? = null,
         totalExamples: Int? = null,
         totalTranscriptions: Int? = null
-) : BaseObservableStats(origin), ObservableRequesterStats {
+) : BaseObservableStats(origin = origin), ObservableRequesterStats {
     override var totalRequests: Int by bindThroughValue(initValue = totalRequests, title = "Total requests")
     override var totalDefinitions: Int? by bindThroughValue(initValue = totalDefinitions, title = "Total definitions")
     override var totalTranslations: Int? by bindThroughValue(initValue = totalTranslations, title = "Total translations")

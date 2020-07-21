@@ -4,8 +4,8 @@
  *
  * Name: <InsertModelFragment.kt>
  * Created: <09/07/2020, 10:43:11 PM>
- * Modified: <21/07/2020, 07:07:00 PM>
- * Version: <178>
+ * Modified: <21/07/2020, 10:02:32 PM>
+ * Version: <180>
  */
 
 package worder.insert.ui
@@ -37,15 +37,14 @@ import tornadofx.gridpaneConstraints
 import tornadofx.label
 import tornadofx.observableListOf
 import tornadofx.onChange
-import tornadofx.paddingAll
 import tornadofx.px
 import tornadofx.row
 import tornadofx.separator
 import tornadofx.style
 import tornadofx.vbox
 import worder.core.formatGrouped
-import worder.core.styles.WorderDefaultStyles
 import worder.core.listBasedStats
+import worder.core.styles.WorderDefaultStyles
 import worder.core.worderStatusLabel
 import worder.insert.InsertController
 import worder.insert.model.InsertModel
@@ -101,7 +100,7 @@ class InsertModelFragment : Fragment() {
                 vgap = 60.0
 
                 row {
-                    val insertProgressStats = listBasedStats(
+                    listBasedStats(
                             statsProperties = listOf(
                                     stats.generatedUnitsProperty,
                                     stats.readyToCommitUnitsProperty,
@@ -110,15 +109,12 @@ class InsertModelFragment : Fragment() {
                                     stats.committedUnitsProperty
                             ),
                             commonValueMutator = { (this as Int).formatGrouped() }
-                    ).root.apply {
+                    ) {
                         setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE)
                         style {
                             borderColor += box(Color.TRANSPARENT)
                         }
                     }
-
-                    add(insertProgressStats)
-
                     vbox(spacing = 10, alignment = Pos.BASELINE_CENTER) {
                         setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE)
                         add(progressIndicator)
@@ -133,7 +129,7 @@ class InsertModelFragment : Fragment() {
                     }
                 }
                 row {
-                    add(listBasedStats(
+                    listBasedStats(
                             blockTitle = "Uploaded Data Stats",
                             statsProperties = listOf(
                                     stats.totalWordsProperty,
@@ -141,8 +137,8 @@ class InsertModelFragment : Fragment() {
                                     stats.totalInvalidWordsProperty
                             ),
                             commonValueMutator = { (this as Int).formatGrouped() }
-                    ))
-                    add(listBasedStats(
+                    )
+                    listBasedStats(
                             blockTitle = "Processed Data Stats",
                             statsProperties = listOf(
                                     stats.totalProcessedProperty,
@@ -150,7 +146,7 @@ class InsertModelFragment : Fragment() {
                                     stats.resetProperty
                             ),
                             commonValueMutator = { (this as Int).formatGrouped() }
-                    ))
+                    )
                 }
                 row {
                     separator {
