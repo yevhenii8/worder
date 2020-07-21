@@ -4,8 +4,8 @@
  *
  * Name: <MapBasedStatsFragment.kt>
  * Created: <10/07/2020, 09:03:31 PM>
- * Modified: <21/07/2020, 10:35:05 PM>
- * Version: <21>
+ * Modified: <21/07/2020, 10:56:28 PM>
+ * Version: <22>
  */
 
 package worder.core.ui

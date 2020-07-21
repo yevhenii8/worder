@@ -4,32 +4,86 @@
  *
  * Name: <UpdateModelFragment.kt>
  * Created: <20/07/2020, 06:26:55 PM>
- * Modified: <21/07/2020, 10:27:12 PM>
- * Version: <9>
+ * Modified: <21/07/2020, 11:49:02 PM>
+ * Version: <40>
  */
 
 package worder.update.ui
 
 import javafx.geometry.Pos
 import javafx.scene.Parent
+import javafx.scene.control.Label
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import tornadofx.Fragment
 import tornadofx.borderpane
+import tornadofx.button
 import tornadofx.label
+import tornadofx.progressindicator
+import tornadofx.textfield
 import tornadofx.vbox
+import tornadofx.visibleWhen
+import worder.core.model.Word
 import worder.core.observableStats
 import worder.database.model.WorderUpdateDB
 import worder.update.model.Requester
+import worder.update.model.impl.requesters.CambridgeRequester
+import worder.update.model.impl.requesters.LingvoRequester
+import worder.update.model.impl.requesters.MacmillanRequester
+import worder.update.model.impl.requesters.WooordHuntRequester
 
 class UpdateModelFragment : Fragment() {
     private val db: WorderUpdateDB by param()
 
 
     override val root: Parent = borderpane {
-        right = vbox(spacing = 25, alignment = Pos.TOP_CENTER) {
+        center = vbox(spacing = 25) {
+            val textField = textfield()
+
+            button("request cambridge") {
+                setOnAction {
+                    CoroutineScope(Dispatchers.Default).launch {
+                        CambridgeRequester.instance.requestWord(Word(textField.text, null))
+                    }
+                }
+            }
+
+            button("request lingvo") {
+                setOnAction {
+                    CoroutineScope(Dispatchers.Default).launch {
+                        LingvoRequester.instance.requestWord(Word(textField.text, null))
+                    }
+                }
+            }
+
+            button("request macmillian") {
+                setOnAction {
+                    CoroutineScope(Dispatchers.Default).launch {
+                        MacmillanRequester.instance.requestWord(Word(textField.text, null))
+                    }
+                }
+            }
+
+            button("request woooordhunt") {
+                setOnAction {
+                    CoroutineScope(Dispatchers.Default).launch {
+                        WooordHuntRequester.instance.requestWord(Word(textField.text, null))
+                    }
+                }
+            }
+        }
+
+        right = vbox(spacing = 20, alignment = Pos.TOP_CENTER) {
             label("Requesters")
 
             Requester.defaultRequesters.forEach {
-                observableStats(observableStats = it.observableStats, hideNullable = true)
+                observableStats(observableStats = it.observableStats, hideNullable = true) {
+                    (children[0] as Label).graphic = progressindicator {
+                        setPrefSize(20.0, 20.0)
+                        visibleWhen(it.isBusyProperty)
+                    }
+                }
             }
         }
     }

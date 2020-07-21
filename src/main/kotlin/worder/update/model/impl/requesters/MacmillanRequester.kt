@@ -46,17 +46,14 @@ class MacmillanRequester private constructor() : DefinitionRequester, ExampleReq
 
         definitions = DEFINITION_PATTERN.findAll(body)
                 .map { COMMON_FILTER.replace(it.value, "").trim() }
-                .distinct()
                 .toList()
 
         examples = EXAMPLE_PATTERN.findAll(body)
                 .map { COMMON_FILTER.replace(it.value, "").trim() }
-                .distinct()
                 .toList()
 
         transcriptions = TRANSCRIPTION_PATTERN.findAll(body)
                 .map { "[${it.value}]" }
-                .distinct()
                 .toList()
     }
 }

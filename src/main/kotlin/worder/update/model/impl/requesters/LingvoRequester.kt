@@ -46,13 +46,11 @@ class LingvoRequester private constructor() : TranslationRequester, Transcriptio
             TRANSLATION_PATTERN.findAll(matchResult.value)
                     .map { it.value.replace(".*>".toRegex(), "").trim() }
                     .filter { str -> TRANSLATION_FILTER.matches(str) }
-                    .distinct()
                     .toList()
         } ?: emptyList()
 
         transcriptions = TRANSCRIPTION_PATTERN.findAll(body)
                 .map { it.groupValues[2].replace("&#x27;", "'") }
-                .distinct()
                 .toList()
     }
 }

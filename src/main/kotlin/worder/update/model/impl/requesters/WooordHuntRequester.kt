@@ -42,12 +42,10 @@ class WooordHuntRequester private constructor() : TranslationRequester, Transcri
         translations = (TRANSLATION_PATTERN.find(body)?.value ?: "")
                 .split(", ")
                 .map { it.trim().toLowerCase() }
-                .distinct()
                 .toList()
 
         transcriptions = TRANSCRIPTION_PATTERN.findAll(body)
                 .map { "[${it.groupValues[2]}]" }
-                .distinct()
                 .toList()
     }
 }

@@ -58,10 +58,10 @@ class DefaultUpdateModel private constructor(
         val dbWord = database.getNextWord(selectOrder)
         requesters.forEach { it.requestWord(dbWord) }
 
-        val definitions = definitionRequesters.flatMap { it.definitions }.toSet()
-        val examples = (exampleRequesters.flatMap { it.examples } + dbWord.examples).toSet()
-        val translations = (translationRequesters.flatMap { it.translations } + dbWord.translations).toSet()
-        val transcriptions = (transcriptionRequesters.flatMap { it.transcriptions } + setOf(dbWord.transcription)).filterNotNull().toSet()
+        val definitions = definitionRequesters.flatMap { it.definitions }.distinct()
+        val examples = (exampleRequesters.flatMap { it.examples } + dbWord.examples).distinct()
+        val translations = (translationRequesters.flatMap { it.translations } + dbWord.translations).distinct()
+        val transcriptions = (transcriptionRequesters.flatMap { it.transcriptions } + setOf(dbWord.transcription)).filterNotNull().distinct()
 
 //        lastBlock = BaseWordBlock(
 //                dbWord = dbWord,

@@ -4,12 +4,13 @@
  *
  * Name: <Requester.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <20/07/2020, 11:27:45 PM>
- * Version: <5>
+ * Modified: <21/07/2020, 11:42:24 PM>
+ * Version: <7>
  */
 
 package worder.update.model
 
+import javafx.beans.property.ReadOnlyProperty
 import worder.core.model.Word
 import worder.update.model.impl.requesters.CambridgeRequester
 import worder.update.model.impl.requesters.LingvoRequester
@@ -25,6 +26,12 @@ interface Requester {
                 WooordHuntRequester.instance
         )
     }
+
+
+    val isBusyProperty: ReadOnlyProperty<Boolean>
+        get() = throw IllegalStateException("Not implemented for this requester!")
+    val isBusy: Boolean
+        get() = throw IllegalStateException("Not implemented for this requester!")
 
 
     val observableStats: ObservableRequesterStats

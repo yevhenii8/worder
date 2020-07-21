@@ -4,8 +4,8 @@
  *
  * Name: <InsertModelFragment.kt>
  * Created: <09/07/2020, 10:43:11 PM>
- * Modified: <21/07/2020, 10:02:32 PM>
- * Version: <180>
+ * Modified: <21/07/2020, 11:28:31 PM>
+ * Version: <184>
  */
 
 package worder.insert.ui
@@ -41,6 +41,7 @@ import tornadofx.px
 import tornadofx.row
 import tornadofx.separator
 import tornadofx.style
+import tornadofx.usePrefSize
 import tornadofx.vbox
 import worder.core.formatGrouped
 import worder.core.listBasedStats
@@ -116,6 +117,7 @@ class InsertModelFragment : Fragment() {
                         }
                     }
                     vbox(spacing = 10, alignment = Pos.BASELINE_CENTER) {
+                        this.usePrefSize = true
                         setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE)
                         add(progressIndicator)
                         worderStatusLabel(model.modelStatusProperty)

@@ -4,19 +4,24 @@
  *
  * Name: <WebsiteRequesterDecorator.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <21/07/2020, 06:45:17 PM>
- * Version: <5>
+ * Modified: <21/07/2020, 11:41:47 PM>
+ * Version: <6>
  */
 
 package worder.update.model.impl
 
+import javafx.beans.property.Property
+import javafx.beans.property.SimpleBooleanProperty
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.future.await
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
+import tornadofx.getValue
+import tornadofx.setValue
 import worder.core.model.Word
-import worder.core.model.applyWithMainUI
 import worder.update.model.DefinitionRequester
 import worder.update.model.ExampleRequester
 import worder.update.model.Requester
@@ -59,6 +64,9 @@ open class WebsiteRequesterDecorator(private val requester: Requester) : Request
     private var lastRequestTime = AtomicLong()
     private val mutex = Mutex()
 
+
+    final override val isBusyProperty: Property<Boolean> = SimpleBooleanProperty(false)
+    override var isBusy: Boolean by isBusyProperty
     override val observableStats: SimpleRequesterStats = SimpleRequesterStats(
             origin = requester.javaClass.simpleName.substringBefore("Requester"),
             totalRequests = 0,
@@ -70,6 +78,8 @@ open class WebsiteRequesterDecorator(private val requester: Requester) : Request
 
 
     override suspend fun requestWord(word: Word) {
+        MainScope().launch { isBusy = true }
+
         mutex.withLock {
             (System.currentTimeMillis() - lastRequestTime.get()).let {
                 if (it < REQUEST_INTERVAL)
@@ -81,20 +91,24 @@ open class WebsiteRequesterDecorator(private val requester: Requester) : Request
 
         lastRequestTime.set(System.currentTimeMillis())
 
-        observableStats.applyWithMainUI {
-            totalRequests++
+        MainScope().launch {
+            observableStats.apply {
+                totalRequests++
 
-            if (requester is DefinitionRequester)
-                totalDefinitions = totalDefinitions?.plus(requester.definitions.count())
+                if (requester is DefinitionRequester)
+                    totalDefinitions = totalDefinitions?.plus(requester.definitions.count())
 
-            if (requester is TranslationRequester)
-                totalTranslations = totalTranslations?.plus(requester.translations.count())
+                if (requester is TranslationRequester)
+                    totalTranslations = totalTranslations?.plus(requester.translations.count())
 
-            if (requester is ExampleRequester)
-                totalExamples = totalExamples?.plus(requester.examples.count())
+                if (requester is ExampleRequester)
+                    totalExamples = totalExamples?.plus(requester.examples.count())
 
-            if (requester is TranscriptionRequester)
-                totalTranscriptions = totalTranscriptions?.plus(requester.transcriptions.count())
+                if (requester is TranscriptionRequester)
+                    totalTranscriptions = totalTranscriptions?.plus(requester.transcriptions.count())
+            }
+
+            isBusy = false
         }
     }
 
