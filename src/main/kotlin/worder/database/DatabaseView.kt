@@ -4,8 +4,8 @@
  *
  * Name: <DatabaseView.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <20/07/2020, 06:26:55 PM>
- * Version: <16>
+ * Modified: <21/07/2020, 07:07:00 PM>
+ * Version: <17>
  */
 
 package worder.database
@@ -61,7 +61,7 @@ class DatabaseView : View("Database"), DatabaseEventListener {
 
 class DatabaseConnectedView : View() {
     private val databaseController: DatabaseController by inject()
-    private val dbLabel = label()
+    private val currentDatabase = label()
 
     override val root = vbox(alignment = CENTER) {
         hbox(alignment = CENTER) {
@@ -71,7 +71,7 @@ class DatabaseConnectedView : View() {
 
             vbox(alignment = Pos.BASELINE_CENTER) {
                 label("Database connection has been established successfully!")
-                add(dbLabel)
+                add(currentDatabase)
             }
         }
 
@@ -87,6 +87,6 @@ class DatabaseConnectedView : View() {
 
 
     override fun onDock() {
-        dbLabel.text = "${databaseController.db}"
+        currentDatabase.text = "${databaseController.db}"
     }
 }

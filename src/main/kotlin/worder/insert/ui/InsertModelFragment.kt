@@ -4,8 +4,8 @@
  *
  * Name: <InsertModelFragment.kt>
  * Created: <09/07/2020, 10:43:11 PM>
- * Modified: <20/07/2020, 06:26:55 PM>
- * Version: <177>
+ * Modified: <21/07/2020, 07:07:00 PM>
+ * Version: <178>
  */
 
 package worder.insert.ui
@@ -83,9 +83,6 @@ class InsertModelFragment : Fragment() {
 
 
     override val root: Parent = borderpane {
-        paddingAll = 15
-
-
         left = vbox(spacing = 20, alignment = Pos.TOP_CENTER) {
             label("UNCOMMITTED UNITS").style { fontSize = 20.px }
             separator()

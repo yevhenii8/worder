@@ -4,8 +4,8 @@
  *
  * Name: <WorderDefaultStyles.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <16/07/2020, 09:42:44 PM>
- * Version: <90>
+ * Modified: <21/07/2020, 07:19:32 PM>
+ * Version: <111>
  */
 
 package worder.core.styles
@@ -14,7 +14,11 @@ import javafx.geometry.Pos
 import javafx.scene.effect.DropShadow
 import javafx.scene.layout.BackgroundPosition
 import javafx.scene.layout.BackgroundRepeat
+import javafx.scene.layout.BorderStrokeStyle
 import javafx.scene.paint.Color
+import javafx.scene.shape.StrokeLineCap
+import javafx.scene.shape.StrokeLineJoin
+import javafx.scene.shape.StrokeType
 import tornadofx.DrawerStyles.Companion.buttonArea
 import tornadofx.DrawerStyles.Companion.drawer
 import tornadofx.DrawerStyles.Companion.drawerItem
@@ -23,6 +27,7 @@ import tornadofx.box
 import tornadofx.c
 import tornadofx.cssclass
 import tornadofx.px
+import java.util.*
 
 class WorderDefaultStyles : Stylesheet() {
     companion object {
@@ -82,6 +87,15 @@ class WorderDefaultStyles : Stylesheet() {
 
         dragDropField {
             backgroundColor += c(Color.GRAY.toString(), 0.1)
+            borderColor += box(Color.DARKGRAY)
+            borderStyle += BorderStrokeStyle(
+                    StrokeType.OUTSIDE,
+                    StrokeLineJoin.MITER,
+                    StrokeLineCap.BUTT,
+                    10.0,
+                    0.0,
+                    listOf(20.0, 14.0)
+            )
         }
 
         drawer {
@@ -91,6 +105,7 @@ class WorderDefaultStyles : Stylesheet() {
 
             drawerItem {
                 backgroundColor += c("#f4f4f4")
+                padding = box(20.px)
             }
 
             buttonArea {
