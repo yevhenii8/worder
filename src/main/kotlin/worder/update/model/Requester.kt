@@ -4,14 +4,14 @@
  *
  * Name: <Requester.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <21/07/2020, 11:42:24 PM>
- * Version: <7>
+ * Modified: <22/07/2020, 09:12:45 PM>
+ * Version: <8>
  */
 
 package worder.update.model
 
 import javafx.beans.property.ReadOnlyProperty
-import worder.core.model.Word
+import worder.core.model.BareWord
 import worder.update.model.impl.requesters.CambridgeRequester
 import worder.update.model.impl.requesters.LingvoRequester
 import worder.update.model.impl.requesters.MacmillanRequester
@@ -38,7 +38,7 @@ interface Requester {
         get() = throw IllegalStateException("Not implemented for this requester!")
 
 
-    suspend fun requestWord(word: Word)
+    suspend fun requestWord(word: BareWord)
 }
 
 

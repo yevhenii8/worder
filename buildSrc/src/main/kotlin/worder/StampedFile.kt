@@ -56,7 +56,7 @@ class StampedFile(
     private val properties = getProperties<StampProperty>()
 
     lateinit var validationResult: String
-    val isStampValid = presentStamp?.let { if (useTransit) isStampValidTransit(it) else isStampValid(it) } ?: false
+    val isStampValid = presentStamp?.let { if (useTransit) isStampValidTransit(it) else isStampValid(it) } ?: true
 
 
     fun updateStamp() {

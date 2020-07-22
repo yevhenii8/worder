@@ -4,8 +4,8 @@
  *
  * Name: <WebsiteRequesterDecorator.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <21/07/2020, 11:41:47 PM>
- * Version: <6>
+ * Modified: <22/07/2020, 09:42:32 PM>
+ * Version: <10>
  */
 
 package worder.update.model.impl
@@ -21,7 +21,8 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
 import tornadofx.getValue
 import tornadofx.setValue
-import worder.core.model.Word
+import worder.core.log
+import worder.core.model.BareWord
 import worder.update.model.DefinitionRequester
 import worder.update.model.ExampleRequester
 import worder.update.model.Requester
@@ -44,7 +45,7 @@ import java.util.concurrent.atomic.AtomicLong
 
 open class WebsiteRequesterDecorator(private val requester: Requester) : Requester {
     companion object {
-        private const val REQUEST_INTERVAL = 3000L
+        private const val REQUEST_INTERVAL = 5000L
         private const val REQUEST_TIMEOUT = 5000L
 
         private val client: HttpClient = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.ALWAYS).build()
@@ -77,7 +78,7 @@ open class WebsiteRequesterDecorator(private val requester: Requester) : Request
     )
 
 
-    override suspend fun requestWord(word: Word) {
+    override suspend fun requestWord(word: BareWord) {
         MainScope().launch { isBusy = true }
 
         mutex.withLock {

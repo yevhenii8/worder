@@ -4,12 +4,14 @@
  *
  * Name: <CambridgeRequester.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <22/07/2020, 12:04:19 AM>
- * Version: <8>
+ * Modified: <22/07/2020, 09:42:32 PM>
+ * Version: <11>
  */
 
 package worder.update.model.impl.requesters
 
+import worder.core.log
+import worder.core.model.BareWord
 import worder.core.model.Word
 import worder.update.model.DefinitionRequester
 import worder.update.model.ExampleRequester
@@ -38,7 +40,7 @@ class CambridgeRequester private constructor() : DefinitionRequester, ExampleReq
         private set
 
 
-    override suspend fun requestWord(word: Word) {
+    override suspend fun requestWord(word: BareWord) {
         val body = sendGetRequest(SITE_URL + word.name)
 
         definitions = DEFINITION_PATTERN.findAll(body)

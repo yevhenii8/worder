@@ -4,12 +4,13 @@
  *
  * Name: <LingvoRequester.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <22/07/2020, 12:04:19 AM>
- * Version: <8>
+ * Modified: <22/07/2020, 09:12:45 PM>
+ * Version: <9>
  */
 
 package worder.update.model.impl.requesters
 
+import worder.core.model.BareWord
 import worder.core.model.Word
 import worder.update.model.Requester
 import worder.update.model.TranscriptionRequester
@@ -39,7 +40,7 @@ class LingvoRequester private constructor() : TranslationRequester, Transcriptio
         private set
 
 
-    override suspend fun requestWord(word: Word) {
+    override suspend fun requestWord(word: BareWord) {
         val body = sendGetRequest(SITE_URL + word.name)
 
         translations = TRANSLATION_BODY_FILTER.find(body)?.let { matchResult ->

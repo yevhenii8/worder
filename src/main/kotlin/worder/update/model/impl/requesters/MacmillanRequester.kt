@@ -4,12 +4,13 @@
  *
  * Name: <MacmillanRequester.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <22/07/2020, 12:04:19 AM>
- * Version: <8>
+ * Modified: <22/07/2020, 09:12:45 PM>
+ * Version: <9>
  */
 
 package worder.update.model.impl.requesters
 
+import worder.core.model.BareWord
 import worder.core.model.Word
 import worder.update.model.DefinitionRequester
 import worder.update.model.ExampleRequester
@@ -41,7 +42,7 @@ class MacmillanRequester private constructor() : DefinitionRequester, ExampleReq
         private set
 
 
-    override suspend fun requestWord(word: Word) {
+    override suspend fun requestWord(word: BareWord) {
         val body = sendGetRequest(SITE_URL + word.name) + sendGetRequest("$SITE_URL${word.name}_1")
 
         definitions = DEFINITION_PATTERN.findAll(body)

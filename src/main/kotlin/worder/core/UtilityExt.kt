@@ -4,12 +4,13 @@
  *
  * Name: <UtilityExt.kt>
  * Created: <17/07/2020, 09:32:24 PM>
- * Modified: <20/07/2020, 06:26:55 PM>
- * Version: <7>
+ * Modified: <22/07/2020, 09:14:43 PM>
+ * Version: <9>
  */
 
 package worder.core
 
+import java.time.LocalTime
 import kotlin.math.round
 
 fun Number.formatGrouped(): String {
@@ -34,3 +35,5 @@ fun Double.round(decimals: Int): Double {
     repeat(decimals) { multiplier *= 10 }
     return round(this * multiplier) / multiplier
 }
+
+fun log(msg: String) = println("[${LocalTime.now()}] [${Thread.currentThread().name}] $msg")
