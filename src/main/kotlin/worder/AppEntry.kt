@@ -4,8 +4,8 @@
  *
  * Name: <AppEntry.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <20/07/2020, 06:28:29 PM>
- * Version: <87>
+ * Modified: <22/07/2020, 06:09:59 PM>
+ * Version: <88>
  */
 
 package worder
@@ -59,7 +59,7 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class) {
 
         fun runDevInsert() = withSampleDB {
             find<MainView>().switchToInsertTab()
-            find<InsertController>().generateInsertModel(devInsertFiles)
+            find<InsertController>().generateInsertBatch(devInsertFiles)
         }
 
         fun runDevInsertHard() = withSampleDB {
@@ -70,7 +70,7 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class) {
             }
 
             find<MainView>().switchToInsertTab()
-            find<InsertController>().generateInsertModel(devInsertFilesMany)
+            find<InsertController>().generateInsertBatch(devInsertFilesMany)
         }
 
         fun runDevUpdate() = withSampleDB {

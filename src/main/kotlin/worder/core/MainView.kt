@@ -4,8 +4,8 @@
  *
  * Name: <MainView.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <20/07/2020, 06:26:55 PM>
- * Version: <7>
+ * Modified: <22/07/2020, 06:41:15 PM>
+ * Version: <13>
  */
 
 package worder.core
@@ -19,27 +19,28 @@ import tornadofx.borderpane
 import tornadofx.drawer
 import tornadofx.hbox
 import tornadofx.hyperlink
+import tornadofx.imageview
 import worder.core.styles.WorderDefaultStyles
-import worder.database.DatabaseView
-import worder.insert.InsertView
-import worder.update.UpdateView
+import worder.database.DatabaseTabView
+import worder.insert.InsertTabView
+import worder.update.UpdateTabView
 
 class MainView : View("Worder GUI") {
     private val drawer: Drawer = drawer { }
-    private val databaseTab: DrawerItem = drawer.item<DatabaseView>().apply { expanded = true }
-    private val updaterTab: DrawerItem = drawer.item<UpdateView>()
-    private val inserterTab: DrawerItem = drawer.item<InsertView>()
+    private val databaseTab: DrawerItem = drawer.item<DatabaseTabView>().apply { expanded = true }
+    private val updaterTab: DrawerItem = drawer.item<UpdateTabView>()
+    private val inserterTab: DrawerItem = drawer.item<InsertTabView>()
 
 
     override val root = borderpane {
-        top<DashboardView>()
+        top<DatabaseDashboardView>()
 
         center = drawer
 
         bottom = hbox(alignment = Pos.CENTER) {
             addClass(WorderDefaultStyles.statusBar)
 
-            hyperlink("Copyright yevhenii8 ® 2020") {
+            hyperlink(text = "© 2019-2020 Yevhenii Nadtochii No Rights Reserved", graphic = imageview("/GitHub-Mark-32px.png")) {
                 setOnAction {
                     hostServices.showDocument("https://github.com/yevhenii8/worder")
                 }

@@ -4,28 +4,28 @@
  *
  * Name: <InsertController.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <20/07/2020, 11:23:03 PM>
- * Version: <8>
+ * Modified: <22/07/2020, 06:41:15 PM>
+ * Version: <11>
  */
 
 package worder.insert
 
 import tornadofx.Controller
 import worder.database.DatabaseController
-import worder.insert.model.impl.DefaultInsertModel
+import worder.insert.model.impl.DefaultInsertBatch
 import java.io.File
 
 class InsertController : Controller() {
-    private val insertView: InsertView by inject()
+    private val insertTabView: InsertTabView by inject()
     private val databaseController: DatabaseController by inject()
 
 
-    fun generateInsertModel(files: List<File>) {
-        val insertModel = DefaultInsertModel.createInstance(databaseController.db!!.inserter, files)
-        insertView.toUploadedState(insertModel)
+    fun generateInsertBatch(files: List<File>) {
+        val insertModel = DefaultInsertBatch.createInstance(databaseController.db!!.inserter, files)
+        insertTabView.toUploadedState(insertModel)
     }
 
-    fun releaseInsertModel() {
-        insertView.toNotUploadedState()
+    fun resetInsertBatch() {
+        insertTabView.toNotUploadedState()
     }
 }

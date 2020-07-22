@@ -4,8 +4,8 @@
  *
  * Name: <ConcurrentCommitTest.kt>
  * Created: <17/07/2020, 11:29:59 PM>
- * Modified: <20/07/2020, 11:23:20 PM>
- * Version: <34>
+ * Modified: <22/07/2020, 05:48:19 PM>
+ * Version: <35>
  */
 
 package worder.insert.model
@@ -17,7 +17,7 @@ import kotlinx.coroutines.runBlocking
 import worder.core.formatGrouped
 import worder.core.round
 import worder.database.model.impl.SQLiteFile
-import worder.insert.model.impl.DefaultInsertModel
+import worder.insert.model.impl.DefaultInsertBatch
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -38,7 +38,7 @@ class ConcurrentCommitTest : ShouldSpec({
         originalSampleDB.copyTo(sampleDB, overwrite = true)
 
         val worderDb = SQLiteFile.createInstance(sampleDB)
-        val insertModel = DefaultInsertModel.createInstance(
+        val insertModel = DefaultInsertBatch.createInstance(
                 worderDb.inserter,
                 Files.list(Path.of("/home/yevhenii/Other/inserter")).map { it.toFile() }.toList().take(filesCount)
         )
