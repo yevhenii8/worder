@@ -4,8 +4,8 @@
  *
  * Name: <UpdateModelFragment.kt>
  * Created: <20/07/2020, 06:26:55 PM>
- * Modified: <21/07/2020, 11:49:02 PM>
- * Version: <40>
+ * Modified: <22/07/2020, 01:55:15 PM>
+ * Version: <42>
  */
 
 package worder.update.ui

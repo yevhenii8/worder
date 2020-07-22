@@ -4,8 +4,8 @@
  *
  * Name: <MapConversionListenerFix.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <10/07/2020, 10:35:52 PM>
- * Version: <4>
+ * Modified: <22/07/2020, 03:21:46 PM>
+ * Version: <8>
  */
 
 package worder.tornadofx
@@ -32,9 +32,10 @@ So, had to put some workarounds instead
  */
 inline fun <reified K, reified V> EventTarget.bindChildren(
         sourceMap: ObservableMap<K, V>,
-        noinline converter: (K, V) -> Node
+        noinline converter: (K, V) -> Node,
+        noinline sourceMapFilter: ((K, V) -> Boolean)? = null
 ): MapConversionListener<K, V, Node> = requireNotNull(
-        getChildList()?.bind(sourceMap, converter)
+        getChildList()?.bind(sourceMap, sourceMapFilter, converter)
 ) { "Unable to extract child nodes from $this" }
 
 
@@ -44,6 +45,7 @@ inline fun <reified K, reified V> EventTarget.bindChildren(
  */
 fun <SourceTypeKey, SourceTypeValue, TargetType> MutableList<TargetType>.bind(
         sourceMap: ObservableMap<SourceTypeKey, SourceTypeValue>,
+        sourceMapFilter: ((SourceTypeKey, SourceTypeValue) -> Boolean)?,
         converter: (SourceTypeKey, SourceTypeValue) -> TargetType
 ): MapConversionListener<SourceTypeKey, SourceTypeValue, TargetType> {
     val ignoringParentBuilder = FX::class.java.methods.find { it.name == "access\$setIgnoreParentBuilder\$cp" }!!
@@ -56,7 +58,7 @@ fun <SourceTypeKey, SourceTypeValue, TargetType> MutableList<TargetType>.bind(
         }
     }
 
-    val sourceMapListener = MapConversionListener(this, sourceMap, ignoringParentConverter)
+    val sourceMapListener = MapConversionListener(this, sourceMap, sourceMapFilter, ignoringParentConverter)
     sourceMap.addListener(sourceMapListener)
     return sourceMapListener
 }
@@ -69,11 +71,14 @@ fun <SourceTypeKey, SourceTypeValue, TargetType> MutableList<TargetType>.bind(
 class MapConversionListener<SourceTypeKey, SourceTypeValue, TargetType>(
         targetList: MutableList<TargetType>,
         sourceMap: ObservableMap<SourceTypeKey, SourceTypeValue>,
+        private val sourceMapFilter: ((SourceTypeKey, SourceTypeValue) -> Boolean)? = null,
         private val converter: (SourceTypeKey, SourceTypeValue) -> TargetType
 ) : MapChangeListener<SourceTypeKey, SourceTypeValue>, WeakListener {
-    internal val targetRef: WeakReference<MutableList<TargetType>> = WeakReference(targetList)
+    private val targetRef: WeakReference<MutableList<TargetType>> = WeakReference(targetList)
     private val sourceToTarget: MutableMap<SourceTypeKey, TargetType> = sourceMap
-            .map { it.key to converter.invoke(it.key, it.value) }.toMap(LinkedHashMap())
+            .filter { sourceMapFilter?.invoke(it.key, it.value) ?: true }
+            .map { it.key to converter.invoke(it.key, it.value) }
+            .toMap(LinkedHashMap())
 
 
     init {
@@ -101,8 +106,10 @@ class MapConversionListener<SourceTypeKey, SourceTypeValue, TargetType>(
                 sourceToTarget.remove(change.key)
             }
             change.wasAdded() -> {
-                sourceToTarget[change.key] = converter(change.key, change.valueAdded)
-                list.add(sourceToTarget[change.key]!!)
+                if (sourceMapFilter == null || sourceMapFilter.invoke(change.key, change.valueAdded)) {
+                    sourceToTarget[change.key] = converter(change.key, change.valueAdded)
+                    list.add(sourceToTarget[change.key]!!)
+                }
             }
         }
     }

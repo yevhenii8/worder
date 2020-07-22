@@ -4,8 +4,8 @@
  *
  * Name: <DefaultUpdateModel.kt>
  * Created: <20/07/2020, 11:22:35 PM>
- * Modified: <21/07/2020, 06:45:17 PM>
- * Version: <3>
+ * Modified: <22/07/2020, 12:04:19 AM>
+ * Version: <4>
  */
 
 package worder.update.model.impl

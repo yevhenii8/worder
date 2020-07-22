@@ -4,8 +4,8 @@
  *
  * Name: <InsertModelFragment.kt>
  * Created: <09/07/2020, 10:43:11 PM>
- * Modified: <21/07/2020, 11:28:31 PM>
- * Version: <184>
+ * Modified: <22/07/2020, 12:04:19 AM>
+ * Version: <185>
  */
 
 package worder.insert.ui
@@ -117,7 +117,6 @@ class InsertModelFragment : Fragment() {
                         }
                     }
                     vbox(spacing = 10, alignment = Pos.BASELINE_CENTER) {
-                        this.usePrefSize = true
                         setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE)
                         add(progressIndicator)
                         worderStatusLabel(model.modelStatusProperty)
