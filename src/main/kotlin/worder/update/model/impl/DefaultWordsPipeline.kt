@@ -4,29 +4,47 @@
  *
  * Name: <DefaultWordsPipeline.kt>
  * Created: <20/07/2020, 11:22:35 PM>
- * Modified: <22/07/2020, 06:41:15 PM>
- * Version: <5>
+ * Modified: <24/07/2020, 11:25:11 PM>
+ * Version: <17>
  */
 
 package worder.update.model.impl
 
+import javafx.beans.property.Property
+import javafx.beans.property.SimpleObjectProperty
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import tornadofx.getValue
+import tornadofx.setValue
+import worder.database.model.DatabaseWord
+import worder.database.model.UpdatedWord
 import worder.database.model.WorderUpdateDB
 import worder.update.model.DefinitionRequester
 import worder.update.model.ExampleRequester
 import worder.update.model.Requester
 import worder.update.model.TranscriptionRequester
 import worder.update.model.TranslationRequester
-import worder.update.model.WordsPipeline
 import worder.update.model.WordBlock
+import worder.update.model.WordsPipeline
 
 class DefaultWordsPipeline private constructor(
         val database: WorderUpdateDB,
         override val usedRequesters: List<Requester>,
-        override var selectOrder: WorderUpdateDB.SelectOrder = WorderUpdateDB.SelectOrder.RANDOM
+        override var selectOrder: WorderUpdateDB.SelectOrder
 ) : WordsPipeline, Iterator<WordBlock> {
+    companion object {
+        fun createInstance(
+                database: WorderUpdateDB,
+                usedRequesters: List<Requester>,
+                selectOrder: WorderUpdateDB.SelectOrder
+        ): WordsPipeline = DefaultWordsPipeline(database, usedRequesters, selectOrder)
+    }
+
+
     private val definitionRequesters = mutableSetOf<DefinitionRequester>()
     private val exampleRequesters = mutableSetOf<ExampleRequester>()
     private val translationRequesters = mutableSetOf<TranslationRequester>()
@@ -48,7 +66,11 @@ class DefaultWordsPipeline private constructor(
 
 
     override val uncommittedBlocks: MutableList<WordBlock> = mutableListOf()
+
+    private var blocksCounter = 0
     private var next: WordBlock? = runBlocking { composeNext() }
+    private var previous: WordBlock? = null
+    private lateinit var backgroundJob: Job
 
 
     private suspend fun composeNext(): WordBlock? {
@@ -61,33 +83,34 @@ class DefaultWordsPipeline private constructor(
         val definitions = definitionRequesters.flatMap { it.definitions }.distinct()
         val examples = (exampleRequesters.flatMap { it.examples } + dbWord.examples).distinct()
         val translations = (translationRequesters.flatMap { it.translations } + dbWord.translations).distinct()
-        val transcriptions = (transcriptionRequesters.flatMap { it.transcriptions } + setOf(dbWord.transcription)).filterNotNull().distinct()
+        val transcriptions = (listOf(dbWord.transcription) + transcriptionRequesters.flatMap { it.transcriptions }).filterNotNull().distinct()
 
-//        lastBlock = BaseWordBlock(
-//                dbWord = dbWord,
-//                serialNumber = readyToCommit.size + 1,
-//                translations = translations,
-//                examples = examples,
-//                definitions = definitions,
-//                transcriptions = transcriptions
-//        )
-//        hasNext = false
-//
-//        return lastBlock!!
-
-        return null
+        return DefaultWordBlock(
+                id = "${blocksCounter++}",
+                originalWord = dbWord,
+                definitions = definitions,
+                examples = examples,
+                translations = translations,
+                transcriptions = transcriptions
+        )
     }
 
 
     override fun iterator(): Iterator<WordBlock> = this
 
     override fun next(): WordBlock {
-        TODO("Not yet implemented")
+        if (previous == next)
+            runBlocking {
+                backgroundJob.join()
+            }
+
+        return next!!.also {
+            previous = next
+            backgroundJob = CoroutineScope(Dispatchers.Default).launch { next = composeNext() }
+        }
     }
 
-    override fun hasNext(): Boolean {
-        TODO("Not yet implemented")
-    }
+    override fun hasNext(): Boolean = next != null
 
     override suspend fun commitAllBlocks() {
         coroutineScope {
@@ -96,5 +119,80 @@ class DefaultWordsPipeline private constructor(
                         .forEach { launch { it.commit() } }
             }
         }
+    }
+
+
+    private inner class DefaultWordBlock(
+            override val id: String,
+            override val originalWord: DatabaseWord,
+            override val definitions: List<String>,
+            override val examples: List<String>,
+            override val translations: List<String>,
+            override val transcriptions: List<String>
+    ) : WordBlock {
+        override val statusProperty: Property<WordBlock.WordBlockStatus> = SimpleObjectProperty(WordBlock.WordBlockStatus.RESOLUTION_NEEDED)
+        override var status: WordBlock.WordBlockStatus by statusProperty
+
+        override val resolutionProperty: Property<WordBlock.WordBlockResolution> = SimpleObjectProperty(WordBlock.WordBlockResolution.NO_RESOLUTION)
+        override var resolution: WordBlock.WordBlockResolution by resolutionProperty
+
+        private var updatedWord: UpdatedWord? = null
+
+
+        override suspend fun commit() {
+            if (status != WordBlock.WordBlockStatus.READY_TO_COMMIT)
+                error("You can't commit block with status: $status")
+
+            when (resolution) {
+                WordBlock.WordBlockResolution.SKIPPED -> database.setAsSkipped(originalWord)
+                WordBlock.WordBlockResolution.REMOVED -> database.removeWord(originalWord)
+                WordBlock.WordBlockResolution.LEARNED -> database.setAsLearned(originalWord)
+                WordBlock.WordBlockResolution.UPDATED -> database.updateWord(updatedWord!!)
+                WordBlock.WordBlockResolution.NO_RESOLUTION -> error("You can't commit block with NO_RESOLUTION!")
+            }
+
+            status = WordBlock.WordBlockStatus.COMMITTED
+        }
+
+        override fun update(primaryDefinition: String, secondaryDefinition: String?, transcription: String, examples: List<String>) {
+            if (status == WordBlock.WordBlockStatus.COMMITTED)
+                error("You can't update block with status: $status")
+
+            updatedWord = UpdatedWord(
+                    name = originalWord.name,
+                    transcription = transcription,
+                    primaryDefinition = primaryDefinition,
+                    secondaryDefinition = secondaryDefinition,
+                    examples = examples
+            )
+
+            resolution = WordBlock.WordBlockResolution.UPDATED
+            status = WordBlock.WordBlockStatus.READY_TO_COMMIT
+        }
+
+        override fun remove() {
+            if (status == WordBlock.WordBlockStatus.COMMITTED)
+                error("You can't remove block with status: $status")
+
+            resolution = WordBlock.WordBlockResolution.REMOVED
+            status = WordBlock.WordBlockStatus.READY_TO_COMMIT
+        }
+
+        override fun learn() {
+            if (status == WordBlock.WordBlockStatus.COMMITTED)
+                error("You can't learn block with status: $status")
+
+            resolution = WordBlock.WordBlockResolution.LEARNED
+            status = WordBlock.WordBlockStatus.READY_TO_COMMIT
+        }
+
+        override fun skip() {
+            if (status == WordBlock.WordBlockStatus.COMMITTED)
+                error("You can't skip block with status: $status")
+
+            resolution = WordBlock.WordBlockResolution.SKIPPED
+            status = WordBlock.WordBlockStatus.READY_TO_COMMIT
+        }
+
     }
 }

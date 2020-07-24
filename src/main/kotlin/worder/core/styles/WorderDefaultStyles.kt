@@ -4,8 +4,8 @@
  *
  * Name: <WorderDefaultStyles.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <21/07/2020, 07:19:32 PM>
- * Version: <111>
+ * Modified: <24/07/2020, 10:07:05 PM>
+ * Version: <113>
  */
 
 package worder.core.styles
@@ -51,12 +51,6 @@ class WorderDefaultStyles : Stylesheet() {
             opacity = 0.2
         }
 
-        separator {
-            line {
-                effect = DropShadow()
-            }
-        }
-
         button {
             padding = box(8.px)
             backgroundInsets += box(0.px)
@@ -82,6 +76,12 @@ class WorderDefaultStyles : Stylesheet() {
         insertModel {
             text {
                 fontSize = 20.px
+            }
+
+            separator {
+                line {
+                    effect = DropShadow()
+                }
             }
         }
 

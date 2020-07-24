@@ -4,15 +4,13 @@
  *
  * Name: <CambridgeRequester.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <22/07/2020, 09:42:32 PM>
- * Version: <11>
+ * Modified: <24/07/2020, 07:46:58 PM>
+ * Version: <13>
  */
 
 package worder.update.model.impl.requesters
 
-import worder.core.log
 import worder.core.model.BareWord
-import worder.core.model.Word
 import worder.update.model.DefinitionRequester
 import worder.update.model.ExampleRequester
 import worder.update.model.Requester

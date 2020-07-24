@@ -4,8 +4,8 @@
  *
  * Name: <DatabaseWords.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <06/07/2020, 07:25:08 PM>
- * Version: <3>
+ * Modified: <24/07/2020, 10:32:48 PM>
+ * Version: <5>
  */
 
 package worder.database.model
@@ -17,20 +17,21 @@ class DatabaseWord(
         transcription: String?,
 
         val rate: Int,
-        val register: Long,
-        val lastModification: Long,
-        val lastRateModification: Long,
-        val lastTraining: Int,
+        val registered: Long,
+        val lastModified: Long,
+        val lastRateModified: Long,
+        val lastTrained: Long,
 
-        val translations: Set<String>,
-        val examples: Set<String>
+        val translations: List<String>,
+        val examples: List<String>
 ) : Word(name, transcription)
 
 class UpdatedWord(
         name: String,
-        transcription: String?,
+
+        override val transcription: String,
 
         val primaryDefinition: String,
         val secondaryDefinition: String?,
-        val examples: Set<String>
+        val examples: List<String>
 ) : Word(name, transcription)

@@ -4,8 +4,8 @@
  *
  * Name: <Requester.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <22/07/2020, 09:12:45 PM>
- * Version: <8>
+ * Modified: <24/07/2020, 11:31:26 PM>
+ * Version: <9>
  */
 
 package worder.update.model
@@ -21,9 +21,9 @@ interface Requester {
     companion object {
         val defaultRequesters: List<Requester> = listOf(
                 CambridgeRequester.instance,
-                LingvoRequester.instance,
+                WooordHuntRequester.instance,
                 MacmillanRequester.instance,
-                WooordHuntRequester.instance
+                LingvoRequester.instance
         )
     }
 

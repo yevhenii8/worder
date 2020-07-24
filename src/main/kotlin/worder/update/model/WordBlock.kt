@@ -4,26 +4,31 @@
  *
  * Name: <WordBlock.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <20/07/2020, 11:23:03 PM>
- * Version: <4>
+ * Modified: <24/07/2020, 11:08:53 PM>
+ * Version: <7>
  */
 
 package worder.update.model
 
+import javafx.beans.property.ReadOnlyProperty
 import javafx.scene.paint.Color
 import worder.core.model.WorderStatus
 import worder.database.model.DatabaseWord
 
 interface WordBlock {
     val id: String
-    var status: WordBlockStatus
-    val resolution: WordBlockResolution
     val originalWord: DatabaseWord
 
     val definitions: List<String>
     val examples: List<String>
     val translations: List<String>
     val transcriptions: List<String>
+
+    val statusProperty: ReadOnlyProperty<WordBlockStatus>
+    var status: WordBlockStatus
+
+    val resolutionProperty: ReadOnlyProperty<WordBlockResolution>
+    val resolution: WordBlockResolution
 
 
     suspend fun commit()
@@ -47,6 +52,6 @@ interface WordBlock {
     }
 
     enum class WordBlockResolution {
-        SKIPPED, REMOVED, LEARNED, UPDATED
+        NO_RESOLUTION, SKIPPED, REMOVED, LEARNED, UPDATED
     }
 }

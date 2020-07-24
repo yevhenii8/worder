@@ -4,8 +4,8 @@
  *
  * Name: <SQLiteFile.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <20/07/2020, 11:23:03 PM>
- * Version: <44>
+ * Modified: <24/07/2020, 10:32:48 PM>
+ * Version: <49>
  */
 
 package worder.database.model.impl
@@ -19,6 +19,7 @@ import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.Concat
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.IntegerColumnType
+import org.jetbrains.exposed.sql.Query
 import org.jetbrains.exposed.sql.Random
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.case
@@ -103,7 +104,7 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
             val closed: Column<Int?> = integer("closed").nullable()
             val lastModification: Column<Long> = long("last_modification").default(Instant.now().toEpochMilli())
             val lastRateModification: Column<Long> = long("last_rate_modification").default(Instant.now().toEpochMilli())
-            val lastTraining: Column<Int> = integer("last_training").default(0)
+            val lastTraining: Column<Long> = long("last_training").default(0)
         }
     }
 
@@ -275,21 +276,19 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
     WorderUpdaterDB's Methods Implementation
      */
 
-    private suspend fun selectNext() = sqlLiteTransactionAsync {
-        WordTable.slice(WordTable.columns.drop(2) + WordTable.name.lowerCase()).select {
-            (WordTable.tags notLike "%$updatedTagId%" or WordTable.tags.isNull()) and
-                    (WordTable.rate less 100) and
-                    (WordTable.name.notInList(skippedWords)) and
-                    (WordTable.dictionaryId eq dictionaryId)
-        }.limit(1)
-    }
+    private fun selectNextTxn(): Query = WordTable.slice(WordTable.columns.drop(2) + WordTable.name.lowerCase()).select {
+        (WordTable.tags notLike "%$updatedTagId%" or WordTable.tags.isNull()) and
+                (WordTable.rate less 100) and
+                (WordTable.name.notInList(skippedWords)) and
+                (WordTable.dictionaryId eq dictionaryId)
+    }.limit(1)
 
-    override suspend fun hasNextWord(): Boolean = sqlLiteTransactionAsync { !(selectNext().empty()) }
+    override suspend fun hasNextWord(): Boolean = sqlLiteTransactionAsync { !(selectNextTxn().empty()) }
 
     override suspend fun getNextWord(order: SelectOrder): DatabaseWord = sqlLiteTransactionAsync {
         val resultRow = when (order) {
-            ASC, DESC -> selectNext().orderBy(WordTable.id, SortOrder.valueOf(order.name))
-            RANDOM -> selectNext().orderBy(Random())
+            ASC, DESC -> selectNextTxn().orderBy(WordTable.id, SortOrder.valueOf(order.name))
+            RANDOM -> selectNextTxn().orderBy(Random())
         }.firstOrNull()
 
         checkNotNull(resultRow) {
@@ -300,15 +299,15 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
                 name = resultRow[WordTable.name.lowerCase()],
                 transcription = resultRow[WordTable.transcription],
                 rate = resultRow[WordTable.rate],
-                register = resultRow[WordTable.register],
-                lastModification = resultRow[WordTable.lastModification],
-                lastRateModification = resultRow[WordTable.lastRateModification],
-                lastTraining = resultRow[WordTable.lastTraining],
-                examples = (resultRow[WordTable.example] ?: "").split("#").filter(String::isNotBlank).toSet(),
+                registered = resultRow[WordTable.register],
+                lastModified = resultRow[WordTable.lastModification],
+                lastRateModified = resultRow[WordTable.lastRateModification],
+                lastTrained = resultRow[WordTable.lastTraining],
+                examples = (resultRow[WordTable.example] ?: "").split("#").filter(String::isNotBlank).distinct(),
                 translations = run {
                     val translations = (resultRow[WordTable.translation] ?: "").split("#").filter(String::isNotBlank)
                     val translationAdditions = (resultRow[WordTable.translationAddition] ?: "").split("#").filter(String::isNotBlank)
-                    (translations + translationAdditions).toSet()
+                    (translations + translationAdditions).distinct()
                 }
         )
     }
@@ -321,31 +320,30 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
                 .Else(stringLiteral("#$tagId#"))
 
         sqlLiteTransactionAsync {
-            WordTable.update({ (WordTable.name eq updatedWord.name) and (WordTable.dictionaryId eq dictionaryId) }) {
-                it[translation] = updatedWord.primaryDefinition
-                it[translationAddition] = updatedWord.secondaryDefinition
-                it[exampleTranslation] = null
-                it[tags] = resolveTagId(updatedTagId)
-
-                it[transcription] = case()
-                        .When(stringLiteral(updatedWord.transcription ?: "NULL") eq "NULL", transcription)
-                        .Else(stringLiteral(updatedWord.transcription ?: "NULL"))
-
-                val exampleStr = stringLiteral(updatedWord.examples.joinToString("#"))
-                it[example] = case()
-                        .When(exampleStr eq stringLiteral(""), example)
-                        .Else(exampleStr)
+            WordTable.update({ (WordTable.name eq updatedWord.name) and (WordTable.dictionaryId eq dictionaryId) }) { wordTable ->
+                wordTable[translation] = updatedWord.primaryDefinition
+                wordTable[translationAddition] = updatedWord.secondaryDefinition
+                wordTable[exampleTranslation] = null
+                wordTable[tags] = resolveTagId(updatedTagId)
+                wordTable[transcription] = updatedWord.transcription
+                wordTable[example] = stringLiteral(updatedWord.examples.joinToString("#")).let {
+                    case()
+                            .When(it eq stringLiteral(""), example)
+                            .Else(it)
+                }
             }
         }
 
-        observableTrackStats.applyWithMainUI {
-            totalAffected++
-            totalUpdated++
-        }
+        MainScope().launch {
+            observableTrackStats.apply {
+                totalAffected++
+                totalUpdated++
+            }
 
-        observableUpdaterStats.applyWithMainUI {
-            totalProcessed++
-            updated++
+            observableUpdaterStats.apply {
+                totalProcessed++
+                updated++
+            }
         }
     }
 
@@ -354,20 +352,22 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
             WordTable.deleteWhere { (WordTable.name eq bareWord.name) and (WordTable.dictionaryId eq dictionaryId) }
         }
 
-        observableSummaryStats.applyWithMainUI {
-            totalAmount--
-            unlearned--
-        }
+        MainScope().launch {
+            observableSummaryStats.apply {
+                totalAmount--
+                unlearned--
+            }
 
-        observableUpdaterStats.applyWithMainUI {
-            totalProcessed++
-            removed++
+            observableUpdaterStats.apply {
+                totalProcessed++
+                removed++
+            }
         }
     }
 
     override suspend fun setAsSkipped(bareWord: BareWord) {
         synchronized(skippedWords) {
-            skippedWords.add(skippedWords.size, bareWord.name)
+            skippedWords.add(bareWord.name)
         }
 
         observableUpdaterStats.applyWithMainUI {
@@ -385,14 +385,16 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
             }
         }
 
-        observableSummaryStats.applyWithMainUI {
-            learned++
-            unlearned--
-        }
+        MainScope().launch {
+            observableSummaryStats.apply {
+                learned++
+                unlearned--
+            }
 
-        observableUpdaterStats.applyWithMainUI {
-            totalProcessed++
-            learned++
+            observableUpdaterStats.apply {
+                totalProcessed++
+                learned++
+            }
         }
     }
 

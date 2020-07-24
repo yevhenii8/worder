@@ -4,8 +4,8 @@
  *
  * Name: <WordsPipelineFragment.kt>
  * Created: <20/07/2020, 06:26:55 PM>
- * Modified: <22/07/2020, 06:41:15 PM>
- * Version: <43>
+ * Modified: <24/07/2020, 09:44:40 PM>
+ * Version: <63>
  */
 
 package worder.update.ui
@@ -13,71 +13,43 @@ package worder.update.ui
 import javafx.geometry.Pos
 import javafx.scene.Parent
 import javafx.scene.control.Label
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import tornadofx.Fragment
 import tornadofx.borderpane
-import tornadofx.button
 import tornadofx.label
+import tornadofx.paddingLeft
 import tornadofx.progressindicator
-import tornadofx.textfield
+import tornadofx.scrollpane
 import tornadofx.vbox
 import tornadofx.visibleWhen
-import worder.core.model.Word
 import worder.core.observableStats
 import worder.database.model.WorderUpdateDB
-import worder.update.model.Requester
-import worder.update.model.impl.requesters.CambridgeRequester
-import worder.update.model.impl.requesters.LingvoRequester
-import worder.update.model.impl.requesters.MacmillanRequester
-import worder.update.model.impl.requesters.WooordHuntRequester
+import worder.update.model.WordsPipeline
+import worder.update.model.impl.DefaultWordsPipeline
+import worder.update.model.impl.requesters.DevRequester
 
 class WordsPipelineFragment : Fragment() {
-    private val db: WorderUpdateDB by param()
+    private val database: WorderUpdateDB by param()
+    private val pipeline: WordsPipeline = DefaultWordsPipeline.createInstance(
+            database = database,
+//            usedRequesters = Requester.defaultRequesters,
+            usedRequesters = listOf(DevRequester()),
+            selectOrder = WorderUpdateDB.SelectOrder.RANDOM
+    )
 
 
     override val root: Parent = borderpane {
-        center = vbox(spacing = 25) {
-            val textField = textfield()
-
-            button("request cambridge") {
-                setOnAction {
-                    CoroutineScope(Dispatchers.Default).launch {
-                        CambridgeRequester.instance.requestWord(Word(textField.text, null))
+        center =
+                vbox(spacing = 30) {
+                    pipeline.take(3).forEach {
+                        add(find<WordBlockFragment>("block" to it))
                     }
                 }
-            }
-
-            button("request lingvo") {
-                setOnAction {
-                    CoroutineScope(Dispatchers.Default).launch {
-                        LingvoRequester.instance.requestWord(Word(textField.text, null))
-                    }
-                }
-            }
-
-            button("request macmillian") {
-                setOnAction {
-                    CoroutineScope(Dispatchers.Default).launch {
-                        MacmillanRequester.instance.requestWord(Word(textField.text, null))
-                    }
-                }
-            }
-
-            button("request woooordhunt") {
-                setOnAction {
-                    CoroutineScope(Dispatchers.Default).launch {
-                        WooordHuntRequester.instance.requestWord(Word(textField.text, null))
-                    }
-                }
-            }
-        }
 
         right = vbox(spacing = 20, alignment = Pos.TOP_CENTER) {
+            paddingLeft = 300
             label("Requesters")
 
-            Requester.defaultRequesters.forEach {
+            pipeline.usedRequesters.forEach {
                 observableStats(observableStats = it.observableStats, hideNullable = true) {
                     (children[0] as Label).graphic = progressindicator {
                         setPrefSize(20.0, 20.0)

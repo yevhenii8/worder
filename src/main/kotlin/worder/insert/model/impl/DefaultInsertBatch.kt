@@ -4,8 +4,8 @@
  *
  * Name: <DefaultInsertBatch.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <22/07/2020, 05:48:19 PM>
- * Version: <22>
+ * Modified: <24/07/2020, 07:45:55 PM>
+ * Version: <23>
  */
 
 package worder.insert.model.impl
@@ -87,7 +87,7 @@ class DefaultInsertBatch private constructor(private val database: WorderInsertD
                     .map { it.trim() }
                     .partition { BareWord.wordValidator.invoke(it) }
 
-            SimpleBatchUnit(
+            DefaultBatchUnit(
                     id = "Unit_$index",
                     source = file.name,
                     validWords = validWords,
@@ -126,7 +126,7 @@ class DefaultInsertBatch private constructor(private val database: WorderInsertD
     }
 
 
-    private inner class SimpleBatchUnit(
+    private inner class DefaultBatchUnit(
             override val id: String,
             override val source: String,
             validWords: List<String>,
@@ -146,7 +146,7 @@ class DefaultInsertBatch private constructor(private val database: WorderInsertD
 
         init {
             validWordsProperty.set(validWords.map { BareWord(it) }.toMutableSet().toObservable())
-            invalidWordsProperty.set(invalidWords.map { SimpleInvalidWord(it) }.toMutableSet().toObservable())
+            invalidWordsProperty.set(invalidWords.map { DefaultInvalidWord(it) }.toMutableSet().toObservable())
             stateController = StateController(BatchUnitStatus.READY_TO_COMMIT)
         }
 
@@ -156,7 +156,7 @@ class DefaultInsertBatch private constructor(private val database: WorderInsertD
         override fun include() = stateController.includeInCommit()
 
 
-        private inner class SimpleInvalidWord(override val value: String) : InvalidWord {
+        private inner class DefaultInvalidWord(override val value: String) : InvalidWord {
             override fun reject() {
                 invalidWords.remove(this)
                 observableStats.totalInvalidWords--
@@ -216,15 +216,15 @@ class DefaultInsertBatch private constructor(private val database: WorderInsertD
 
             private abstract inner class UnitState {
                 open suspend fun commit() {
-                    error("You can't commit unit with status: ${this@SimpleBatchUnit.status}")
+                    error("You can't commit unit with status: ${this@DefaultBatchUnit.status}")
                 }
 
                 open fun excludeFromCommit() {
-                    error("You can't exclude unit with status: ${this@SimpleBatchUnit.status}")
+                    error("You can't exclude unit with status: ${this@DefaultBatchUnit.status}")
                 }
 
                 open fun includeInCommit() {
-                    error("You can't include unit with status: ${this@SimpleBatchUnit.status}")
+                    error("You can't include unit with status: ${this@DefaultBatchUnit.status}")
                 }
 
 
@@ -262,11 +262,11 @@ class DefaultInsertBatch private constructor(private val database: WorderInsertD
                     if (invalidWords.isNotEmpty())
                         changeState(BatchUnitStatus.ACTION_NEEDED)
                     else
-                        readyToCommitUnits.add(this@SimpleBatchUnit)
+                        readyToCommitUnits.add(this@DefaultBatchUnit)
                 }
 
                 override fun onDetach() {
-                    readyToCommitUnits.remove(this@SimpleBatchUnit)
+                    readyToCommitUnits.remove(this@DefaultBatchUnit)
                 }
             }
 
@@ -276,11 +276,11 @@ class DefaultInsertBatch private constructor(private val database: WorderInsertD
                 }
 
                 override fun onAttach() {
-                    actionNeededUnits.add(this@SimpleBatchUnit)
+                    actionNeededUnits.add(this@DefaultBatchUnit)
                 }
 
                 override fun onDetach() {
-                    actionNeededUnits.remove(this@SimpleBatchUnit)
+                    actionNeededUnits.remove(this@DefaultBatchUnit)
                 }
             }
 
@@ -290,27 +290,27 @@ class DefaultInsertBatch private constructor(private val database: WorderInsertD
                 }
 
                 override fun onAttach() {
-                    excludedUnits.add(this@SimpleBatchUnit)
+                    excludedUnits.add(this@DefaultBatchUnit)
                 }
 
                 override fun onDetach() {
-                    excludedUnits.remove(this@SimpleBatchUnit)
+                    excludedUnits.remove(this@DefaultBatchUnit)
                 }
             }
 
             private inner class CommittingState : UnitState() {
                 override fun onAttach() {
-                    committingUnits.add(this@SimpleBatchUnit)
+                    committingUnits.add(this@DefaultBatchUnit)
                 }
 
                 override fun onDetach() {
-                    committingUnits.remove(this@SimpleBatchUnit)
+                    committingUnits.remove(this@DefaultBatchUnit)
                 }
             }
 
             private inner class CommittedState : UnitState() {
                 override fun onAttach() {
-                    committedUnits.add(this@SimpleBatchUnit)
+                    committedUnits.add(this@DefaultBatchUnit)
                 }
             }
         }

@@ -4,8 +4,8 @@
  *
  * Name: <UpdateTabView.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <22/07/2020, 06:41:15 PM>
- * Version: <8>
+ * Modified: <24/07/2020, 07:46:58 PM>
+ * Version: <9>
  */
 
 package worder.update
@@ -32,7 +32,7 @@ class UpdateTabView : View("Update"), DatabaseEventListener {
     }
 
 
-    override fun onDatabaseConnection(db: WorderDB) = root.replaceChildren(find<WordsPipelineFragment>("db" to db.updater))
+    override fun onDatabaseConnection(db: WorderDB) = root.replaceChildren(find<WordsPipelineFragment>("database" to db.updater))
 
     override fun onDatabaseDisconnection() = root.replaceChildren(notConnectedFragment)
 }

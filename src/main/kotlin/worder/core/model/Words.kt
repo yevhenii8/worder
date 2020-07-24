@@ -4,8 +4,8 @@
  *
  * Name: <Words.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <17/07/2020, 03:03:32 PM>
- * Version: <5>
+ * Modified: <24/07/2020, 07:45:55 PM>
+ * Version: <6>
  */
 
 package worder.core.model
@@ -25,7 +25,7 @@ open class BareWord(val name: String) {
             if (other is BareWord) other.name == name else false
 }
 
-open class Word(name: String, val transcription: String?) : BareWord(name) {
+open class Word(name: String, open val transcription: String?) : BareWord(name) {
     override fun toString(): String = "Word(name=$name, transcription=$transcription)"
     override fun hashCode(): Int = Objects.hash(name, transcription)
     override fun equals(other: Any?): Boolean =
