@@ -4,8 +4,8 @@
  *
  * Name: <DatabaseWords.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <24/07/2020, 10:32:48 PM>
- * Version: <5>
+ * Modified: <25/07/2020, 01:58:58 PM>
+ * Version: <6>
  */
 
 package worder.database.model
@@ -28,8 +28,7 @@ class DatabaseWord(
 
 class UpdatedWord(
         name: String,
-
-        override val transcription: String,
+        transcription: String?,
 
         val primaryDefinition: String,
         val secondaryDefinition: String?,

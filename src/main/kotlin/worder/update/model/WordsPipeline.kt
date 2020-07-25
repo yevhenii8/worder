@@ -4,18 +4,31 @@
  *
  * Name: <WordsPipeline.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <22/07/2020, 06:41:15 PM>
- * Version: <5>
+ * Modified: <25/07/2020, 08:56:51 PM>
+ * Version: <7>
  */
 
 package worder.update.model
 
+import javafx.beans.property.ReadOnlyListProperty
+import javafx.beans.property.ReadOnlyProperty
 import worder.database.model.WorderUpdateDB
 
-interface WordsPipeline : Iterable<WordBlock> {
-    val uncommittedBlocks: List<WordBlock>
+/**
+ * Contract notes about WordsPipeline use:
+ * 1) The next word in pipeline should be issued only when the previous one received its resolution.
+ *    Only first WordBlock can be issued without adhering to this requirement.
+ * 2) Pipeline should hold the current and the previous WordBlock uncommitted.
+ *    The rest should be consistently committed when the last block receives resolution.
+ */
+
+interface WordsPipeline {
+    val pipelineProperty: ReadOnlyListProperty<WordBlock>
+    val pipeline: List<WordBlock>
+
+    val isEmptyProperty: ReadOnlyProperty<Boolean>
+    val isEmpty: Boolean
+
     val usedRequesters: List<Requester>
     var selectOrder: WorderUpdateDB.SelectOrder
-
-    suspend fun commitAllBlocks()
 }

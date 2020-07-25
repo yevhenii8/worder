@@ -4,52 +4,105 @@
  *
  * Name: <WordsPipelineFragment.kt>
  * Created: <20/07/2020, 06:26:55 PM>
- * Modified: <24/07/2020, 09:44:40 PM>
- * Version: <63>
+ * Modified: <25/07/2020, 07:37:57 PM>
+ * Version: <149>
  */
 
 package worder.update.ui
 
+import javafx.geometry.Orientation
 import javafx.geometry.Pos
 import javafx.scene.Parent
 import javafx.scene.control.Label
+import javafx.scene.control.ScrollBar
+import javafx.scene.control.ScrollPane
+import javafx.scene.layout.VBox
+import javafx.scene.paint.Color
 import tornadofx.Fragment
+import tornadofx.bindChildren
 import tornadofx.borderpane
+import tornadofx.fitToParentSize
+import tornadofx.fitToParentWidth
+import tornadofx.hbox
 import tornadofx.label
-import tornadofx.paddingLeft
+import tornadofx.onChange
+import tornadofx.paddingAll
+import tornadofx.paddingHorizontal
 import tornadofx.progressindicator
+import tornadofx.px
 import tornadofx.scrollpane
+import tornadofx.style
+import tornadofx.textfield
 import tornadofx.vbox
 import tornadofx.visibleWhen
 import worder.core.observableStats
 import worder.database.model.WorderUpdateDB
 import worder.update.model.WordsPipeline
 import worder.update.model.impl.DefaultWordsPipeline
-import worder.update.model.impl.requesters.DevRequester
+import worder.update.model.impl.requesters.FakeRequester
 
 class WordsPipelineFragment : Fragment() {
     private val database: WorderUpdateDB by param()
-    private val pipeline: WordsPipeline = DefaultWordsPipeline.createInstance(
+    private val wordsPipeline: WordsPipeline = DefaultWordsPipeline.createInstance(
             database = database,
 //            usedRequesters = Requester.defaultRequesters,
-            usedRequesters = listOf(DevRequester()),
+//            usedRequesters = listOf(FakeRequester()),
+            usedRequesters = listOf(FakeRequester.instance),
             selectOrder = WorderUpdateDB.SelectOrder.RANDOM
     )
+    private val scrollBarUI: ScrollBar = ScrollBar().apply {
+        orientation = Orientation.VERTICAL
+    }
 
 
     override val root: Parent = borderpane {
-        center =
-                vbox(spacing = 30) {
-                    pipeline.take(3).forEach {
-                        add(find<WordBlockFragment>("block" to it))
+        center = vbox(spacing = 20) {
+            hbox {
+                fitToParentSize()
+
+                add(scrollBarUI)
+                scrollpane {
+                    fitToParentSize()
+
+                    vbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
+                    hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
+                    content = vbox(spacing = 30, alignment = Pos.BOTTOM_CENTER) {
+                        isFitToWidth = true
+                        isFitToHeight = true
+                        paddingAll = 15
+
+                        bindChildren(wordsPipeline.pipelineProperty) {
+                            find<WordBlockFragment>("block" to it).root
+                        }
+
+                        heightProperty().onChange {
+                            vvalue = 1.0
+                        }
+                    }
+
+                    scrollBarUI.apply {
+                        minProperty().bind(vminProperty())
+                        maxProperty().bind(vmaxProperty())
+                        visibleAmountProperty().bind(heightProperty().divide((content as VBox).heightProperty()))
+                        vvalueProperty().bindBidirectional(valueProperty())
                     }
                 }
+            }
+            textfield {
+                promptText = "Console Line Interface"
+                minHeight = 50.0
+
+                style {
+                    fontSize = 18.px
+                }
+            }
+        }
 
         right = vbox(spacing = 20, alignment = Pos.TOP_CENTER) {
-            paddingLeft = 300
+            paddingHorizontal = 125
             label("Requesters")
 
-            pipeline.usedRequesters.forEach {
+            wordsPipeline.usedRequesters.forEach {
                 observableStats(observableStats = it.observableStats, hideNullable = true) {
                     (children[0] as Label).graphic = progressindicator {
                         setPrefSize(20.0, 20.0)

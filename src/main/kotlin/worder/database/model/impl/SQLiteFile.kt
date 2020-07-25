@@ -4,8 +4,8 @@
  *
  * Name: <SQLiteFile.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <24/07/2020, 10:32:48 PM>
- * Version: <49>
+ * Modified: <25/07/2020, 09:50:41 PM>
+ * Version: <51>
  */
 
 package worder.database.model.impl
@@ -139,6 +139,7 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
         TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
     }
     private val skippedWords: MutableList<String> = mutableListOf()
+    private val cachedWords: MutableList<String> = mutableListOf()
 
     private var dictionaryId = -1
     private var updatedTagId = -1
@@ -279,7 +280,7 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
     private fun selectNextTxn(): Query = WordTable.slice(WordTable.columns.drop(2) + WordTable.name.lowerCase()).select {
         (WordTable.tags notLike "%$updatedTagId%" or WordTable.tags.isNull()) and
                 (WordTable.rate less 100) and
-                (WordTable.name.notInList(skippedWords)) and
+                (WordTable.name.notInList(skippedWords + cachedWords)) and
                 (WordTable.dictionaryId eq dictionaryId)
     }.limit(1)
 
@@ -295,8 +296,14 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
             "Last call of hasNextWord() returned FALSE!"
         }
 
+        val word = resultRow[WordTable.name.lowerCase()]
+        cachedWords.add(word)
+
+        if (cachedWords.size > 3)
+            cachedWords.removeAt(0)
+
         DatabaseWord(
-                name = resultRow[WordTable.name.lowerCase()],
+                name = word,
                 transcription = resultRow[WordTable.transcription],
                 rate = resultRow[WordTable.rate],
                 registered = resultRow[WordTable.register],
@@ -325,7 +332,9 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
                 wordTable[translationAddition] = updatedWord.secondaryDefinition
                 wordTable[exampleTranslation] = null
                 wordTable[tags] = resolveTagId(updatedTagId)
-                wordTable[transcription] = updatedWord.transcription
+                wordTable[transcription] = case()
+                        .When(stringLiteral(updatedWord.transcription ?: "NULL") eq "NULL", transcription)
+                        .Else(stringLiteral(updatedWord.transcription ?: "NULL"))
                 wordTable[example] = stringLiteral(updatedWord.examples.joinToString("#")).let {
                     case()
                             .When(it eq stringLiteral(""), example)

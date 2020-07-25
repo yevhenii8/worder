@@ -4,26 +4,36 @@
  *
  * Name: <WordBlockFragment.kt>
  * Created: <24/07/2020, 07:45:55 PM>
- * Modified: <24/07/2020, 11:31:26 PM>
- * Version: <62>
+ * Modified: <25/07/2020, 08:57:24 PM>
+ * Version: <108>
  */
 
 package worder.update.ui
 
+import javafx.beans.property.ListProperty
+import javafx.beans.property.SimpleListProperty
+import javafx.beans.property.SimpleObjectProperty
+import javafx.collections.ObservableList
 import javafx.geometry.Pos
 import javafx.scene.Parent
+import javafx.scene.control.ComboBox
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import tornadofx.Fragment
 import tornadofx.box
 import tornadofx.checkbox
+import tornadofx.combobox
+import tornadofx.enableWhen
 import tornadofx.hbox
 import tornadofx.hgrow
 import tornadofx.label
+import tornadofx.observableListOf
+import tornadofx.onChange
 import tornadofx.paddingVertical
 import tornadofx.px
 import tornadofx.separator
 import tornadofx.style
+import tornadofx.toObservable
 import tornadofx.tooltip
 import tornadofx.vbox
 import worder.core.formatted
@@ -35,6 +45,45 @@ import java.time.Instant
 class WordBlockFragment : Fragment() {
     private val block: WordBlock by param()
     private val word: DatabaseWord = block.originalWord
+
+    private val possibleResolutions: ObservableList<WordBlock.WordBlockResolution> = WordBlock.WordBlockResolution.values()
+            .filter { it != WordBlock.WordBlockResolution.UPDATED }
+            .toList()
+            .toObservable()
+    private val resolutionUI: ComboBox<WordBlock.WordBlockResolution> = combobox(
+            property = SimpleObjectProperty(block.resolution),
+            values = possibleResolutions
+    ) {
+        valueProperty().onChange {
+            when (it) {
+                WordBlock.WordBlockResolution.UPDATED -> block.update(
+                        primaryDefinition = selectedDefinitions.first(),
+                        secondaryDefinition = selectedDefinitions.getOrNull(1),
+                        transcription = selectedTranscription,
+                        examples = selectedExamples
+                )
+                WordBlock.WordBlockResolution.REMOVED -> block.remove()
+                WordBlock.WordBlockResolution.LEARNED -> block.learn()
+                WordBlock.WordBlockResolution.SKIPPED -> block.skip()
+            }
+        }
+    }
+
+    private var selectedTranscription: String? = block.transcriptions.firstOrNull()
+    private var selectedDefinitions: ListProperty<String> = SimpleListProperty<String>(observableListOf()).apply {
+        sizeProperty().onChange {
+            if (it > 0) {
+                if (!possibleResolutions.contains(WordBlock.WordBlockResolution.UPDATED))
+                    possibleResolutions.add(WordBlock.WordBlockResolution.UPDATED)
+                resolutionUI.value = WordBlock.WordBlockResolution.UPDATED
+            } else {
+                if (possibleResolutions.contains(WordBlock.WordBlockResolution.UPDATED))
+                    possibleResolutions.remove(WordBlock.WordBlockResolution.UPDATED)
+                resolutionUI.value = WordBlock.WordBlockResolution.NO_RESOLUTION
+            }
+        }
+    }
+    private var selectedExamples: MutableList<String> = mutableListOf()
 
 
     override val root: Parent = vbox(spacing = 10) {
@@ -90,8 +139,8 @@ class WordBlockFragment : Fragment() {
             hbox(alignment = Pos.CENTER_RIGHT) {
                 hgrow = Priority.ALWAYS
                 vbox(spacing = 5, alignment = Pos.CENTER) {
-                    worderStatusLabel(block.statusProperty)
-                    label(block.resolutionProperty)
+                    worderStatusLabel(block.statusProperty).style { fontSize = 16.px }
+                    add(resolutionUI)
                 }
             }
         }
@@ -100,7 +149,15 @@ class WordBlockFragment : Fragment() {
 
         vbox {
             block.definitions.forEachIndexed { index, definition ->
-                checkbox("${index + 1}) $definition")
+                checkbox("${index + 1}) $definition") {
+                    enableWhen(selectedDefinitions.sizeProperty().lessThan(2).or(selectedProperty()))
+                    selectedProperty().onChange {
+                        if (it)
+                            selectedDefinitions.add(text.substringAfter(')'))
+                        else
+                            selectedDefinitions.remove(text.substringAfter(')'))
+                    }
+                }
             }
         }
 
@@ -108,7 +165,14 @@ class WordBlockFragment : Fragment() {
 
         vbox {
             block.examples.forEachIndexed { index, example ->
-                checkbox("${index + 1}) $example")
+                checkbox("${index + 1}) $example") {
+                    selectedProperty().onChange {
+                        if (it)
+                            selectedExamples.add(text.substringAfter(')'))
+                        else
+                            selectedExamples.remove(text.substringAfter(')'))
+                    }
+                }
             }
         }
     }

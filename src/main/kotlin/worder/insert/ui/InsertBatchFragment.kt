@@ -4,8 +4,8 @@
  *
  * Name: <InsertBatchFragment.kt>
  * Created: <09/07/2020, 10:43:11 PM>
- * Modified: <22/07/2020, 06:11:33 PM>
- * Version: <188>
+ * Modified: <25/07/2020, 05:12:29 PM>
+ * Version: <189>
  */
 
 package worder.insert.ui
@@ -90,7 +90,7 @@ class InsertBatchFragment : Fragment() {
 
         center = vbox(spacing = 20, alignment = Pos.TOP_CENTER) {
             BorderPane.setMargin(this, Insets(0.0, 10.0, 0.0, 10.0))
-            addClass(WorderDefaultStyles.insertModel)
+            addClass(WorderDefaultStyles.insertBatch)
 
             label("INSERT BATCH")
             separator()

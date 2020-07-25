@@ -4,8 +4,8 @@
  *
  * Name: <WordBlock.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <24/07/2020, 11:08:53 PM>
- * Version: <7>
+ * Modified: <25/07/2020, 08:56:51 PM>
+ * Version: <11>
  */
 
 package worder.update.model
@@ -14,6 +14,12 @@ import javafx.beans.property.ReadOnlyProperty
 import javafx.scene.paint.Color
 import worder.core.model.WorderStatus
 import worder.database.model.DatabaseWord
+
+/**
+ * Contract note about WordBlock use:
+ * WordBlock should not be able to reset its resolution after receiving one.
+ * Only replacing with another resolution should be allowed until this block is committed by the pipeline.
+ */
 
 interface WordBlock {
     val id: String
@@ -36,7 +42,7 @@ interface WordBlock {
     fun update(
             primaryDefinition: String,
             secondaryDefinition: String?,
-            transcription: String,
+            transcription: String?,
             examples: List<String>
     )
 

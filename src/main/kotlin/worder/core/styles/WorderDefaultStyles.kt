@@ -4,8 +4,8 @@
  *
  * Name: <WorderDefaultStyles.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <24/07/2020, 10:07:05 PM>
- * Version: <113>
+ * Modified: <25/07/2020, 05:12:29 PM>
+ * Version: <123>
  */
 
 package worder.core.styles
@@ -27,14 +27,13 @@ import tornadofx.box
 import tornadofx.c
 import tornadofx.cssclass
 import tornadofx.px
-import java.util.*
 
 class WorderDefaultStyles : Stylesheet() {
     companion object {
         val statsBlock by cssclass()
         val insertUnit by cssclass()
         val insertUnits by cssclass()
-        val insertModel by cssclass()
+        val insertBatch by cssclass()
         val unitButton by cssclass()
 
         val dragDropField by cssclass()
@@ -57,6 +56,11 @@ class WorderDefaultStyles : Stylesheet() {
             backgroundRadius += box(0.px)
         }
 
+        comboBox {
+            backgroundInsets += box(0.px)
+            backgroundRadius += box(0.px)
+        }
+
         statsBlock {
             alignment = Pos.TOP_CENTER
             padding = box(15.px)
@@ -73,14 +77,14 @@ class WorderDefaultStyles : Stylesheet() {
             }
         }
 
-        insertModel {
+        insertBatch {
             text {
                 fontSize = 20.px
             }
 
             separator {
                 line {
-                    effect = DropShadow()
+                    effect = DropShadow(2.0, Color.DIMGRAY)
                 }
             }
         }

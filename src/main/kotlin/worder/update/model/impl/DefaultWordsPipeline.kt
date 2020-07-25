@@ -4,21 +4,25 @@
  *
  * Name: <DefaultWordsPipeline.kt>
  * Created: <20/07/2020, 11:22:35 PM>
- * Modified: <24/07/2020, 11:25:11 PM>
- * Version: <17>
+ * Modified: <25/07/2020, 10:07:18 PM>
+ * Version: <45>
  */
 
 package worder.update.model.impl
 
+import javafx.beans.property.ListProperty
 import javafx.beans.property.Property
+import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import tornadofx.getValue
+import tornadofx.observableListOf
+import tornadofx.onChangeOnce
 import tornadofx.setValue
 import worder.database.model.DatabaseWord
 import worder.database.model.UpdatedWord
@@ -35,7 +39,7 @@ class DefaultWordsPipeline private constructor(
         val database: WorderUpdateDB,
         override val usedRequesters: List<Requester>,
         override var selectOrder: WorderUpdateDB.SelectOrder
-) : WordsPipeline, Iterator<WordBlock> {
+) : WordsPipeline {
     companion object {
         fun createInstance(
                 database: WorderUpdateDB,
@@ -50,6 +54,18 @@ class DefaultWordsPipeline private constructor(
     private val translationRequesters = mutableSetOf<TranslationRequester>()
     private val transcriptionRequesters = mutableSetOf<TranscriptionRequester>()
 
+    override val pipelineProperty: ListProperty<WordBlock> = SimpleListProperty(observableListOf())
+    override val pipeline: MutableList<WordBlock> by pipelineProperty
+
+    override val isEmptyProperty: Property<Boolean> = SimpleObjectProperty<Boolean>(false)
+    override var isEmpty: Boolean by isEmptyProperty
+
+    private lateinit var backgroundJob: Job
+    private lateinit var current: WordBlock
+    private var readyToCommit: WordBlock? = null
+    private var next: WordBlock? = null
+    private var blocksCounter = 1
+
 
     init {
         usedRequesters.forEach {
@@ -62,20 +78,24 @@ class DefaultWordsPipeline private constructor(
             if (it is TranscriptionRequester)
                 transcriptionRequesters += it
         }
+
+        runBlocking {
+            composeNext()?.let {
+                pipeline.add(it)
+                current = it
+                backgroundJob = CoroutineScope(Dispatchers.Default).launch {
+                    next = composeNext()
+                }
+            }
+        }
     }
 
 
-    override val uncommittedBlocks: MutableList<WordBlock> = mutableListOf()
-
-    private var blocksCounter = 0
-    private var next: WordBlock? = runBlocking { composeNext() }
-    private var previous: WordBlock? = null
-    private lateinit var backgroundJob: Job
-
-
     private suspend fun composeNext(): WordBlock? {
-        if (!database.hasNextWord())
+        if (!database.hasNextWord()) {
+            isEmpty = true
             return null
+        }
 
         val dbWord = database.getNextWord(selectOrder)
         usedRequesters.forEach { it.requestWord(dbWord) }
@@ -85,7 +105,7 @@ class DefaultWordsPipeline private constructor(
         val translations = (translationRequesters.flatMap { it.translations } + dbWord.translations).distinct()
         val transcriptions = (listOf(dbWord.transcription) + transcriptionRequesters.flatMap { it.transcriptions }).filterNotNull().distinct()
 
-        return DefaultWordBlock(
+        val newBlock = DefaultWordBlock(
                 id = "${blocksCounter++}",
                 originalWord = dbWord,
                 definitions = definitions,
@@ -93,32 +113,34 @@ class DefaultWordsPipeline private constructor(
                 translations = translations,
                 transcriptions = transcriptions
         )
-    }
 
+        newBlock.apply {
+            statusProperty.onChangeOnce {
+                if (isEmpty) {
+                    backgroundJob = CoroutineScope(Dispatchers.Default).launch {
+                        readyToCommit?.commit()
+                        current.commit()
+                    }
+                    return@onChangeOnce
+                }
 
-    override fun iterator(): Iterator<WordBlock> = this
+                if (current == next || next == null)
+                    runBlocking {
+                        backgroundJob.join()
+                    }
 
-    override fun next(): WordBlock {
-        if (previous == next)
-            runBlocking {
-                backgroundJob.join()
+                pipeline.add(next!!)
+
+                backgroundJob = CoroutineScope(Dispatchers.Default).launch {
+                    readyToCommit?.commit()
+                    readyToCommit = current
+                    current = next!!
+                    next = composeNext()
+                }
             }
-
-        return next!!.also {
-            previous = next
-            backgroundJob = CoroutineScope(Dispatchers.Default).launch { next = composeNext() }
         }
-    }
 
-    override fun hasNext(): Boolean = next != null
-
-    override suspend fun commitAllBlocks() {
-        coroutineScope {
-            ArrayList(uncommittedBlocks).apply {
-                filter { it.status == WordBlock.WordBlockStatus.READY_TO_COMMIT }
-                        .forEach { launch { it.commit() } }
-            }
-        }
+        return newBlock
     }
 
 
@@ -151,10 +173,12 @@ class DefaultWordsPipeline private constructor(
                 WordBlock.WordBlockResolution.NO_RESOLUTION -> error("You can't commit block with NO_RESOLUTION!")
             }
 
-            status = WordBlock.WordBlockStatus.COMMITTED
+            MainScope().launch {
+                status = WordBlock.WordBlockStatus.COMMITTED
+            }
         }
 
-        override fun update(primaryDefinition: String, secondaryDefinition: String?, transcription: String, examples: List<String>) {
+        override fun update(primaryDefinition: String, secondaryDefinition: String?, transcription: String?, examples: List<String>) {
             if (status == WordBlock.WordBlockStatus.COMMITTED)
                 error("You can't update block with status: $status")
 
@@ -193,6 +217,5 @@ class DefaultWordsPipeline private constructor(
             resolution = WordBlock.WordBlockResolution.SKIPPED
             status = WordBlock.WordBlockStatus.READY_TO_COMMIT
         }
-
     }
 }

@@ -4,13 +4,21 @@
  *
  * Name: <WorderUpdateDB.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <06/07/2020, 07:25:08 PM>
- * Version: <3>
+ * Modified: <25/07/2020, 09:50:41 PM>
+ * Version: <4>
  */
 
 package worder.database.model
 
 import worder.core.model.BareWord
+
+/**
+ * Due to the contract notes of WordsPipeline:
+ * All classes implementing this interface should guarantee that at least 3 consequent calls of getNextWord(RANDOM) will return unique result.
+ * 3 calls of getNextWord(RANDOM) can return (apple, car, human)
+ * 4 calls of getNextWord(RANDOM) can return (apple, car, human, apple)
+ * but NEVER 3 calls of getNextWord(RANDOM) can return (apple, car, apple)
+ */
 
 interface WorderUpdateDB {
     val observableUpdaterStats: ObservableUpdaterStats

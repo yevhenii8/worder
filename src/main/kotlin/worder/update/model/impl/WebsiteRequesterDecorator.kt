@@ -4,8 +4,8 @@
  *
  * Name: <WebsiteRequesterDecorator.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <22/07/2020, 09:42:32 PM>
- * Version: <10>
+ * Modified: <25/07/2020, 08:56:51 PM>
+ * Version: <11>
  */
 
 package worder.update.model.impl
@@ -45,7 +45,7 @@ import java.util.concurrent.atomic.AtomicLong
 
 open class WebsiteRequesterDecorator(private val requester: Requester) : Requester {
     companion object {
-        private const val REQUEST_INTERVAL = 5000L
+        private const val REQUEST_INTERVAL = 3000L
         private const val REQUEST_TIMEOUT = 5000L
 
         private val client: HttpClient = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.ALWAYS).build()
