@@ -4,8 +4,8 @@
  *
  * Name: <DefaultWordsPipeline.kt>
  * Created: <20/07/2020, 11:22:35 PM>
- * Modified: <25/07/2020, 10:07:18 PM>
- * Version: <45>
+ * Modified: <26/07/2020, 06:54:11 PM>
+ * Version: <54>
  */
 
 package worder.update.model.impl
@@ -19,7 +19,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import tornadofx.getValue
 import tornadofx.observableListOf
 import tornadofx.onChangeOnce
@@ -60,6 +59,7 @@ class DefaultWordsPipeline private constructor(
     override val isEmptyProperty: Property<Boolean> = SimpleObjectProperty<Boolean>(false)
     override var isEmpty: Boolean by isEmptyProperty
 
+    private var isEmptyInternal: Boolean = false
     private lateinit var backgroundJob: Job
     private lateinit var current: WordBlock
     private var readyToCommit: WordBlock? = null
@@ -79,21 +79,24 @@ class DefaultWordsPipeline private constructor(
                 transcriptionRequesters += it
         }
 
-        runBlocking {
-            composeNext()?.let {
-                pipeline.add(it)
-                current = it
-                backgroundJob = CoroutineScope(Dispatchers.Default).launch {
-                    next = composeNext()
-                }
+        CoroutineScope(Dispatchers.Default).launch {
+            val firstBlock = composeNext()
+
+            if (firstBlock == null) {
+                isEmpty = true
+                return@launch
             }
+
+            current = firstBlock
+            backgroundJob = launch { next = composeNext() }
+            MainScope().launch { pipeline.add(current) }
         }
     }
 
 
     private suspend fun composeNext(): WordBlock? {
         if (!database.hasNextWord()) {
-            isEmpty = true
+            isEmptyInternal = true
             return null
         }
 
@@ -116,26 +119,27 @@ class DefaultWordsPipeline private constructor(
 
         newBlock.apply {
             statusProperty.onChangeOnce {
-                if (isEmpty) {
-                    backgroundJob = CoroutineScope(Dispatchers.Default).launch {
-                        readyToCommit?.commit()
-                        current.commit()
+                CoroutineScope(Dispatchers.Default).launch {
+                    if (isEmptyInternal) {
+                        backgroundJob = launch {
+                            readyToCommit?.commit()
+                            current.commit()
+                        }
+                        MainScope().launch { isEmpty = true }
+                        return@launch
                     }
-                    return@onChangeOnce
-                }
 
-                if (current == next || next == null)
-                    runBlocking {
+                    if (current == next || next == null)
                         backgroundJob.join()
+
+                    MainScope().launch { pipeline.add(next!!) }
+
+                    backgroundJob = launch {
+                        readyToCommit?.commit()
+                        readyToCommit = current
+                        current = next!!
+                        next = composeNext()
                     }
-
-                pipeline.add(next!!)
-
-                backgroundJob = CoroutineScope(Dispatchers.Default).launch {
-                    readyToCommit?.commit()
-                    readyToCommit = current
-                    current = next!!
-                    next = composeNext()
                 }
             }
         }

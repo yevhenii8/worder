@@ -4,8 +4,8 @@
  *
  * Name: <WordsPipelineFragment.kt>
  * Created: <20/07/2020, 06:26:55 PM>
- * Modified: <25/07/2020, 07:37:57 PM>
- * Version: <149>
+ * Modified: <26/07/2020, 06:56:26 PM>
+ * Version: <159>
  */
 
 package worder.update.ui
@@ -17,17 +17,17 @@ import javafx.scene.control.Label
 import javafx.scene.control.ScrollBar
 import javafx.scene.control.ScrollPane
 import javafx.scene.layout.VBox
-import javafx.scene.paint.Color
 import tornadofx.Fragment
 import tornadofx.bindChildren
 import tornadofx.borderpane
 import tornadofx.fitToParentSize
-import tornadofx.fitToParentWidth
 import tornadofx.hbox
+import tornadofx.imageview
 import tornadofx.label
 import tornadofx.onChange
 import tornadofx.paddingAll
 import tornadofx.paddingHorizontal
+import tornadofx.paddingTop
 import tornadofx.progressindicator
 import tornadofx.px
 import tornadofx.scrollpane
@@ -78,6 +78,14 @@ class WordsPipelineFragment : Fragment() {
                         heightProperty().onChange {
                             vvalue = 1.0
                         }
+
+                        wordsPipeline.isEmptyProperty.onChange {
+                            if (it == true)
+                                if (children.isNotEmpty())
+                                    label("ALL THE WORDS HAVE BEEN UPDATED :)").style { fontSize = 18.px }
+                                else
+                                    content = find<EmptyPipeline>().root
+                        }
                     }
 
                     scrollBarUI.apply {
@@ -89,7 +97,7 @@ class WordsPipelineFragment : Fragment() {
                 }
             }
             textfield {
-                promptText = "Console Line Interface"
+                promptText = "Command Line Interface"
                 minHeight = 50.0
 
                 style {
@@ -110,6 +118,16 @@ class WordsPipelineFragment : Fragment() {
                     }
                 }
             }
+        }
+    }
+
+
+    class EmptyPipeline : Fragment() {
+        override val root: Parent = vbox {
+            alignment = Pos.CENTER
+            spacing = 15.0
+            imageview("/images/empty-box.png")
+            label("NO WORDS TO UPDATE :(").style { fontSize = 18.px }
         }
     }
 }

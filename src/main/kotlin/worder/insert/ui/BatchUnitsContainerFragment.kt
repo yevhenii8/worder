@@ -4,8 +4,8 @@
  *
  * Name: <BatchUnitsContainerFragment.kt>
  * Created: <05/07/2020, 06:50:42 PM>
- * Modified: <22/07/2020, 06:09:59 PM>
- * Version: <66>
+ * Modified: <26/07/2020, 06:28:07 PM>
+ * Version: <67>
  */
 
 package worder.insert.ui
@@ -29,7 +29,9 @@ import tornadofx.onChange
 import tornadofx.paddingLeft
 import tornadofx.paddingRight
 import tornadofx.paddingTop
+import tornadofx.px
 import tornadofx.scrollpane
+import tornadofx.style
 import tornadofx.vbox
 import tornadofx.visibleWhen
 import worder.core.styles.WorderDefaultStyles
@@ -95,7 +97,7 @@ class BatchUnitsContainerFragment : Fragment() {
             spacing = 15.0
             paddingTop = 200
             imageview("/images/empty-box.png")
-            label("NO UNITS HERE :(")
+            label("NO UNITS HERE :(").style { fontSize = 18.px }
         }
     }
 }

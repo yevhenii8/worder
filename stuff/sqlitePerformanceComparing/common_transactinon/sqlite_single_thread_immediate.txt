@@ -22,4 +22,3 @@ running 1 files 3 times
  * 29 ms
  * 24 ms
  * 28 ms
-

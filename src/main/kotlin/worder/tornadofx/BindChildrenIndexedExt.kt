@@ -4,8 +4,8 @@
  *
  * Name: <BindChildrenIndexedExt.kt>
  * Created: <10/07/2020, 10:35:52 PM>
- * Modified: <10/07/2020, 10:35:52 PM>
- * Version: <1>
+ * Modified: <26/07/2020, 05:22:51 PM>
+ * Version: <2>
  */
 
 package worder.tornadofx

@@ -4,8 +4,8 @@
  *
  * Name: <WordBlock.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <25/07/2020, 08:56:51 PM>
- * Version: <11>
+ * Modified: <26/07/2020, 05:33:30 PM>
+ * Version: <13>
  */
 
 package worder.update.model
@@ -17,8 +17,8 @@ import worder.database.model.DatabaseWord
 
 /**
  * Contract note about WordBlock use:
- * WordBlock should not be able to reset its resolution after receiving one.
- * Only replacing with another resolution should be allowed until this block is committed by the pipeline.
+ * 1) WordBlock should not be able to reset its resolution after receiving one.
+ *    Only replacing with another resolution should be allowed until this block is committed by the pipeline.
  */
 
 interface WordBlock {

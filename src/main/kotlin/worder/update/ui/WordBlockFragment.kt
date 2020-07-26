@@ -4,8 +4,8 @@
  *
  * Name: <WordBlockFragment.kt>
  * Created: <24/07/2020, 07:45:55 PM>
- * Modified: <25/07/2020, 08:57:24 PM>
- * Version: <108>
+ * Modified: <26/07/2020, 06:15:05 PM>
+ * Version: <114>
  */
 
 package worder.update.ui
@@ -29,6 +29,7 @@ import tornadofx.hgrow
 import tornadofx.label
 import tornadofx.observableListOf
 import tornadofx.onChange
+import tornadofx.onChangeOnce
 import tornadofx.paddingVertical
 import tornadofx.px
 import tornadofx.separator
@@ -47,9 +48,7 @@ class WordBlockFragment : Fragment() {
     private val word: DatabaseWord = block.originalWord
 
     private val possibleResolutions: ObservableList<WordBlock.WordBlockResolution> = WordBlock.WordBlockResolution.values()
-            .filter { it != WordBlock.WordBlockResolution.UPDATED }
-            .toList()
-            .toObservable()
+            .filter { it != WordBlock.WordBlockResolution.UPDATED }.toList().toObservable()
     private val resolutionUI: ComboBox<WordBlock.WordBlockResolution> = combobox(
             property = SimpleObjectProperty(block.resolution),
             values = possibleResolutions
@@ -65,7 +64,12 @@ class WordBlockFragment : Fragment() {
                 WordBlock.WordBlockResolution.REMOVED -> block.remove()
                 WordBlock.WordBlockResolution.LEARNED -> block.learn()
                 WordBlock.WordBlockResolution.SKIPPED -> block.skip()
+                WordBlock.WordBlockResolution.NO_RESOLUTION -> error("You can't change presented resolution with NO_RESOLUTION!")
             }
+        }
+
+        valueProperty().onChangeOnce {
+            possibleResolutions.remove(WordBlock.WordBlockResolution.NO_RESOLUTION)
         }
     }
 
@@ -77,9 +81,8 @@ class WordBlockFragment : Fragment() {
                     possibleResolutions.add(WordBlock.WordBlockResolution.UPDATED)
                 resolutionUI.value = WordBlock.WordBlockResolution.UPDATED
             } else {
-                if (possibleResolutions.contains(WordBlock.WordBlockResolution.UPDATED))
-                    possibleResolutions.remove(WordBlock.WordBlockResolution.UPDATED)
-                resolutionUI.value = WordBlock.WordBlockResolution.NO_RESOLUTION
+                possibleResolutions.remove(WordBlock.WordBlockResolution.UPDATED)
+                resolutionUI.value = WordBlock.WordBlockResolution.SKIPPED
             }
         }
     }
@@ -173,6 +176,19 @@ class WordBlockFragment : Fragment() {
                             selectedExamples.remove(text.substringAfter(')'))
                     }
                 }
+            }
+        }
+    }
+
+
+    init {
+        with(block.statusProperty) {
+            if (value == WordBlock.WordBlockStatus.COMMITTED)
+                root.isDisable = true
+
+            onChange { status ->
+                if (status == WordBlock.WordBlockStatus.COMMITTED)
+                    root.isDisable = true
             }
         }
     }

@@ -132,6 +132,10 @@ class StampedFile(
             if (fileContent.startsWith("/**")) fileContent.substringBefore("*/") + "*/\n" else null
 
     private fun isStampValid(rawStamp: String): Boolean = when {
+        !fileContent.endsWith("\n") -> {
+            validationResult = "File should end with a newline: $sourceFile"
+            false
+        }
         !rawStamp.matches(regexStampPattern) -> {
             validationResult = "Invalid stamp format occurred: $sourceFile"
             false
