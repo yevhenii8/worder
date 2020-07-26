@@ -4,8 +4,8 @@
  *
  * Name: <DefaultWordsPipeline.kt>
  * Created: <20/07/2020, 11:22:35 PM>
- * Modified: <26/07/2020, 06:54:11 PM>
- * Version: <54>
+ * Modified: <26/07/2020, 10:11:46 PM>
+ * Version: <78>
  */
 
 package worder.update.model.impl
@@ -83,13 +83,20 @@ class DefaultWordsPipeline private constructor(
             val firstBlock = composeNext()
 
             if (firstBlock == null) {
-                isEmpty = true
+                MainScope().launch {
+                    isEmpty = true
+                }
                 return@launch
             }
 
             current = firstBlock
-            backgroundJob = launch { next = composeNext() }
-            MainScope().launch { pipeline.add(current) }
+            backgroundJob = launch {
+                next = composeNext()
+            }
+
+            MainScope().launch {
+                pipeline.add(current)
+            }
         }
     }
 
@@ -120,24 +127,27 @@ class DefaultWordsPipeline private constructor(
         newBlock.apply {
             statusProperty.onChangeOnce {
                 CoroutineScope(Dispatchers.Default).launch {
+                    backgroundJob.join()
+
                     if (isEmptyInternal) {
                         backgroundJob = launch {
                             readyToCommit?.commit()
-                            current.commit()
+                            MainScope().launch {
+                                isEmpty = true
+                            }
                         }
-                        MainScope().launch { isEmpty = true }
                         return@launch
                     }
-
-                    if (current == next || next == null)
-                        backgroundJob.join()
-
-                    MainScope().launch { pipeline.add(next!!) }
 
                     backgroundJob = launch {
                         readyToCommit?.commit()
                         readyToCommit = current
                         current = next!!
+
+                        MainScope().launch {
+                            pipeline.add(current)
+                        }
+
                         next = composeNext()
                     }
                 }

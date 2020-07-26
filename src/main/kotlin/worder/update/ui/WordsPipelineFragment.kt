@@ -4,8 +4,8 @@
  *
  * Name: <WordsPipelineFragment.kt>
  * Created: <20/07/2020, 06:26:55 PM>
- * Modified: <26/07/2020, 06:56:26 PM>
- * Version: <159>
+ * Modified: <26/07/2020, 10:27:52 PM>
+ * Version: <163>
  */
 
 package worder.update.ui
@@ -16,10 +16,15 @@ import javafx.scene.Parent
 import javafx.scene.control.Label
 import javafx.scene.control.ScrollBar
 import javafx.scene.control.ScrollPane
+import javafx.scene.control.TextField
 import javafx.scene.layout.VBox
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import tornadofx.Fragment
 import tornadofx.bindChildren
 import tornadofx.borderpane
+import tornadofx.button
 import tornadofx.fitToParentSize
 import tornadofx.hbox
 import tornadofx.imageview
@@ -27,7 +32,6 @@ import tornadofx.label
 import tornadofx.onChange
 import tornadofx.paddingAll
 import tornadofx.paddingHorizontal
-import tornadofx.paddingTop
 import tornadofx.progressindicator
 import tornadofx.px
 import tornadofx.scrollpane
@@ -52,6 +56,14 @@ class WordsPipelineFragment : Fragment() {
     )
     private val scrollBarUI: ScrollBar = ScrollBar().apply {
         orientation = Orientation.VERTICAL
+    }
+    private val commandLineUI: TextField = textfield {
+        promptText = "Command Line Interface"
+        minHeight = 50.0
+
+        style {
+            fontSize = 18.px
+        }
     }
 
 
@@ -81,9 +93,21 @@ class WordsPipelineFragment : Fragment() {
 
                         wordsPipeline.isEmptyProperty.onChange {
                             if (it == true)
-                                if (children.isNotEmpty())
-                                    label("ALL THE WORDS HAVE BEEN UPDATED :)").style { fontSize = 18.px }
-                                else
+                                if (children.isNotEmpty()) {
+                                    vbox(spacing = 5, alignment = Pos.CENTER) {
+                                        label("ALL THE WORDS HAVE BEEN UPDATED :)").style { fontSize = 18.px }
+                                        button("Commit the last block!") {
+                                            setOnAction {
+                                                CoroutineScope(Dispatchers.Default).launch {
+                                                    wordsPipeline.pipeline.last().commit()
+                                                }
+
+                                                isDisable = true
+                                                commandLineUI.isDisable = true
+                                            }
+                                        }
+                                    }
+                                } else
                                     content = find<EmptyPipeline>().root
                         }
                     }
@@ -96,14 +120,7 @@ class WordsPipelineFragment : Fragment() {
                     }
                 }
             }
-            textfield {
-                promptText = "Command Line Interface"
-                minHeight = 50.0
-
-                style {
-                    fontSize = 18.px
-                }
-            }
+            add(commandLineUI)
         }
 
         right = vbox(spacing = 20, alignment = Pos.TOP_CENTER) {

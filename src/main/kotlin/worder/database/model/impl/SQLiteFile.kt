@@ -4,8 +4,8 @@
  *
  * Name: <SQLiteFile.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <25/07/2020, 09:50:41 PM>
- * Version: <51>
+ * Modified: <26/07/2020, 10:40:06 PM>
+ * Version: <54>
  */
 
 package worder.database.model.impl
@@ -253,8 +253,8 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
                 .selectAll()
                 .first()
 
-        learned = resultRow[learnedColumn]!!
-        unlearned = resultRow[unlearnedColumn]!!
+        learned = resultRow[learnedColumn] ?: 0
+        unlearned = resultRow[unlearnedColumn] ?: 0
         totalAmount = resultRow[totalColumn].toInt()
     }
 

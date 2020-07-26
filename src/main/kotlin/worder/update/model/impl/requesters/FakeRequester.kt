@@ -4,8 +4,8 @@
  *
  * Name: <FakeRequester.kt>
  * Created: <24/07/2020, 07:45:55 PM>
- * Modified: <26/07/2020, 06:29:41 PM>
- * Version: <12>
+ * Modified: <26/07/2020, 08:54:52 PM>
+ * Version: <13>
  */
 
 package worder.update.model.impl.requesters
@@ -55,6 +55,6 @@ class FakeRequester : DefinitionRequester, ExampleRequester, TranscriptionReques
 
 
     override suspend fun requestWord(word: BareWord) {
-        delay(1000)
+        delay(2000)
     }
 }

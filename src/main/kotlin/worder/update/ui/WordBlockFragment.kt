@@ -4,8 +4,8 @@
  *
  * Name: <WordBlockFragment.kt>
  * Created: <24/07/2020, 07:45:55 PM>
- * Modified: <26/07/2020, 06:15:05 PM>
- * Version: <114>
+ * Modified: <26/07/2020, 10:15:16 PM>
+ * Version: <122>
  */
 
 package worder.update.ui
@@ -76,13 +76,11 @@ class WordBlockFragment : Fragment() {
     private var selectedTranscription: String? = block.transcriptions.firstOrNull()
     private var selectedDefinitions: ListProperty<String> = SimpleListProperty<String>(observableListOf()).apply {
         sizeProperty().onChange {
-            if (it > 0) {
-                if (!possibleResolutions.contains(WordBlock.WordBlockResolution.UPDATED))
+            when {
+                it > 0 && !possibleResolutions.contains(WordBlock.WordBlockResolution.UPDATED) -> {
                     possibleResolutions.add(WordBlock.WordBlockResolution.UPDATED)
-                resolutionUI.value = WordBlock.WordBlockResolution.UPDATED
-            } else {
-                possibleResolutions.remove(WordBlock.WordBlockResolution.UPDATED)
-                resolutionUI.value = WordBlock.WordBlockResolution.SKIPPED
+                }
+                it == 0 -> possibleResolutions.remove(WordBlock.WordBlockResolution.UPDATED)
             }
         }
     }
