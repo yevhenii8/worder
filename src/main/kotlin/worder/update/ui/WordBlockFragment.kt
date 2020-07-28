@@ -4,26 +4,37 @@
  *
  * Name: <WordBlockFragment.kt>
  * Created: <24/07/2020, 07:45:55 PM>
- * Modified: <26/07/2020, 10:15:16 PM>
- * Version: <122>
+ * Modified: <28/07/2020, 10:56:17 PM>
+ * Version: <270>
  */
 
 package worder.update.ui
 
-import javafx.beans.property.ListProperty
-import javafx.beans.property.SimpleListProperty
-import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.Property
+import javafx.beans.property.SimpleStringProperty
+import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
+import javafx.geometry.Orientation
 import javafx.geometry.Pos
+import javafx.geometry.VPos
 import javafx.scene.Parent
+import javafx.scene.control.Button
+import javafx.scene.control.CheckBox
 import javafx.scene.control.ComboBox
+import javafx.scene.control.Label
+import javafx.scene.control.Separator
+import javafx.scene.control.TextField
+import javafx.scene.input.KeyCode
+import javafx.scene.layout.GridPane
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import tornadofx.Fragment
+import tornadofx.bind
 import tornadofx.box
-import tornadofx.checkbox
 import tornadofx.combobox
+import tornadofx.constraintsForColumn
 import tornadofx.enableWhen
+import tornadofx.gridpane
 import tornadofx.hbox
 import tornadofx.hgrow
 import tornadofx.label
@@ -32,11 +43,15 @@ import tornadofx.onChange
 import tornadofx.onChangeOnce
 import tornadofx.paddingVertical
 import tornadofx.px
+import tornadofx.removeRow
 import tornadofx.separator
+import tornadofx.sizeProperty
 import tornadofx.style
 import tornadofx.toObservable
 import tornadofx.tooltip
+import tornadofx.usePrefWidth
 import tornadofx.vbox
+import tornadofx.warning
 import worder.core.formatted
 import worder.core.worderStatusLabel
 import worder.database.model.DatabaseWord
@@ -46,45 +61,106 @@ import java.time.Instant
 class WordBlockFragment : Fragment() {
     private val block: WordBlock by param()
     private val word: DatabaseWord = block.originalWord
+    private val possibleResolutions: ObservableList<WordBlock.WordBlockResolution>
+    private val resolutionUI: ComboBox<WordBlock.WordBlockResolution>
 
-    private val possibleResolutions: ObservableList<WordBlock.WordBlockResolution> = WordBlock.WordBlockResolution.values()
-            .filter { it != WordBlock.WordBlockResolution.UPDATED }.toList().toObservable()
-    private val resolutionUI: ComboBox<WordBlock.WordBlockResolution> = combobox(
-            property = SimpleObjectProperty(block.resolution),
-            values = possibleResolutions
-    ) {
-        valueProperty().onChange {
-            when (it) {
-                WordBlock.WordBlockResolution.UPDATED -> block.update(
-                        primaryDefinition = selectedDefinitions.first(),
-                        secondaryDefinition = selectedDefinitions.getOrNull(1),
-                        transcription = selectedTranscription,
-                        examples = selectedExamples
-                )
-                WordBlock.WordBlockResolution.REMOVED -> block.remove()
-                WordBlock.WordBlockResolution.LEARNED -> block.learn()
-                WordBlock.WordBlockResolution.SKIPPED -> block.skip()
-                WordBlock.WordBlockResolution.NO_RESOLUTION -> error("You can't change presented resolution with NO_RESOLUTION!")
+    private var chosenTranscription: String? = block.transcriptions.firstOrNull()
+    private val allExamples: MutableList<String> = ArrayList(block.examples)
+    private val chosenExamples: ObservableList<Pair<Int, Property<String>>> = observableListOf()
+    private val allDefinitions: MutableList<String> = ArrayList(block.definitions)
+    private val chosenDefinitions: ObservableList<Pair<Int, Property<String>>> = observableListOf()
+
+
+    init {
+        with(block.statusProperty) {
+            if (value == WordBlock.WordBlockStatus.COMMITTED)
+                root.isDisable = true
+
+            onChange { status ->
+                if (status == WordBlock.WordBlockStatus.COMMITTED)
+                    root.isDisable = true
             }
         }
 
-        valueProperty().onChangeOnce {
-            possibleResolutions.remove(WordBlock.WordBlockResolution.NO_RESOLUTION)
-        }
-    }
+        possibleResolutions = WordBlock.WordBlockResolution.values()
+                .filter { it != WordBlock.WordBlockResolution.UPDATED }
+                .toList()
+                .toObservable()
 
-    private var selectedTranscription: String? = block.transcriptions.firstOrNull()
-    private var selectedDefinitions: ListProperty<String> = SimpleListProperty<String>(observableListOf()).apply {
-        sizeProperty().onChange {
-            when {
-                it > 0 && !possibleResolutions.contains(WordBlock.WordBlockResolution.UPDATED) -> {
-                    possibleResolutions.add(WordBlock.WordBlockResolution.UPDATED)
+        resolutionUI = combobox(values = possibleResolutions) {
+            value = block.resolution
+
+            valueProperty().onChange { chosenResolution ->
+                when (chosenResolution) {
+                    WordBlock.WordBlockResolution.UPDATED -> block.update(
+                            primaryDefinition = allDefinitions[chosenDefinitions[0].first],
+                            secondaryDefinition = allDefinitions[chosenDefinitions[1].first],
+                            transcription = chosenTranscription,
+                            examples = chosenExamples.map { allExamples[it.first] }
+                    )
+                    WordBlock.WordBlockResolution.REMOVED -> block.remove()
+                    WordBlock.WordBlockResolution.LEARNED -> block.learn()
+                    WordBlock.WordBlockResolution.SKIPPED -> block.skip()
+                    WordBlock.WordBlockResolution.NO_RESOLUTION -> error("You can't change presented resolution with NO_RESOLUTION!")
                 }
-                it == 0 -> possibleResolutions.remove(WordBlock.WordBlockResolution.UPDATED)
+            }
+
+            valueProperty().onChangeOnce {
+                possibleResolutions.remove(WordBlock.WordBlockResolution.NO_RESOLUTION)
+            }
+        }
+
+        chosenExamples.onChange { change: ListChangeListener.Change<out Pair<Int, Property<String>>> ->
+            change.next()
+            when {
+                change.wasRemoved() -> {
+                    change.removed.forEach { it.second.value = "" }
+                    chosenExamples.forEachIndexed { index, pair ->
+                        pair.second.value = when (index + 1) {
+                            1 -> "1st"
+                            2 -> "2nd"
+                            3 -> "3rd"
+                            else -> "${index + 1}th"
+                        }
+                    }
+                }
+                change.wasAdded() -> {
+                    change.addedSubList.first().second.value = when (chosenExamples.size) {
+                        1 -> "1st"
+                        2 -> "2nd"
+                        3 -> "3rd"
+                        else -> "${chosenExamples.size}th"
+                    }
+                }
+            }
+        }
+
+        chosenDefinitions.apply {
+            sizeProperty.onChange {
+                when {
+                    it > 0 && !possibleResolutions.contains(WordBlock.WordBlockResolution.UPDATED) -> {
+                        possibleResolutions.add(WordBlock.WordBlockResolution.UPDATED)
+                    }
+                    it == 0 -> possibleResolutions.remove(WordBlock.WordBlockResolution.UPDATED)
+                }
+            }
+
+            onChange { change: ListChangeListener.Change<out Pair<Int, Property<String>>> ->
+                change.next()
+                when {
+                    change.wasRemoved() -> {
+                        change.removed.forEach { it.second.value = "" }
+                        chosenDefinitions.forEachIndexed { index, pair ->
+                            pair.second.value = if (index == 0) "1st" else "2nd"
+                        }
+                    }
+                    change.wasAdded() -> {
+                        change.addedSubList.first().second.value = if (chosenDefinitions.size == 1) "1st" else "2nd"
+                    }
+                }
             }
         }
     }
-    private var selectedExamples: MutableList<String> = mutableListOf()
 
 
     override val root: Parent = vbox(spacing = 10) {
@@ -108,7 +184,7 @@ class WordBlockFragment : Fragment() {
             vbox {
                 paddingVertical = 10
 
-                label(word.name.toUpperCase()) {
+                label("${word.name.toUpperCase()} (?)") {
                     style {
                         fontSize = 16.px
                         padding = box(0.px, 0.px, 5.px, 0.px)
@@ -148,46 +224,211 @@ class WordBlockFragment : Fragment() {
 
         separator()
 
-        vbox {
-            block.definitions.forEachIndexed { index, definition ->
-                checkbox("${index + 1}) $definition") {
-                    enableWhen(selectedDefinitions.sizeProperty().lessThan(2).or(selectedProperty()))
-                    selectedProperty().onChange {
-                        if (it)
-                            selectedDefinitions.add(text.substringAfter(')'))
-                        else
-                            selectedDefinitions.remove(text.substringAfter(')'))
-                    }
-                }
+        gridpane {
+            hgap = 5.0
+            vgap = 5.0
+
+            allDefinitions.forEachIndexed { index, definition ->
+                addDefinitionToGrid(index, definition)
             }
+
+            add(Separator(Orientation.VERTICAL), 1, 0, 1, GridPane.REMAINING)
+            constraintsForColumn(0).minWidth = 40.0
+            appendCustomDefinitionField()
         }
 
         separator()
 
-        vbox {
-            block.examples.forEachIndexed { index, example ->
-                checkbox("${index + 1}) $example") {
-                    selectedProperty().onChange {
-                        if (it)
-                            selectedExamples.add(text.substringAfter(')'))
-                        else
-                            selectedExamples.remove(text.substringAfter(')'))
-                    }
-                }
+        gridpane {
+            hgap = 5.0
+            vgap = 5.0
+
+            allExamples.forEachIndexed { rowIndex, example ->
+                addExampleToGrid(rowIndex, example)
             }
+
+            add(Separator(Orientation.VERTICAL), 1, 0, 1, GridPane.REMAINING)
+            constraintsForColumn(0).minWidth = 40.0
+            appendCustomExampleField()
         }
     }
 
 
-    init {
-        with(block.statusProperty) {
-            if (value == WordBlock.WordBlockStatus.COMMITTED)
-                root.isDisable = true
+    private fun GridPane.addExampleToGrid(rowIndex: Int, example: String, isChosen: Boolean = false) {
+        val chosenIndexProperty = SimpleStringProperty()
 
-            onChange { status ->
-                if (status == WordBlock.WordBlockStatus.COMMITTED)
-                    root.isDisable = true
+        Label().apply {
+            bind(chosenIndexProperty)
+            add(this, 0, rowIndex, 1, 1)
+            GridPane.setValignment(this, VPos.TOP)
+        }
+
+        CheckBox().apply {
+            selectedProperty().onChange {
+                val chosen = rowIndex to chosenIndexProperty
+                if (it) {
+                    chosenExamples.add(chosen)
+                } else {
+                    chosenExamples.remove(chosen)
+                }
             }
+
+            isSelected = isChosen
+            add(this, 2, rowIndex, 1, 1)
+            GridPane.setValignment(this, VPos.TOP)
+        }
+
+        Label("${rowIndex + 1})").apply {
+            usePrefWidth = true
+            add(this, 3, rowIndex, 1, 1)
+            GridPane.setValignment(this, VPos.TOP)
+        }
+
+        Label(example).apply {
+            isWrapText = true
+            add(this, 4, rowIndex, 1, 1)
+        }
+    }
+
+    private fun GridPane.appendCustomExampleField() {
+        val rowIndex = rowCount
+
+        val textField = TextField()
+        val button = Button("+").apply {
+            style {
+                padding = box(3.px)
+            }
+
+            setOnAction {
+                val input = textField.text
+
+                if (input.isBlank()) {
+                    warning("Please type something in the field!")
+                    return@setOnAction
+                }
+
+                removeRow(this)
+                addExampleToGrid(allExamples.size, input, true)
+                appendCustomExampleField()
+                allExamples.add(input)
+                textField.text = null
+            }
+
+            add(this, 2, rowIndex, 1, 1)
+        }
+
+        Label("${rowIndex + 1})").apply {
+            usePrefWidth = true
+            add(this, 3, rowIndex, 1, 1)
+        }
+
+        textField.apply {
+            promptText = "custom example"
+
+            style {
+                backgroundColor += Color.TRANSPARENT
+                padding = box(0.px)
+            }
+
+            setOnKeyPressed {
+                if (it.code == KeyCode.ENTER) {
+                    button.onAction.handle(null)
+                }
+            }
+
+            add(this, 4, rowIndex, 1, 1)
+        }
+    }
+
+    private fun GridPane.addDefinitionToGrid(rowIndex: Int, definition: String, isChosen: Boolean = false) {
+        val chosenIndexProperty = SimpleStringProperty()
+
+        Label().apply {
+            bind(chosenIndexProperty)
+            add(this, 0, rowIndex, 1, 1)
+            GridPane.setValignment(this, VPos.TOP)
+        }
+
+        val checkBox = CheckBox().apply {
+            selectedProperty().onChange {
+                val chosen = rowIndex to chosenIndexProperty
+                if (it) {
+                    chosenDefinitions.add(chosen)
+                } else {
+                    chosenDefinitions.remove(chosen)
+                }
+            }
+
+            isSelected = isChosen
+            enableWhen(chosenDefinitions.sizeProperty.lessThan(2).or(selectedProperty()))
+            add(this, 2, rowIndex, 1, 1)
+            GridPane.setValignment(this, VPos.TOP)
+        }
+
+        Label("${rowIndex + 1})").apply {
+            usePrefWidth = true
+            disableProperty().bind(checkBox.disableProperty())
+            add(this, 3, rowIndex, 1, 1)
+            GridPane.setValignment(this, VPos.TOP)
+        }
+
+        Label(definition).apply {
+            isWrapText = true
+            disableProperty().bind(checkBox.disableProperty())
+            add(this, 4, rowIndex, 1, 1)
+        }
+    }
+
+    private fun GridPane.appendCustomDefinitionField() {
+        val rowIndex = rowCount
+
+        val textField = TextField()
+        val button = Button("+").apply {
+            style {
+                padding = box(3.px)
+            }
+
+            setOnAction {
+                val input = textField.text
+
+                if (input.isBlank()) {
+                    warning("Please type something in the field!")
+                    return@setOnAction
+                }
+
+                removeRow(this)
+                addDefinitionToGrid(allDefinitions.size, input, true)
+                appendCustomDefinitionField()
+                allDefinitions.add(input)
+                textField.text = null
+            }
+
+            enableWhen(chosenDefinitions.sizeProperty.lessThan(2))
+            add(this, 2, rowIndex, 1, 1)
+        }
+
+        Label("${rowIndex + 1})").apply {
+            usePrefWidth = true
+            add(this, 3, rowIndex, 1, 1)
+            disableProperty().bind(button.disableProperty())
+        }
+
+        textField.apply {
+            promptText = "custom definition"
+
+            style {
+                backgroundColor += Color.TRANSPARENT
+                padding = box(0.px)
+            }
+
+            setOnKeyPressed {
+                if (it.code == KeyCode.ENTER) {
+                    button.onAction.handle(null)
+                }
+            }
+
+            disableProperty().bind(button.disableProperty())
+            add(this, 4, rowIndex, 1, 1)
         }
     }
 }

@@ -4,8 +4,8 @@
  *
  * Name: <FakeRequester.kt>
  * Created: <24/07/2020, 07:45:55 PM>
- * Modified: <26/07/2020, 08:54:52 PM>
- * Version: <13>
+ * Modified: <28/07/2020, 08:12:36 PM>
+ * Version: <20>
  */
 
 package worder.update.model.impl.requesters
@@ -37,11 +37,11 @@ class FakeRequester : DefinitionRequester, ExampleRequester, TranscriptionReques
     override val definitions: List<String> = listOf(
             "a place regarded in various religions as a spiritual realm of evil and suffering",
             "used to express annoyance or surprise or for emphasis",
-            "In religion and folklore, Hell is an afterlife location in which evil souls are subjected to punitive suffering, often torture as eternal punishment after death"
+            "In religion and folklore, Hell is an afterlife location in which evil souls are subjected to punitive suffering, often torture as eternal punishment after deathhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh hell end"
     )
     override val examples: List<String> = listOf(
-            "hell, no, we were all married",
-            "I've been through hell"
+            "I've been through hell",
+            "hell, no, we were all we were allwe were allwe werewe were allwe were allwe were allwe were allwe were allwe were all allwe were allwe were allwe were allwe were allwe were all ---------------- hell end"
     )
     override val translations: List<String> = listOf(
             "ад",
