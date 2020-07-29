@@ -4,37 +4,23 @@
  *
  * Name: <WordBlockFragment.kt>
  * Created: <24/07/2020, 07:45:55 PM>
- * Modified: <28/07/2020, 10:56:17 PM>
- * Version: <270>
+ * Modified: <30/07/2020, 12:18:13 AM>
+ * Version: <297>
  */
 
 package worder.update.ui
 
-import javafx.beans.property.Property
-import javafx.beans.property.SimpleStringProperty
-import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
-import javafx.geometry.Orientation
 import javafx.geometry.Pos
-import javafx.geometry.VPos
 import javafx.scene.Parent
-import javafx.scene.control.Button
-import javafx.scene.control.CheckBox
 import javafx.scene.control.ComboBox
-import javafx.scene.control.Label
-import javafx.scene.control.Separator
-import javafx.scene.control.TextField
 import javafx.scene.input.KeyCode
-import javafx.scene.layout.GridPane
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import tornadofx.Fragment
-import tornadofx.bind
+import tornadofx.asObservable
 import tornadofx.box
 import tornadofx.combobox
-import tornadofx.constraintsForColumn
-import tornadofx.enableWhen
-import tornadofx.gridpane
 import tornadofx.hbox
 import tornadofx.hgrow
 import tornadofx.label
@@ -43,15 +29,11 @@ import tornadofx.onChange
 import tornadofx.onChangeOnce
 import tornadofx.paddingVertical
 import tornadofx.px
-import tornadofx.removeRow
 import tornadofx.separator
-import tornadofx.sizeProperty
 import tornadofx.style
 import tornadofx.toObservable
 import tornadofx.tooltip
-import tornadofx.usePrefWidth
 import tornadofx.vbox
-import tornadofx.warning
 import worder.core.formatted
 import worder.core.worderStatusLabel
 import worder.database.model.DatabaseWord
@@ -60,15 +42,19 @@ import java.time.Instant
 
 class WordBlockFragment : Fragment() {
     private val block: WordBlock by param()
+    private val clFragment: CommandLineFragment by param()
+
     private val word: DatabaseWord = block.originalWord
     private val possibleResolutions: ObservableList<WordBlock.WordBlockResolution>
     private val resolutionUI: ComboBox<WordBlock.WordBlockResolution>
+    private val clHandler: ClHandler = ClHandler()
 
-    private var chosenTranscription: String? = block.transcriptions.firstOrNull()
-    private val allExamples: MutableList<String> = ArrayList(block.examples)
-    private val chosenExamples: ObservableList<Pair<Int, Property<String>>> = observableListOf()
-    private val allDefinitions: MutableList<String> = ArrayList(block.definitions)
-    private val chosenDefinitions: ObservableList<Pair<Int, Property<String>>> = observableListOf()
+    private val allDefinitions: ObservableList<String> = block.definitions.asObservable()
+    private val allExamples: ObservableList<String> = block.examples.asObservable()
+
+    private val chosenTranscription: String? = block.transcriptions.firstOrNull()
+    private val chosenDefinitions: ObservableList<Int> = observableListOf(mutableListOf())
+    private val chosenExamples: ObservableList<Int> = observableListOf(mutableListOf())
 
 
     init {
@@ -93,10 +79,10 @@ class WordBlockFragment : Fragment() {
             valueProperty().onChange { chosenResolution ->
                 when (chosenResolution) {
                     WordBlock.WordBlockResolution.UPDATED -> block.update(
-                            primaryDefinition = allDefinitions[chosenDefinitions[0].first],
-                            secondaryDefinition = allDefinitions[chosenDefinitions[1].first],
+                            primaryDefinition = allDefinitions[chosenDefinitions[0]],
+                            secondaryDefinition = if (chosenDefinitions.size > 1) allDefinitions[chosenDefinitions[1]] else null,
                             transcription = chosenTranscription,
-                            examples = chosenExamples.map { allExamples[it.first] }
+                            examples = chosenExamples.map { allExamples[it] }
                     )
                     WordBlock.WordBlockResolution.REMOVED -> block.remove()
                     WordBlock.WordBlockResolution.LEARNED -> block.learn()
@@ -110,54 +96,14 @@ class WordBlockFragment : Fragment() {
             }
         }
 
-        chosenExamples.onChange { change: ListChangeListener.Change<out Pair<Int, Property<String>>> ->
-            change.next()
+        chosenDefinitions.onChange {
+            val newSize = it.list.size
+
             when {
-                change.wasRemoved() -> {
-                    change.removed.forEach { it.second.value = "" }
-                    chosenExamples.forEachIndexed { index, pair ->
-                        pair.second.value = when (index + 1) {
-                            1 -> "1st"
-                            2 -> "2nd"
-                            3 -> "3rd"
-                            else -> "${index + 1}th"
-                        }
-                    }
+                newSize > 0 && !possibleResolutions.contains(WordBlock.WordBlockResolution.UPDATED) -> {
+                    possibleResolutions.add(WordBlock.WordBlockResolution.UPDATED)
                 }
-                change.wasAdded() -> {
-                    change.addedSubList.first().second.value = when (chosenExamples.size) {
-                        1 -> "1st"
-                        2 -> "2nd"
-                        3 -> "3rd"
-                        else -> "${chosenExamples.size}th"
-                    }
-                }
-            }
-        }
-
-        chosenDefinitions.apply {
-            sizeProperty.onChange {
-                when {
-                    it > 0 && !possibleResolutions.contains(WordBlock.WordBlockResolution.UPDATED) -> {
-                        possibleResolutions.add(WordBlock.WordBlockResolution.UPDATED)
-                    }
-                    it == 0 -> possibleResolutions.remove(WordBlock.WordBlockResolution.UPDATED)
-                }
-            }
-
-            onChange { change: ListChangeListener.Change<out Pair<Int, Property<String>>> ->
-                change.next()
-                when {
-                    change.wasRemoved() -> {
-                        change.removed.forEach { it.second.value = "" }
-                        chosenDefinitions.forEachIndexed { index, pair ->
-                            pair.second.value = if (index == 0) "1st" else "2nd"
-                        }
-                    }
-                    change.wasAdded() -> {
-                        change.addedSubList.first().second.value = if (chosenDefinitions.size == 1) "1st" else "2nd"
-                    }
-                }
+                newSize == 0 -> possibleResolutions.remove(WordBlock.WordBlockResolution.UPDATED)
             }
         }
     }
@@ -224,211 +170,120 @@ class WordBlockFragment : Fragment() {
 
         separator()
 
-        gridpane {
-            hgap = 5.0
-            vgap = 5.0
-
-            allDefinitions.forEachIndexed { index, definition ->
-                addDefinitionToGrid(index, definition)
-            }
-
-            add(Separator(Orientation.VERTICAL), 1, 0, 1, GridPane.REMAINING)
-            constraintsForColumn(0).minWidth = 40.0
-            appendCustomDefinitionField()
-        }
+        add(find<ChoosablesTableFragment>(
+                "allValues" to allDefinitions,
+                "chosenValues" to chosenDefinitions,
+                "chooseLimit" to 2
+        ))
 
         separator()
 
-        gridpane {
-            hgap = 5.0
-            vgap = 5.0
-
-            allExamples.forEachIndexed { rowIndex, example ->
-                addExampleToGrid(rowIndex, example)
-            }
-
-            add(Separator(Orientation.VERTICAL), 1, 0, 1, GridPane.REMAINING)
-            constraintsForColumn(0).minWidth = 40.0
-            appendCustomExampleField()
-        }
+        add(find<ChoosablesTableFragment>(
+                "allValues" to allExamples,
+                "chosenValues" to chosenExamples,
+                "chooseLimit" to Int.MAX_VALUE
+        ))
     }
 
 
-    private fun GridPane.addExampleToGrid(rowIndex: Int, example: String, isChosen: Boolean = false) {
-        val chosenIndexProperty = SimpleStringProperty()
+    private inner class ClHandler {
+        private var areDefinitionsSet = false
+        private var areExamplesSet = false
 
-        Label().apply {
-            bind(chosenIndexProperty)
-            add(this, 0, rowIndex, 1, 1)
-            GridPane.setValignment(this, VPos.TOP)
-        }
 
-        CheckBox().apply {
-            selectedProperty().onChange {
-                val chosen = rowIndex to chosenIndexProperty
-                if (it) {
-                    chosenExamples.add(chosen)
-                } else {
-                    chosenExamples.remove(chosen)
-                }
-            }
-
-            isSelected = isChosen
-            add(this, 2, rowIndex, 1, 1)
-            GridPane.setValignment(this, VPos.TOP)
-        }
-
-        Label("${rowIndex + 1})").apply {
-            usePrefWidth = true
-            add(this, 3, rowIndex, 1, 1)
-            GridPane.setValignment(this, VPos.TOP)
-        }
-
-        Label(example).apply {
-            isWrapText = true
-            add(this, 4, rowIndex, 1, 1)
-        }
-    }
-
-    private fun GridPane.appendCustomExampleField() {
-        val rowIndex = rowCount
-
-        val textField = TextField()
-        val button = Button("+").apply {
-            style {
-                padding = box(3.px)
-            }
-
-            setOnAction {
-                val input = textField.text
-
-                if (input.isBlank()) {
-                    warning("Please type something in the field!")
-                    return@setOnAction
-                }
-
-                removeRow(this)
-                addExampleToGrid(allExamples.size, input, true)
-                appendCustomExampleField()
-                allExamples.add(input)
-                textField.text = null
-            }
-
-            add(this, 2, rowIndex, 1, 1)
-        }
-
-        Label("${rowIndex + 1})").apply {
-            usePrefWidth = true
-            add(this, 3, rowIndex, 1, 1)
-        }
-
-        textField.apply {
-            promptText = "custom example"
-
-            style {
-                backgroundColor += Color.TRANSPARENT
-                padding = box(0.px)
-            }
-
-            setOnKeyPressed {
+        init {
+            clFragment.textField.setOnKeyPressed {
                 if (it.code == KeyCode.ENTER) {
-                    button.onAction.handle(null)
+                    clHandler.send(clFragment.textField.text ?: "")
+                    clFragment.textField.text = null
                 }
             }
 
-            add(this, 4, rowIndex, 1, 1)
-        }
-    }
+            clFragment.label.text = "DEF"
 
-    private fun GridPane.addDefinitionToGrid(rowIndex: Int, definition: String, isChosen: Boolean = false) {
-        val chosenIndexProperty = SimpleStringProperty()
-
-        Label().apply {
-            bind(chosenIndexProperty)
-            add(this, 0, rowIndex, 1, 1)
-            GridPane.setValignment(this, VPos.TOP)
+            clFragment.button.setOnAction {
+                println(allDefinitions)
+                println(chosenDefinitions)
+            }
         }
 
-        val checkBox = CheckBox().apply {
-            selectedProperty().onChange {
-                val chosen = rowIndex to chosenIndexProperty
-                if (it) {
-                    chosenDefinitions.add(chosen)
-                } else {
-                    chosenDefinitions.remove(chosen)
+
+        fun send(input: String) {
+            if (input.startsWith("--")) {
+                when (input) {
+                    "--remove" -> resolutionUI.value = WordBlock.WordBlockResolution.REMOVED
+                    "--learn" -> resolutionUI.value = WordBlock.WordBlockResolution.LEARNED
+                    "--skip" -> resolutionUI.value = WordBlock.WordBlockResolution.SKIPPED
                 }
+                return
             }
 
-            isSelected = isChosen
-            enableWhen(chosenDefinitions.sizeProperty.lessThan(2).or(selectedProperty()))
-            add(this, 2, rowIndex, 1, 1)
-            GridPane.setValignment(this, VPos.TOP)
-        }
+            if (!areDefinitionsSet) {
+                when {
+                    input.isEmpty() -> {
+                        areDefinitionsSet = chosenDefinitions.size > 0
+                    }
 
-        Label("${rowIndex + 1})").apply {
-            usePrefWidth = true
-            disableProperty().bind(checkBox.disableProperty())
-            add(this, 3, rowIndex, 1, 1)
-            GridPane.setValignment(this, VPos.TOP)
-        }
+                    input.first().isDigit() -> {
+                        val chosenIndexes = input.split(' ')
+                                .map { it.toInt() - 1 }
 
-        Label(definition).apply {
-            isWrapText = true
-            disableProperty().bind(checkBox.disableProperty())
-            add(this, 4, rowIndex, 1, 1)
-        }
-    }
+                        if (chosenIndexes.size > 2) {
+                            tornadofx.error("You can't choose more than 2 definitions! (Primary and secondary ones)")
+                            return
+                        }
 
-    private fun GridPane.appendCustomDefinitionField() {
-        val rowIndex = rowCount
+                        if (chosenIndexes.any { it >= allDefinitions.size }) {
+                            tornadofx.error("Please check your selected indexes! You can choose from 1 to ${allDefinitions.size}!")
+                            return
+                        }
 
-        val textField = TextField()
-        val button = Button("+").apply {
-            style {
-                padding = box(3.px)
-            }
+                        chosenDefinitions.addAll(chosenIndexes)
+                        areDefinitionsSet = true
+                    }
 
-            setOnAction {
-                val input = textField.text
-
-                if (input.isBlank()) {
-                    warning("Please type something in the field!")
-                    return@setOnAction
+                    else -> {
+                        allDefinitions.add(input)
+                        chosenDefinitions.add(allDefinitions.lastIndex)
+                        areDefinitionsSet = chosenDefinitions.size == 2
+                    }
                 }
 
-                removeRow(this)
-                addDefinitionToGrid(allDefinitions.size, input, true)
-                appendCustomDefinitionField()
-                allDefinitions.add(input)
-                textField.text = null
-            }
-
-            enableWhen(chosenDefinitions.sizeProperty.lessThan(2))
-            add(this, 2, rowIndex, 1, 1)
-        }
-
-        Label("${rowIndex + 1})").apply {
-            usePrefWidth = true
-            add(this, 3, rowIndex, 1, 1)
-            disableProperty().bind(button.disableProperty())
-        }
-
-        textField.apply {
-            promptText = "custom definition"
-
-            style {
-                backgroundColor += Color.TRANSPARENT
-                padding = box(0.px)
-            }
-
-            setOnKeyPressed {
-                if (it.code == KeyCode.ENTER) {
-                    button.onAction.handle(null)
+                if (areDefinitionsSet) {
+                    clFragment.label.text = "EXP"
                 }
+
+                return
             }
 
-            disableProperty().bind(button.disableProperty())
-            add(this, 4, rowIndex, 1, 1)
+            if (!areExamplesSet) {
+                when {
+                    input.isEmpty() -> {
+                        areExamplesSet = true
+                    }
+
+                    input.first().isDigit() -> {
+                        val chosenIndexes = input.split(' ')
+                                .map { it.toInt() - 1 }
+
+                        if (chosenIndexes.any { it >= allExamples.size }) {
+                            tornadofx.error("Please check your selected indexes! You can choose from 1 to ${allExamples.size}!")
+                            return
+                        }
+
+                        chosenExamples.addAll(chosenIndexes)
+                        areExamplesSet = true
+                    }
+
+                    else -> {
+                        allExamples.add(input)
+                        chosenExamples.add(allExamples.lastIndex)
+                        return
+                    }
+                }
+
+                resolutionUI.value = WordBlock.WordBlockResolution.UPDATED
+            }
         }
     }
 }

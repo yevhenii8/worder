@@ -4,8 +4,8 @@
  *
  * Name: <BindChildrenIndexedExt.kt>
  * Created: <10/07/2020, 10:35:52 PM>
- * Modified: <26/07/2020, 05:22:51 PM>
- * Version: <2>
+ * Modified: <29/07/2020, 09:54:54 PM>
+ * Version: <3>
  */
 
 package worder.tornadofx
@@ -73,6 +73,7 @@ class ListConversionListener<SourceType, TargetType>(
 
     override fun onChanged(change: ListChangeListener.Change<out SourceType>) {
         val list = targetRef.get()
+        val originalList = change.list
 
         if (list == null) {
             change.list.removeListener(this)
@@ -83,14 +84,15 @@ class ListConversionListener<SourceType, TargetType>(
             when {
                 change.wasPermutated() -> {
                     list.subList(change.from, change.to).clear()
-                    list.addAll(change.from, change.list.subList(change.from, change.to).mapIndexed(converter))
+//                    list.addAll(change.from, change.list.subList(change.from, change.to).mapIndexed(converter))
+                    list.addAll(change.from, change.list.subList(change.from, change.to).map { converter.invoke(originalList.indexOf(it), it) })
                 }
                 change.wasRemoved() -> {
                     list.subList(change.from, change.from + change.removedSize).clear()
                 }
                 change.wasAdded() -> {
-                    list.addAll(change.from, change.addedSubList.mapIndexed(converter))
-
+//                    list.addAll(change.from, change.addedSubList.mapIndexed(converter))
+                    list.addAll(change.from, change.addedSubList.map { converter.invoke(originalList.indexOf(it), it) })
                 }
             }
         }

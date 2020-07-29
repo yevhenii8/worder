@@ -4,8 +4,8 @@
  *
  * Name: <WordsPipelineFragment.kt>
  * Created: <20/07/2020, 06:26:55 PM>
- * Modified: <26/07/2020, 10:27:52 PM>
- * Version: <163>
+ * Modified: <29/07/2020, 11:12:59 PM>
+ * Version: <168>
  */
 
 package worder.update.ui
@@ -16,7 +16,6 @@ import javafx.scene.Parent
 import javafx.scene.control.Label
 import javafx.scene.control.ScrollBar
 import javafx.scene.control.ScrollPane
-import javafx.scene.control.TextField
 import javafx.scene.layout.VBox
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -36,7 +35,6 @@ import tornadofx.progressindicator
 import tornadofx.px
 import tornadofx.scrollpane
 import tornadofx.style
-import tornadofx.textfield
 import tornadofx.vbox
 import tornadofx.visibleWhen
 import worder.core.observableStats
@@ -57,14 +55,7 @@ class WordsPipelineFragment : Fragment() {
     private val scrollBarUI: ScrollBar = ScrollBar().apply {
         orientation = Orientation.VERTICAL
     }
-    private val commandLineUI: TextField = textfield {
-        promptText = "Command Line Interface"
-        minHeight = 50.0
-
-        style {
-            fontSize = 18.px
-        }
-    }
+    private val commandLineUI: CommandLineFragment = find<CommandLineFragment>()
 
 
     override val root: Parent = borderpane {
@@ -84,7 +75,7 @@ class WordsPipelineFragment : Fragment() {
                         paddingAll = 15
 
                         bindChildren(wordsPipeline.pipelineProperty) {
-                            find<WordBlockFragment>("block" to it).root
+                            find<WordBlockFragment>("block" to it, "clFragment" to commandLineUI).root
                         }
 
                         heightProperty().onChange {
@@ -92,7 +83,7 @@ class WordsPipelineFragment : Fragment() {
                         }
 
                         wordsPipeline.isEmptyProperty.onChange {
-                            if (it == true)
+                            if (it == true) {
                                 if (children.isNotEmpty()) {
                                     vbox(spacing = 5, alignment = Pos.CENTER) {
                                         label("ALL THE WORDS HAVE BEEN UPDATED :)").style { fontSize = 18.px }
@@ -103,12 +94,14 @@ class WordsPipelineFragment : Fragment() {
                                                 }
 
                                                 isDisable = true
-                                                commandLineUI.isDisable = true
+                                                commandLineUI.root.isDisable = true
                                             }
                                         }
                                     }
-                                } else
+                                } else {
                                     content = find<EmptyPipeline>().root
+                                }
+                            }
                         }
                     }
 
@@ -125,7 +118,6 @@ class WordsPipelineFragment : Fragment() {
 
         right = vbox(spacing = 20, alignment = Pos.TOP_CENTER) {
             paddingHorizontal = 125
-            label("Requesters")
 
             wordsPipeline.usedRequesters.forEach {
                 observableStats(observableStats = it.observableStats, hideNullable = true) {
