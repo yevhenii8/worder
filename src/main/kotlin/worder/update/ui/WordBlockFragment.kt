@@ -4,14 +4,14 @@
  *
  * Name: <WordBlockFragment.kt>
  * Created: <24/07/2020, 07:45:55 PM>
- * Modified: <30/07/2020, 10:49:54 PM>
- * Version: <323>
+ * Modified: <31/07/2020, 12:06:33 AM>
+ * Version: <331>
  */
 
 package worder.update.ui
 
+import javafx.collections.FXCollections
 import javafx.collections.ObservableList
-import javafx.collections.ObservableSet
 import javafx.geometry.Pos
 import javafx.scene.Parent
 import javafx.scene.control.ComboBox
@@ -20,12 +20,12 @@ import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import tornadofx.Fragment
 import tornadofx.View
-import tornadofx.asObservable
 import tornadofx.box
 import tornadofx.combobox
 import tornadofx.hbox
 import tornadofx.hgrow
 import tornadofx.label
+import tornadofx.observableListOf
 import tornadofx.onChange
 import tornadofx.onChangeOnce
 import tornadofx.paddingVertical
@@ -37,11 +37,8 @@ import tornadofx.tooltip
 import tornadofx.vbox
 import tornadofx.webview
 import worder.core.formatted
-import worder.core.lastIndex
 import worder.core.worderStatusLabel
 import worder.database.model.DatabaseWord
-import worder.tornadofx.observableLinkedHashSet
-import worder.tornadofx.onChange
 import worder.update.model.WordBlock
 import java.time.Instant
 
@@ -54,12 +51,12 @@ class WordBlockFragment : Fragment() {
     private val resolutionUI: ComboBox<WordBlock.WordBlockResolution>
     private val clHandler: ClHandler = ClHandler()
 
-    private val allDefinitions: ObservableSet<String> = block.definitions.toCollection(LinkedHashSet()).asObservable()
-    private val allExamples: ObservableSet<String> = block.examples.toCollection(LinkedHashSet()).asObservable()
+    private val allDefinitions: ObservableList<String> = FXCollections.observableList(DistinctArrayList(block.definitions))
+    private val allExamples: ObservableList<String> = FXCollections.observableList(DistinctArrayList(block.examples))
 
     private val chosenTranscription: String? = block.transcriptions.firstOrNull()
-    private val chosenDefinitions: ObservableSet<Int> = observableLinkedHashSet()
-    private val chosenExamples: ObservableSet<Int> = observableLinkedHashSet()
+    private val chosenDefinitions: ObservableList<Int> = observableListOf()
+    private val chosenExamples: ObservableList<Int> = observableListOf()
 
 
     init {
@@ -99,7 +96,7 @@ class WordBlockFragment : Fragment() {
         }
 
         chosenDefinitions.onChange {
-            val newSize = it.set.size
+            val newSize = it.list.size
 
             when {
                 newSize > 0 && !possibleResolutions.contains(WordBlock.WordBlockResolution.UPDATED) -> {
@@ -203,7 +200,7 @@ class WordBlockFragment : Fragment() {
                     }
                 }
                 button.setOnAction {
-                    find<ClHelpView>().openModal()
+                    find<WordBlockHelp>().openModal()
                 }
             }
         }
@@ -288,15 +285,25 @@ class WordBlockFragment : Fragment() {
         }
     }
 
-    internal class ClHelpView : View("Update Tab Info") {
+    internal class WordBlockHelp : View("Update Tab Info") {
         override val root: Parent = webview {
             prefWidth = 1000.0
 
-            engine.load(resources["/updateTab-help.html"])
+            engine.load(resources["/WordBlock-help.html"])
 
             widthProperty().onChange {
                 println(it)
             }
+        }
+    }
+
+    internal class DistinctArrayList<E>(c: Collection<E>) : ArrayList<E>(c) {
+        override fun add(index: Int, element: E) {
+            if (contains(element)) {
+                throw IllegalArgumentException("You can't add already present value!")
+            }
+
+            super.add(index, element)
         }
     }
 }
