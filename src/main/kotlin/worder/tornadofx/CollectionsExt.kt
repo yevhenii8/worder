@@ -4,23 +4,25 @@
  *
  * Name: <CollectionsExt.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <06/07/2020, 07:25:08 PM>
- * Version: <3>
+ * Modified: <30/07/2020, 10:49:54 PM>
+ * Version: <5>
  */
 
 package worder.tornadofx
 
 import javafx.collections.FXCollections
+import javafx.collections.ObservableList
 import javafx.collections.ObservableMap
+import javafx.collections.ObservableSet
+import javafx.collections.SetChangeListener
+import tornadofx.FX
+import tornadofx.ListConversionListener
 import java.util.*
 import kotlin.collections.HashMap
+import kotlin.collections.LinkedHashSet
 
-/**
- * Returns a new empty [ObservableMap] that is backed by a LinkedHashMap
- */
 fun <K, V> observableMapOf(): ObservableMap<K, V> = FXCollections.observableMap(LinkedHashMap())
 
-/**
- * Returns an empty new [ObservableMap] that is backed by a HashMap
- */
 fun <K, V> observableHashMapOf(): ObservableMap<K, V> = FXCollections.observableMap(HashMap())
+
+fun <E> observableLinkedHashSet(): ObservableSet<E> = FXCollections.observableSet(LinkedHashSet())

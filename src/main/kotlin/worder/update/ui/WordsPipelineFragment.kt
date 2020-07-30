@@ -4,8 +4,8 @@
  *
  * Name: <WordsPipelineFragment.kt>
  * Created: <20/07/2020, 06:26:55 PM>
- * Modified: <29/07/2020, 11:12:59 PM>
- * Version: <168>
+ * Modified: <30/07/2020, 09:35:17 PM>
+ * Version: <221>
  */
 
 package worder.update.ui
@@ -29,8 +29,8 @@ import tornadofx.hbox
 import tornadofx.imageview
 import tornadofx.label
 import tornadofx.onChange
-import tornadofx.paddingAll
 import tornadofx.paddingHorizontal
+import tornadofx.paddingVertical
 import tornadofx.progressindicator
 import tornadofx.px
 import tornadofx.scrollpane
@@ -45,6 +45,7 @@ import worder.update.model.impl.requesters.FakeRequester
 
 class WordsPipelineFragment : Fragment() {
     private val database: WorderUpdateDB by param()
+    private val commandLineUI: CommandLineFragment = find()
     private val wordsPipeline: WordsPipeline = DefaultWordsPipeline.createInstance(
             database = database,
 //            usedRequesters = Requester.defaultRequesters,
@@ -52,10 +53,6 @@ class WordsPipelineFragment : Fragment() {
             usedRequesters = listOf(FakeRequester.instance),
             selectOrder = WorderUpdateDB.SelectOrder.RANDOM
     )
-    private val scrollBarUI: ScrollBar = ScrollBar().apply {
-        orientation = Orientation.VERTICAL
-    }
-    private val commandLineUI: CommandLineFragment = find<CommandLineFragment>()
 
 
     override val root: Parent = borderpane {
@@ -63,23 +60,29 @@ class WordsPipelineFragment : Fragment() {
             hbox {
                 fitToParentSize()
 
-                add(scrollBarUI)
+                val scrollBarUI: ScrollBar = ScrollBar().apply {
+                    orientation = Orientation.VERTICAL
+                    this@hbox.add(this)
+                }
+
                 scrollpane {
                     fitToParentSize()
 
                     vbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
                     hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
+                    isFitToWidth = true
+                    paddingHorizontal = 20
+                    paddingVertical = 10
+
+
                     content = vbox(spacing = 30, alignment = Pos.BOTTOM_CENTER) {
-                        isFitToWidth = true
-                        isFitToHeight = true
-                        paddingAll = 15
+                        minHeightProperty().bind(this@scrollpane.heightProperty())
+                        heightProperty().onChange {
+                            vvalue = 1.0
+                        }
 
                         bindChildren(wordsPipeline.pipelineProperty) {
                             find<WordBlockFragment>("block" to it, "clFragment" to commandLineUI).root
-                        }
-
-                        heightProperty().onChange {
-                            vvalue = 1.0
                         }
 
                         wordsPipeline.isEmptyProperty.onChange {
@@ -118,7 +121,6 @@ class WordsPipelineFragment : Fragment() {
 
         right = vbox(spacing = 20, alignment = Pos.TOP_CENTER) {
             paddingHorizontal = 125
-
             wordsPipeline.usedRequesters.forEach {
                 observableStats(observableStats = it.observableStats, hideNullable = true) {
                     (children[0] as Label).graphic = progressindicator {

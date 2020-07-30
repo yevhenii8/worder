@@ -4,8 +4,8 @@
  *
  * Name: <UtilityExt.kt>
  * Created: <17/07/2020, 09:32:24 PM>
- * Modified: <26/07/2020, 09:13:35 PM>
- * Version: <12>
+ * Modified: <30/07/2020, 09:50:09 PM>
+ * Version: <13>
  */
 
 package worder.core
@@ -46,3 +46,6 @@ fun Double.round(decimals: Int): Double {
 }
 
 fun log(msg: String) = println("[${LocalTime.now()}] [${Thread.currentThread().name}] $msg")
+
+val <T> Set<T>.lastIndex: Int
+    get() = this.size - 1

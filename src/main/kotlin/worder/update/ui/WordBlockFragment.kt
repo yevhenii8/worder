@@ -4,13 +4,14 @@
  *
  * Name: <WordBlockFragment.kt>
  * Created: <24/07/2020, 07:45:55 PM>
- * Modified: <30/07/2020, 05:22:59 PM>
- * Version: <316>
+ * Modified: <30/07/2020, 10:49:54 PM>
+ * Version: <323>
  */
 
 package worder.update.ui
 
 import javafx.collections.ObservableList
+import javafx.collections.ObservableSet
 import javafx.geometry.Pos
 import javafx.scene.Parent
 import javafx.scene.control.ComboBox
@@ -25,7 +26,6 @@ import tornadofx.combobox
 import tornadofx.hbox
 import tornadofx.hgrow
 import tornadofx.label
-import tornadofx.observableListOf
 import tornadofx.onChange
 import tornadofx.onChangeOnce
 import tornadofx.paddingVertical
@@ -34,12 +34,14 @@ import tornadofx.separator
 import tornadofx.style
 import tornadofx.toObservable
 import tornadofx.tooltip
-import tornadofx.urlEncoded
 import tornadofx.vbox
 import tornadofx.webview
 import worder.core.formatted
+import worder.core.lastIndex
 import worder.core.worderStatusLabel
 import worder.database.model.DatabaseWord
+import worder.tornadofx.observableLinkedHashSet
+import worder.tornadofx.onChange
 import worder.update.model.WordBlock
 import java.time.Instant
 
@@ -52,19 +54,16 @@ class WordBlockFragment : Fragment() {
     private val resolutionUI: ComboBox<WordBlock.WordBlockResolution>
     private val clHandler: ClHandler = ClHandler()
 
-    private val allDefinitions: ObservableList<String> = block.definitions.asObservable()
-    private val allExamples: ObservableList<String> = block.examples.asObservable()
+    private val allDefinitions: ObservableSet<String> = block.definitions.toCollection(LinkedHashSet()).asObservable()
+    private val allExamples: ObservableSet<String> = block.examples.toCollection(LinkedHashSet()).asObservable()
 
     private val chosenTranscription: String? = block.transcriptions.firstOrNull()
-    private val chosenDefinitions: ObservableList<Int> = observableListOf(mutableListOf())
-    private val chosenExamples: ObservableList<Int> = observableListOf(mutableListOf())
+    private val chosenDefinitions: ObservableSet<Int> = observableLinkedHashSet()
+    private val chosenExamples: ObservableSet<Int> = observableLinkedHashSet()
 
 
     init {
         with(block.statusProperty) {
-            if (value == WordBlock.WordBlockStatus.COMMITTED)
-                root.isDisable = true
-
             onChange { status ->
                 if (status == WordBlock.WordBlockStatus.COMMITTED)
                     root.isDisable = true
@@ -82,10 +81,10 @@ class WordBlockFragment : Fragment() {
             valueProperty().onChange { chosenResolution ->
                 when (chosenResolution) {
                     WordBlock.WordBlockResolution.UPDATED -> block.update(
-                            primaryDefinition = allDefinitions[chosenDefinitions[0]],
-                            secondaryDefinition = if (chosenDefinitions.size > 1) allDefinitions[chosenDefinitions[1]] else null,
+                            primaryDefinition = allDefinitions.elementAt(chosenDefinitions.elementAt(0)),
+                            secondaryDefinition = if (chosenDefinitions.size > 1) allDefinitions.elementAt(chosenDefinitions.elementAt(1)) else null,
                             transcription = chosenTranscription,
-                            examples = chosenExamples.map { allExamples[it] }
+                            examples = chosenExamples.map { allExamples.elementAt(it) }
                     )
                     WordBlock.WordBlockResolution.REMOVED -> block.remove()
                     WordBlock.WordBlockResolution.LEARNED -> block.learn()
@@ -100,7 +99,7 @@ class WordBlockFragment : Fragment() {
         }
 
         chosenDefinitions.onChange {
-            val newSize = it.list.size
+            val newSize = it.set.size
 
             when {
                 newSize > 0 && !possibleResolutions.contains(WordBlock.WordBlockResolution.UPDATED) -> {
@@ -291,7 +290,8 @@ class WordBlockFragment : Fragment() {
 
     internal class ClHelpView : View("Update Tab Info") {
         override val root: Parent = webview {
-//            prefWidth = 1000.0
+            prefWidth = 1000.0
+
             engine.load(resources["/updateTab-help.html"])
 
             widthProperty().onChange {

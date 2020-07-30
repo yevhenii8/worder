@@ -4,8 +4,8 @@
  *
  * Name: <SQLiteFile.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <30/07/2020, 04:58:08 PM>
- * Version: <55>
+ * Modified: <30/07/2020, 09:34:37 PM>
+ * Version: <56>
  */
 
 package worder.database.model.impl
@@ -332,10 +332,10 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
                 wordTable[translationAddition] = updatedWord.secondaryDefinition
                 wordTable[exampleTranslation] = null
                 wordTable[tags] = resolveTagId(updatedTagId)
-                wordTable[example] = stringLiteral(updatedWord.examples.joinToString("#"))
+                wordTable[example] = if (updatedWord.examples.isNotEmpty()) updatedWord.examples.joinToString("#") else null
                 wordTable[transcription] = case()
                         .When(stringLiteral(updatedWord.transcription ?: "NULL") eq "NULL", transcription)
-                        .Else(stringLiteral(updatedWord.transcription ?: "NULL"))
+                        .Else(stringLiteral(updatedWord.transcription!!))
             }
         }
 

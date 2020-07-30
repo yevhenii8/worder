@@ -4,8 +4,8 @@
  *
  * Name: <ChoosablesTableFragment.kt>
  * Created: <29/07/2020, 07:38:48 PM>
- * Modified: <30/07/2020, 12:04:07 AM>
- * Version: <23>
+ * Modified: <30/07/2020, 11:18:53 PM>
+ * Version: <46>
  */
 
 package worder.update.ui
@@ -13,8 +13,8 @@ package worder.update.ui
 import javafx.beans.property.Property
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.collections.ListChangeListener
-import javafx.collections.ObservableList
+import javafx.collections.ObservableSet
+import javafx.collections.SetChangeListener
 import javafx.geometry.Orientation
 import javafx.geometry.VPos
 import javafx.scene.control.Button
@@ -32,42 +32,41 @@ import tornadofx.constraintsForColumn
 import tornadofx.enableWhen
 import tornadofx.getValue
 import tornadofx.gridpane
-import tornadofx.observableListOf
 import tornadofx.onChange
 import tornadofx.px
 import tornadofx.setValue
-import tornadofx.sizeProperty
 import tornadofx.style
 import tornadofx.usePrefWidth
 import tornadofx.warning
-import worder.tornadofx.bind
+import worder.core.lastIndex
+import worder.tornadofx.bindIndexed
+import worder.tornadofx.observableLinkedHashSet
+import worder.tornadofx.onChange
+import worder.tornadofx.sizeProperty
 
 class ChoosablesTableFragment : Fragment() {
-    private val allValues: ObservableList<String> by param()
-    private val chosenValues: ObservableList<Int> by param()
+    private val allValues: ObservableSet<String> by param()
+    private val chosenValues: ObservableSet<Int> by param()
     private val chooseLimit: Int by param()
 
-    private val choosables: ObservableList<Choosable> = observableListOf(mutableListOf())
-    private val chosen: ObservableList<Choosable> = observableListOf(mutableListOf())
+    private val choosables: ObservableSet<Choosable> = observableLinkedHashSet()
+    private val chosen: ObservableSet<Choosable> = observableLinkedHashSet()
 
 
     init {
         choosables.apply {
-            bind(allValues) { index, value ->
+            bindIndexed(allValues) { index, value ->
                 Choosable(index, value)
             }
 
-            onChange { change: ListChangeListener.Change<out Choosable> ->
-                if (change.next() && change.wasAdded()) {
+            onChange { change: SetChangeListener.Change<out Choosable> ->
+                if (change.wasAdded()) {
                     root.apply {
                         children.removeIf {
                             GridPane.getRowIndex(it) == (rowCount - 1)
                         }
 
-                        change.addedSubList.forEach { newChoosable ->
-                            putChoosable(newChoosable)
-                        }
-
+                        putChoosable(change.elementAdded)
                         appendCustomValueField()
                     }
                 }
@@ -75,8 +74,8 @@ class ChoosablesTableFragment : Fragment() {
         }
 
         chosen.apply {
-            bind(chosenValues) { chosenIndex, originalIndex ->
-                choosables[originalIndex].also {
+            bindIndexed(chosenValues) { chosenIndex, originalIndex ->
+                choosables.elementAt(originalIndex).also {
                     it.isChosen = true
                     it.chosenOrdinal = when (chosenIndex + 1) {
                         1 -> "1st"
@@ -87,11 +86,11 @@ class ChoosablesTableFragment : Fragment() {
                 }
             }
 
-            onChange { change: ListChangeListener.Change<out Choosable> ->
-                if (change.next() && change.wasRemoved()) {
-                    change.removed.forEach {
-                        it.chosenOrdinal = ""
-                        it.isChosen = false
+            onChange { change: SetChangeListener.Change<out Choosable> ->
+                if (change.wasRemoved()) {
+                    change.elementRemoved.apply {
+                        chosenOrdinal = ""
+                        isChosen = false
                     }
 
                     forEachIndexed { chosenIndex, choosable ->
@@ -213,7 +212,7 @@ class ChoosablesTableFragment : Fragment() {
         init {
             isChosenProperty.onChange {
                 when {
-                    it!! && !chosenValues.contains(index) -> chosenValues.add(index)
+                    it == true && !chosenValues.contains(index) -> chosenValues.add(index)
                     it == false -> chosenValues.remove(index)
                 }
             }

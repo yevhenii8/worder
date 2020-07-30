@@ -4,8 +4,8 @@
  *
  * Name: <ComponentsExt.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <10/07/2020, 10:35:52 PM>
- * Version: <6>
+ * Modified: <30/07/2020, 10:49:54 PM>
+ * Version: <7>
  */
 
 package worder.tornadofx
@@ -18,17 +18,6 @@ import tornadofx.UIComponent
 import tornadofx.bind
 import tornadofx.getChildList
 
-/*
-There's no extension function for bindComponents(ObservableList): [ISSUE IS NEEDED]
-So, had to put some workarounds instead
- */
-
-
-/**
- * Bind the children of this Layout node to the given observable set of items by converting
- * them into UIComponents via the given converter function. Changes to the source set will be reflected
- * in the children list of this layout node.
- */
 inline fun <reified T> EventTarget.bindComponents(
         sourceSet: ObservableSet<T>,
         noinline converter: (T) -> UIComponent
@@ -36,11 +25,6 @@ inline fun <reified T> EventTarget.bindComponents(
     "Unable to extract child nodes from $this"
 }
 
-
-/**
- * Replaces Node's children with provided UI Components
- * Analogue of fun EventTarget.add(uiComponent: UIComponent) = plusAssign(uiComponent.root)
- */
 fun EventTarget.replaceChildren(vararg uiComponent: UIComponent) {
     val children = requireNotNull(getChildList()) { "This node doesn't have a child list" }
     children.clear()

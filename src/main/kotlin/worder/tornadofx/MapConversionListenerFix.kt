@@ -4,8 +4,8 @@
  *
  * Name: <MapConversionListenerFix.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <22/07/2020, 03:21:46 PM>
- * Version: <8>
+ * Modified: <30/07/2020, 10:49:54 PM>
+ * Version: <9>
  */
 
 package worder.tornadofx
@@ -19,17 +19,6 @@ import tornadofx.FX
 import tornadofx.getChildList
 import java.lang.ref.WeakReference
 
-/*
-Children's binding to map doesn't work due to https://github.com/edvin/tornadofx2/issues/8
-So, had to put some workarounds instead
- */
-
-
-/**
- * Bind the children of this Layout node to the given observable map of items
- * by converting them into nodes via the given converter function.
- * Changes to the source map will be reflected in the children list of this layout node.
- */
 inline fun <reified K, reified V> EventTarget.bindChildren(
         sourceMap: ObservableMap<K, V>,
         noinline converter: (K, V) -> Node,
@@ -38,11 +27,6 @@ inline fun <reified K, reified V> EventTarget.bindChildren(
         getChildList()?.bind(sourceMap, sourceMapFilter, converter)
 ) { "Unable to extract child nodes from $this" }
 
-
-/**
- * Bind this map to the given observable list by converting them into the correct type via the given converter.
- * Changes to the observable list are synced.
- */
 fun <SourceTypeKey, SourceTypeValue, TargetType> MutableList<TargetType>.bind(
         sourceMap: ObservableMap<SourceTypeKey, SourceTypeValue>,
         sourceMapFilter: ((SourceTypeKey, SourceTypeValue) -> Boolean)?,
@@ -63,11 +47,6 @@ fun <SourceTypeKey, SourceTypeValue, TargetType> MutableList<TargetType>.bind(
     return sourceMapListener
 }
 
-
-/**
- * Listens to changes on a Map of SourceTypeKey to SourceTypeValue and keeps the target list synced by converting
- * each object into the TargetType via the supplied converter.
- */
 class MapConversionListener<SourceTypeKey, SourceTypeValue, TargetType>(
         targetList: MutableList<TargetType>,
         sourceMap: ObservableMap<SourceTypeKey, SourceTypeValue>,

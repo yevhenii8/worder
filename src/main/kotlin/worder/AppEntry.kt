@@ -4,8 +4,8 @@
  *
  * Name: <AppEntry.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <30/07/2020, 05:20:59 PM>
- * Version: <107>
+ * Modified: <30/07/2020, 07:06:48 PM>
+ * Version: <108>
  */
 
 package worder
@@ -110,7 +110,7 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class) {
 
         mappedArgs.apply {
             if (size > 0)
-                mainView.title += " ${keys.joinToString(" ")}"
+                mainView.title += " (${keys.joinToString(" ")})"
             forEach { it.value!!.action.invoke() }
         }
     }
