@@ -4,8 +4,8 @@
  *
  * Name: <WordBlockFragment.kt>
  * Created: <24/07/2020, 07:45:55 PM>
- * Modified: <30/07/2020, 12:18:13 AM>
- * Version: <297>
+ * Modified: <30/07/2020, 05:22:59 PM>
+ * Version: <316>
  */
 
 package worder.update.ui
@@ -18,6 +18,7 @@ import javafx.scene.input.KeyCode
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import tornadofx.Fragment
+import tornadofx.View
 import tornadofx.asObservable
 import tornadofx.box
 import tornadofx.combobox
@@ -33,7 +34,9 @@ import tornadofx.separator
 import tornadofx.style
 import tornadofx.toObservable
 import tornadofx.tooltip
+import tornadofx.urlEncoded
 import tornadofx.vbox
+import tornadofx.webview
 import worder.core.formatted
 import worder.core.worderStatusLabel
 import worder.database.model.DatabaseWord
@@ -192,18 +195,17 @@ class WordBlockFragment : Fragment() {
 
 
         init {
-            clFragment.textField.setOnKeyPressed {
-                if (it.code == KeyCode.ENTER) {
-                    clHandler.send(clFragment.textField.text ?: "")
-                    clFragment.textField.text = null
+            clFragment.apply {
+                label.text = "DEF"
+                textField.setOnKeyPressed {
+                    if (it.code == KeyCode.ENTER) {
+                        clHandler.send(clFragment.textField.text ?: "")
+                        clFragment.textField.text = null
+                    }
                 }
-            }
-
-            clFragment.label.text = "DEF"
-
-            clFragment.button.setOnAction {
-                println(allDefinitions)
-                println(chosenDefinitions)
+                button.setOnAction {
+                    find<ClHelpView>().openModal()
+                }
             }
         }
 
@@ -214,6 +216,7 @@ class WordBlockFragment : Fragment() {
                     "--remove" -> resolutionUI.value = WordBlock.WordBlockResolution.REMOVED
                     "--learn" -> resolutionUI.value = WordBlock.WordBlockResolution.LEARNED
                     "--skip" -> resolutionUI.value = WordBlock.WordBlockResolution.SKIPPED
+                    "--help" -> clFragment.button.onAction.handle(null)
                 }
                 return
             }
@@ -239,7 +242,7 @@ class WordBlockFragment : Fragment() {
                         }
 
                         chosenDefinitions.addAll(chosenIndexes)
-                        areDefinitionsSet = true
+                        areDefinitionsSet = chosenDefinitions.size == 2
                     }
 
                     else -> {
@@ -272,7 +275,6 @@ class WordBlockFragment : Fragment() {
                         }
 
                         chosenExamples.addAll(chosenIndexes)
-                        areExamplesSet = true
                     }
 
                     else -> {
@@ -283,6 +285,17 @@ class WordBlockFragment : Fragment() {
                 }
 
                 resolutionUI.value = WordBlock.WordBlockResolution.UPDATED
+            }
+        }
+    }
+
+    internal class ClHelpView : View("Update Tab Info") {
+        override val root: Parent = webview {
+//            prefWidth = 1000.0
+            engine.load(resources["/updateTab-help.html"])
+
+            widthProperty().onChange {
+                println(it)
             }
         }
     }

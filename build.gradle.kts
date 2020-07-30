@@ -38,7 +38,7 @@ application {
 
     javafx {
         version = "14"
-        modules("javafx.controls", "javafx.graphics")
+        modules("javafx.controls", "javafx.graphics", "javafx.web")
     }
 }
 

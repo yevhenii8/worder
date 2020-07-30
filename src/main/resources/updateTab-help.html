@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            padding: 10px;
+        }
+        ol {
+            margin: 0;
+            padding-left: 15px;
+        }
+
+        dt {
+            padding-top: 10px;
+        }
+
+        dd {
+            padding-top: 5px;
+        }
+
+        h2 {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+
+<h2>Command Line Interface</h2>
+<p>Initially, Worder was a Java CLI application, then a Kotlin CLI application. As for now it's a GUI one :) But utilizing CLI is still the most
+    convenient and a very handy way to choose a resolution for WordBlocks. Some important notes here are: </p>
+<ul>
+    <li>CLI is only connected to the current NO_RESOLUTION block.</li>
+    <li>When first resolution received, you can only change it through GUI.</li>
+</ul>
+
+<p>The intended way of using CLI is the next: you choose DEF (definition(s)), EXP (example(s)) and then CLI sets WordBlock's resolution to UPDATED.
+    You can select from proposed options (using their indexes) or from the custom ones. Also, you can combine proposed and custom in any way.</p>
+<dl>
+    <dt>Possible ways to choose definition(s) - DEF?</dt>
+    <dd>
+        <ol>
+            <li>Two proposed: (i1 i2) -> (ENTER)</li>
+            <li>Two custom: (c1) -> (ENTER) -> (c2) -> (ENTER)</li>
+            <li>Only proposed: (i1) -> (ENTER) -> (ENTER)</li>
+            <li>Only custom: (c1) -> (ENTER) -> (ENTER)</li>
+            <li>Proposed and custom: (i1) -> (ENTER) -> (c1) -> (ENTER)</li>
+            <li>Custom and proposed: (c1) -> (ENTER) -> (i1) -> (ENTER)</li>
+        </ol>
+    </dd>
+
+    <dt>Possible ways to choose example(s) - EXP?</dt>
+    <dd>
+        <ol>
+            <li>No example: (ENTER)</li>
+            <li>One or more proposed: (i1 i2 i3 ... in) -> (ENTER) -> (ENTER)</li>
+            <li>One or more custom: (c1) -> (ENTER) -> (c2) -> (ENTER) -> ... -> (ENTER) -> (ENTER)</li>
+            <li>Proposed and custom: (i1) -> (ENTER) -> (c1) -> (ENTER) -> ... -> (ENTER) -> (ENTER)</li>
+            <li>Custom and proposed: (c1) -> (ENTER) -> (i1) -> (ENTER) -> ... -> (ENTER) -> (ENTER)</li>
+        </ol>
+    </dd>
+
+    <dt>At any moment (DEF or EXP stages) you can set another resolution or ask for help:</dt>
+    <dd>
+        <ol>
+            <li>--remove -> immediately sets Removed resolution</li>
+            <li>--learn -> immediately sets Learned resolution</li>
+            <li>--skip -> immediately sets Skipped resolution</li>
+            <li>--help -> displays this help message</li>
+        </ol>
+    </dd>
+</dl>
+
+
+<h2>Update Tab Guide</h2>
+<p>To update a word means to pick up a non-updated word from your database, request all possible transcriptions, definitions and examples from the
+    present Requesters. Then to compose a WordBlock which allows you to choose definitions and examples for the word and consequently update the word
+    in database.</p>
+
+<dl>
+    <dt>Which words will Worder pick up for updating?</dt>
+    <dd>
+        <ol>
+            <li>It doesn't not have worder's #updated Tag.</li>
+            <li>Its rate &lt; 100, so it's unlearned word.</li>
+            <li>It was not skipped in current session.</li>
+        </ol>
+    </dd>
+
+    <dt>Can I configure pick-up criteria?</dt>
+    <dd>As for now - No.</dd>
+
+    <dt>Which actions are available for WordBlock?</dt>
+    <dd>
+        <ol>
+            <li>Update</li>
+            <li>Set Removed</li>
+            <li>Set Learned</li>
+            <li>Set Skipped</li>
+        </ol>
+    </dd>
+
+    <dt>What I need to choose in order to update a word?</dt>
+    <dd>
+        <ol>
+            <li>You have to choose only one (primary) definition. Secondary is optional.</li>
+            <li>You can also choose zero or more (unlimited) count of examples.</li>
+            <li>Transcription is picked up automatically, preferring the present one.</li>
+        </ol>
+    </dd>
+</dl>
+
+
+</body>
+</html>

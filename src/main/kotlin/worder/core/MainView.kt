@@ -4,8 +4,8 @@
  *
  * Name: <MainView.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <22/07/2020, 06:45:18 PM>
- * Version: <14>
+ * Modified: <30/07/2020, 05:10:55 PM>
+ * Version: <17>
  */
 
 package worder.core
@@ -20,6 +20,7 @@ import tornadofx.drawer
 import tornadofx.hbox
 import tornadofx.hyperlink
 import tornadofx.imageview
+import worder.AppEntry
 import worder.core.styles.WorderDefaultStyles
 import worder.database.DatabaseTabView
 import worder.insert.InsertTabView

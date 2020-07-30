@@ -4,8 +4,8 @@
  *
  * Name: <AppEntry.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <26/07/2020, 10:40:21 PM>
- * Version: <97>
+ * Modified: <30/07/2020, 05:20:59 PM>
+ * Version: <107>
  */
 
 package worder
@@ -35,6 +35,7 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class) {
                 File("$samplePath/inserting/words5.txt")
         )
 
+        val mainView: MainView = find()
         val sampleDB: File = samplePath.resolve("sample-db_TMP.bck").toFile()
         val isConnectedToSample: Boolean
             get() = databaseController.db?.toString()?.substringAfterLast('/') == sampleDB.name
@@ -58,7 +59,7 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class) {
         fun runDevSample() = withSampleDB { }
 
         fun runDevInsert() = withSampleDB {
-            find<MainView>().switchToInsertTab()
+            mainView.switchToInsertTab()
             find<InsertController>().generateInsertBatch(devInsertFiles)
         }
 
@@ -69,12 +70,12 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class) {
                 }
             }
 
-            find<MainView>().switchToInsertTab()
+            mainView.switchToInsertTab()
             find<InsertController>().generateInsertBatch(devInsertFilesMany)
         }
 
         fun runDevUpdate() = withSampleDB {
-            find<MainView>().switchToUpdateTab()
+            mainView.switchToUpdateTab()
         }
     }
 
@@ -107,10 +108,15 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class) {
             "Unexpected argument(s) has been passed! ${mappedArgs.filterValues { it == null }.keys}"
         }
 
-        mappedArgs.forEach { it.value!!.action.invoke() }
+        mappedArgs.apply {
+            if (size > 0)
+                mainView.title += " ${keys.joinToString(" ")}"
+            forEach { it.value!!.action.invoke() }
+        }
     }
 
 
+    @Suppress("unused")
     enum class WorderArgument(val value: String, val description: String, val action: () -> Unit) {
         DEV_DATABASE("--dev-sample", "Automatically connects to the sampleDB.", AppEntry.Companion::runDevSample),
         DEV_INSERT("--dev-insert", "Development stage for the Insert Tab.", AppEntry.Companion::runDevInsert),
