@@ -62,7 +62,7 @@ tasks {
             "updateFileStamps",
             projectDir.resolve("src"),
             listOf(".kt", ".kts")
-    ).apply {
-        compileKotlin.get().dependsOn(this.get())
+    ).also {
+        compileKotlin.get().dependsOn(it.get())
     }
 }
