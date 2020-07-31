@@ -4,24 +4,33 @@
  *
  * Name: <UpdateTabView.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <24/07/2020, 07:46:58 PM>
- * Version: <9>
+ * Modified: <31/07/2020, 10:09:31 PM>
+ * Version: <13>
  */
 
 package worder.update
 
 import javafx.scene.Parent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import tornadofx.View
 import tornadofx.stackpane
 import worder.database.DatabaseController
 import worder.database.DatabaseEventListener
 import worder.database.model.WorderDB
+import worder.database.model.WorderUpdateDB
 import worder.database.ui.NoConnectionFragment
 import worder.tornadofx.replaceChildren
+import worder.update.model.WordBlock
+import worder.update.model.WordsPipeline
+import worder.update.model.impl.DefaultWordsPipeline
+import worder.update.model.impl.requesters.FakeRequester
 import worder.update.ui.WordsPipelineFragment
 
 class UpdateTabView : View("Update"), DatabaseEventListener {
     private val notConnectedFragment = find<NoConnectionFragment>()
+    lateinit var wordsPipeline: WordsPipeline
 
 
     override val root: Parent = stackpane()
@@ -32,7 +41,25 @@ class UpdateTabView : View("Update"), DatabaseEventListener {
     }
 
 
-    override fun onDatabaseConnection(db: WorderDB) = root.replaceChildren(find<WordsPipelineFragment>("database" to db.updater))
+    override fun onDatabaseConnection(db: WorderDB) {
+        wordsPipeline = DefaultWordsPipeline.createInstance(
+                database = db.updater,
+                //usedRequesters = Requester.defaultRequesters,
+                //usedRequesters = listOf(FakeRequester()),
+                usedRequesters = listOf(FakeRequester.instance),
+                selectOrder = WorderUpdateDB.SelectOrder.RANDOM
+        )
+
+        root.replaceChildren(find<WordsPipelineFragment>("wordsPipeline" to wordsPipeline))
+    }
 
     override fun onDatabaseDisconnection() = root.replaceChildren(notConnectedFragment)
+
+    fun commitLast() {
+        CoroutineScope(Dispatchers.Default).launch {
+            wordsPipeline.pipeline
+                    .filter { it.status == WordBlock.WordBlockStatus.READY_TO_COMMIT }
+                    .forEach { it.commit() }
+        }
+    }
 }

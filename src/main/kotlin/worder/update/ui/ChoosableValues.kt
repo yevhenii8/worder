@@ -4,8 +4,8 @@
  *
  * Name: <ChoosableValues.kt>
  * Created: <31/07/2020, 04:56:09 PM>
- * Modified: <31/07/2020, 05:08:11 PM>
- * Version: <4>
+ * Modified: <31/07/2020, 07:41:22 PM>
+ * Version: <7>
  */
 
 package worder.update.ui
@@ -86,11 +86,16 @@ class ChoosableValues<E>(initValues: Collection<E> = emptyList(), val chooseLimi
 
             isChosenProperty.onChange {
                 when {
-                    it == true && chosenIndex == null && chosenChoosables.size < chooseLimit -> {
+                    it == true && chosenIndex == null -> {
+                        if (chosenChoosables.size == chooseLimit) {
+                            isChosen = false
+                            throw IllegalStateException("Only $chooseLimit values can be chosen for this values set!")
+                        }
+
                         chosenChoosables.add(this)
                         chosenIndex = chosenChoosables.lastIndex
                     }
-                    it == false -> {
+                    it == false && chosenIndex != null -> {
                         chosenChoosables.removeAt(chosenIndex!!)
                         chosenOrdinal = ""
                         chosenIndex = null

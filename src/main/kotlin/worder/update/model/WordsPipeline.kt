@@ -4,8 +4,8 @@
  *
  * Name: <WordsPipeline.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <26/07/2020, 05:22:51 PM>
- * Version: <8>
+ * Modified: <31/07/2020, 10:31:00 PM>
+ * Version: <10>
  */
 
 package worder.update.model
@@ -26,8 +26,11 @@ interface WordsPipeline {
     val pipelineProperty: ReadOnlyListProperty<WordBlock>
     val pipeline: List<WordBlock>
 
-    val isEmptyProperty: ReadOnlyProperty<Boolean>
-    val isEmpty: Boolean
+    val isConsumedProperty: ReadOnlyProperty<Boolean>
+    val isConsumed: Boolean
+
+    val isCommittedProperty: ReadOnlyProperty<Boolean>
+    val isCommitted: Boolean
 
     val usedRequesters: List<Requester>
     var selectOrder: WorderUpdateDB.SelectOrder

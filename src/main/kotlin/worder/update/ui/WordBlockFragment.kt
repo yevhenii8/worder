@@ -4,8 +4,8 @@
  *
  * Name: <WordBlockFragment.kt>
  * Created: <24/07/2020, 07:45:55 PM>
- * Modified: <31/07/2020, 06:08:32 PM>
- * Version: <339>
+ * Modified: <31/07/2020, 10:31:00 PM>
+ * Version: <357>
  */
 
 package worder.update.ui
@@ -33,10 +33,12 @@ import tornadofx.style
 import tornadofx.toObservable
 import tornadofx.tooltip
 import tornadofx.vbox
+import tornadofx.warning
 import tornadofx.webview
 import worder.core.formatted
 import worder.core.worderStatusLabel
 import worder.database.model.DatabaseWord
+import worder.update.UpdateTabView
 import worder.update.model.WordBlock
 import java.time.Instant
 
@@ -50,7 +52,9 @@ class WordBlockFragment : Fragment() {
     private val clHandler: ClHandler = ClHandler()
 
     private val choosableDefinitions: ChoosableValues<String> = ChoosableValues(block.definitions, chooseLimit = 2)
+    private val chosenDefinitions = choosableDefinitions.chosenValues
     private val choosableExamples: ChoosableValues<String> = ChoosableValues(block.examples)
+    private val chosenExamples = choosableExamples.chosenValues
 
 
     init {
@@ -72,10 +76,10 @@ class WordBlockFragment : Fragment() {
             valueProperty().onChange { chosenResolution ->
                 when (chosenResolution) {
                     WordBlock.WordBlockResolution.UPDATED -> block.update(
-                            primaryDefinition = choosableDefinitions.chosenValues[0],
-                            secondaryDefinition = if (choosableDefinitions.chosenValues.size > 1) choosableDefinitions.chosenValues[1] else null,
+                            primaryDefinition = chosenDefinitions[0],
+                            secondaryDefinition = if (chosenDefinitions.size > 1) chosenDefinitions[1] else null,
                             transcription = block.transcriptions.firstOrNull(),
-                            examples = choosableExamples.chosenValues
+                            examples = chosenExamples
                     )
                     WordBlock.WordBlockResolution.REMOVED -> block.remove()
                     WordBlock.WordBlockResolution.LEARNED -> block.learn()
@@ -89,7 +93,7 @@ class WordBlockFragment : Fragment() {
             }
         }
 
-        choosableDefinitions.chosenValues.onChange {
+        chosenDefinitions.onChange {
             val size = it.list.size
 
             when {
@@ -185,7 +189,7 @@ class WordBlockFragment : Fragment() {
                         clFragment.textField.text = null
                     }
                 }
-                button.setOnAction {
+                helpButton.setOnAction {
                     find<WordBlockHelp>().openModal()
                 }
             }
@@ -198,88 +202,95 @@ class WordBlockFragment : Fragment() {
                     "--remove" -> resolutionUI.value = WordBlock.WordBlockResolution.REMOVED
                     "--learn" -> resolutionUI.value = WordBlock.WordBlockResolution.LEARNED
                     "--skip" -> resolutionUI.value = WordBlock.WordBlockResolution.SKIPPED
-                    "--help" -> clFragment.button.onAction.handle(null)
+                    "--commit" -> find<UpdateTabView>().commitLast()
+                    "--help" -> clFragment.helpButton.onAction.handle(null)
                 }
                 return
             }
 
-//            if (!areDefinitionsSet) {
-//                when {
-//                    input.isEmpty() -> {
-//                        areDefinitionsSet = chosenDefinitions.size > 0
-//                    }
-//
-//                    input.first().isDigit() -> {
-//                        val chosenIndexes = input.split(' ')
-//                                .map { it.toInt() - 1 }
-//
-//                        if (chosenIndexes.size > 2) {
-//                            tornadofx.error("You can't choose more than 2 definitions! (Primary and secondary ones)")
-//                            return
-//                        }
-//
-//                        if (chosenIndexes.any { it >= allDefinitions.size }) {
-//                            tornadofx.error("Please check your selected indexes! You can choose from 1 to ${allDefinitions.size}!")
-//                            return
-//                        }
-//
-//                        chosenDefinitions.addAll(chosenIndexes)
-//                        areDefinitionsSet = chosenDefinitions.size == 2
-//                    }
-//
-//                    else -> {
-//                        allDefinitions.add(input)
-//                        chosenDefinitions.add(allDefinitions.lastIndex)
-//                        areDefinitionsSet = chosenDefinitions.size == 2
-//                    }
-//                }
-//
-//                if (areDefinitionsSet) {
-//                    clFragment.label.text = "EXP"
-//                }
-//
-//                return
-//            }
+            if (!areDefinitionsSet) {
+                when {
+                    input.isEmpty() -> {
+                        areDefinitionsSet = chosenDefinitions.size > 0
+                    }
 
-//            if (!areExamplesSet) {
-//                when {
-//                    input.isEmpty() -> {
-//                        areExamplesSet = true
-//                    }
-//
-//                    input.first().isDigit() -> {
-//                        val chosenIndexes = input.split(' ')
-//                                .map { it.toInt() - 1 }
-//
-//                        if (chosenIndexes.any { it >= allExamples.size }) {
-//                            tornadofx.error("Please check your selected indexes! You can choose from 1 to ${allExamples.size}!")
-//                            return
-//                        }
-//
-//                        chosenExamples.addAll(chosenIndexes)
-//                    }
-//
-//                    else -> {
-//                        allExamples.add(input)
-//                        chosenExamples.add(allExamples.lastIndex)
-//                        return
-//                    }
-//                }
-//
-//                resolutionUI.value = WordBlock.WordBlockResolution.UPDATED
-//            }
+                    input.first().isDigit() -> {
+                        val chosenIndexes = input.split(' ')
+                                .map { it.toInt() - 1 }
+
+                        if (chosenIndexes.size + chosenDefinitions.size > 2) {
+                            warning("You can't choose more than 2 definitions! (Primary and secondary ones)")
+                            return
+                        }
+
+                        if (chosenIndexes.any { it > choosableDefinitions.values.lastIndex }) {
+                            warning("Please check your selected indexes! You can choose from 1 to ${choosableDefinitions.values.size}!")
+                            return
+                        }
+
+                        chosenIndexes.forEach { choosableDefinitions.choosables[it].isChosen = true }
+                        areDefinitionsSet = chosenDefinitions.size == 2
+                    }
+
+                    else -> {
+                        if (chosenDefinitions.size + 1 > 2) {
+                            warning("You can't choose more than 2 definitions! (Primary and secondary ones)")
+                            return
+                        }
+
+                        val newChoosable = choosableDefinitions.proposeNewValue(input)?.let {
+                            it.isChosen = true
+                        }
+
+                        if (newChoosable == null)
+                            warning("You can't add duplicated value!")
+
+                        areDefinitionsSet = chosenDefinitions.size == 2
+                    }
+                }
+
+                if (areDefinitionsSet) {
+                    clFragment.label.text = "EXP"
+                }
+
+                return
+            }
+
+            if (!areExamplesSet) {
+                when {
+                    input.isEmpty() -> {
+                        resolutionUI.value = WordBlock.WordBlockResolution.UPDATED
+                    }
+
+                    input.first().isDigit() -> {
+                        val chosenIndexes = input.split(' ')
+                                .map { it.toInt() - 1 }
+
+                        if (chosenIndexes.any { it > choosableExamples.values.lastIndex }) {
+                            warning("Please check your selected indexes! You can choose from 1 to ${choosableExamples.values.size}!")
+                            return
+                        }
+
+                        chosenIndexes.forEach { choosableExamples.choosables[it].isChosen = true }
+                    }
+
+                    else -> {
+                        val newChoosable = choosableExamples.proposeNewValue(input)?.let {
+                            it.isChosen = true
+                        }
+
+                        if (newChoosable == null)
+                            warning("You can't add duplicated value!")
+                    }
+                }
+            }
         }
     }
 
-    internal class WordBlockHelp : View("Update Tab Info") {
+    class WordBlockHelp : View("Update Tab Info") {
         override val root: Parent = webview {
             prefWidth = 1000.0
-
             engine.load(resources["/WordBlock-help.html"])
-
-            widthProperty().onChange {
-                println(it)
-            }
         }
     }
 }

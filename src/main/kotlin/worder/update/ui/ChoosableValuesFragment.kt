@@ -4,8 +4,8 @@
  *
  * Name: <ChoosableValuesFragment.kt>
  * Created: <29/07/2020, 07:38:48 PM>
- * Modified: <31/07/2020, 05:37:50 PM>
- * Version: <58>
+ * Modified: <31/07/2020, 11:13:18 PM>
+ * Version: <63>
  */
 
 package worder.update.ui
@@ -40,6 +40,7 @@ class ChoosableValuesFragment : Fragment() {
     private val choosableValues: ChoosableValues<Any?> by param()
     private val choosables: ObservableList<ChoosableValues<Any?>.ChoosableValue> = choosableValues.choosables
     private val chosenChoosables: ObservableList<ChoosableValues<Any?>.ChoosableValue> = choosableValues.chosenChoosables
+    private var isNextCustomFieldFocused: Boolean = false
 
 
     init {
@@ -56,7 +57,7 @@ class ChoosableValuesFragment : Fragment() {
                             putChoosable(initSize - index, newChoosable)
                         }
 
-                        appendCustomValueField(isFocused = true)
+                        appendCustomValueField()
                     }
                 }
             }
@@ -106,7 +107,7 @@ class ChoosableValuesFragment : Fragment() {
         }
     }
 
-    private fun GridPane.appendCustomValueField(isFocused: Boolean = false) {
+    private fun GridPane.appendCustomValueField() {
         val newRowIndex = rowCount
         val textField = TextField()
 
@@ -123,12 +124,15 @@ class ChoosableValuesFragment : Fragment() {
                     }
                 }
 
-                val newChoosable = choosableValues.proposeNewValue(input)
+                isNextCustomFieldFocused = true
+                val newChoosable = choosableValues.proposeNewValue(input)?.let {
+                    it.isChosen = true
+                }
 
-                if (newChoosable == null)
+                if (newChoosable == null) {
+                    isNextCustomFieldFocused = false
                     warning("You can't add duplicated value!")
-                else
-                    newChoosable.isChosen = true
+                }
 
                 textField.text = null
             }
@@ -160,8 +164,10 @@ class ChoosableValuesFragment : Fragment() {
             disableProperty().bind(button.disableProperty())
             add(this, 4, newRowIndex, 1, 1)
 
-            if (isFocused)
-                runLater { requestFocus() }
+            if (isNextCustomFieldFocused) {
+                isNextCustomFieldFocused = false
+                runLater { textField.requestFocus() }
+            }
         }
     }
 }

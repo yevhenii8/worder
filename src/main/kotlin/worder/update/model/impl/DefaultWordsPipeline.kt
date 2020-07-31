@@ -4,8 +4,8 @@
  *
  * Name: <DefaultWordsPipeline.kt>
  * Created: <20/07/2020, 11:22:35 PM>
- * Modified: <26/07/2020, 10:11:46 PM>
- * Version: <78>
+ * Modified: <31/07/2020, 10:39:17 PM>
+ * Version: <86>
  */
 
 package worder.update.model.impl
@@ -56,8 +56,11 @@ class DefaultWordsPipeline private constructor(
     override val pipelineProperty: ListProperty<WordBlock> = SimpleListProperty(observableListOf())
     override val pipeline: MutableList<WordBlock> by pipelineProperty
 
-    override val isEmptyProperty: Property<Boolean> = SimpleObjectProperty<Boolean>(false)
-    override var isEmpty: Boolean by isEmptyProperty
+    override val isConsumedProperty: Property<Boolean> = SimpleObjectProperty<Boolean>(false)
+    override var isConsumed: Boolean by isConsumedProperty
+
+    override val isCommittedProperty: Property<Boolean> = SimpleObjectProperty<Boolean>(false)
+    override var isCommitted: Boolean by isCommittedProperty
 
     private var isEmptyInternal: Boolean = false
     private lateinit var backgroundJob: Job
@@ -84,7 +87,7 @@ class DefaultWordsPipeline private constructor(
 
             if (firstBlock == null) {
                 MainScope().launch {
-                    isEmpty = true
+                    isConsumed = true
                 }
                 return@launch
             }
@@ -133,7 +136,7 @@ class DefaultWordsPipeline private constructor(
                         backgroundJob = launch {
                             readyToCommit?.commit()
                             MainScope().launch {
-                                isEmpty = true
+                                isConsumed = true
                             }
                         }
                         return@launch
@@ -176,6 +179,9 @@ class DefaultWordsPipeline private constructor(
 
 
         override suspend fun commit() {
+            if (status == WordBlock.WordBlockStatus.COMMITTED)
+                return
+
             if (status != WordBlock.WordBlockStatus.READY_TO_COMMIT)
                 error("You can't commit block with status: $status")
 
@@ -187,8 +193,11 @@ class DefaultWordsPipeline private constructor(
                 WordBlock.WordBlockResolution.NO_RESOLUTION -> error("You can't commit block with NO_RESOLUTION!")
             }
 
+
             MainScope().launch {
                 status = WordBlock.WordBlockStatus.COMMITTED
+                if (pipeline.last() == this@DefaultWordBlock)
+                    isCommitted = true
             }
         }
 

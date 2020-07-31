@@ -4,14 +4,14 @@
  *
  * Name: <MainView.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <30/07/2020, 05:10:55 PM>
- * Version: <17>
+ * Modified: <31/07/2020, 08:57:20 PM>
+ * Version: <19>
  */
 
 package worder.core
 
 import javafx.geometry.Pos
-import tornadofx.Drawer
+import javafx.scene.layout.BorderPane
 import tornadofx.DrawerItem
 import tornadofx.View
 import tornadofx.addClass
@@ -20,23 +20,25 @@ import tornadofx.drawer
 import tornadofx.hbox
 import tornadofx.hyperlink
 import tornadofx.imageview
-import worder.AppEntry
 import worder.core.styles.WorderDefaultStyles
 import worder.database.DatabaseTabView
 import worder.insert.InsertTabView
 import worder.update.UpdateTabView
 
 class MainView : View("Worder GUI") {
-    private val drawer: Drawer = drawer { }
-    private val databaseTab: DrawerItem = drawer.item<DatabaseTabView>().apply { expanded = true }
-    private val updaterTab: DrawerItem = drawer.item<UpdateTabView>()
-    private val inserterTab: DrawerItem = drawer.item<InsertTabView>()
+    private lateinit var databaseTab: DrawerItem
+    private lateinit var updaterTab: DrawerItem
+    private lateinit var inserterTab: DrawerItem
 
 
-    override val root = borderpane {
+    override val root: BorderPane = borderpane {
         top<DatabaseDashboardView>()
 
-        center = drawer
+        center = drawer {
+            databaseTab = item<DatabaseTabView>(expanded = true)
+            updaterTab = item<UpdateTabView>(expanded = false)
+            inserterTab = item<InsertTabView>(expanded = false)
+        }
 
         bottom = hbox(alignment = Pos.CENTER) {
             addClass(WorderDefaultStyles.statusBar)

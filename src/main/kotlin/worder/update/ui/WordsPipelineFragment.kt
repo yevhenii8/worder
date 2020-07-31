@@ -4,8 +4,8 @@
  *
  * Name: <WordsPipelineFragment.kt>
  * Created: <20/07/2020, 06:26:55 PM>
- * Modified: <30/07/2020, 09:35:17 PM>
- * Version: <221>
+ * Modified: <31/07/2020, 11:00:45 PM>
+ * Version: <234>
  */
 
 package worder.update.ui
@@ -16,15 +16,14 @@ import javafx.scene.Parent
 import javafx.scene.control.Label
 import javafx.scene.control.ScrollBar
 import javafx.scene.control.ScrollPane
+import javafx.scene.layout.BorderPane
 import javafx.scene.layout.VBox
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import tornadofx.Fragment
 import tornadofx.bindChildren
 import tornadofx.borderpane
-import tornadofx.button
+import tornadofx.box
 import tornadofx.fitToParentSize
+import tornadofx.getChildList
 import tornadofx.hbox
 import tornadofx.imageview
 import tornadofx.label
@@ -33,29 +32,23 @@ import tornadofx.paddingHorizontal
 import tornadofx.paddingVertical
 import tornadofx.progressindicator
 import tornadofx.px
+import tornadofx.runLater
 import tornadofx.scrollpane
 import tornadofx.style
 import tornadofx.vbox
 import tornadofx.visibleWhen
 import worder.core.observableStats
-import worder.database.model.WorderUpdateDB
+import worder.database.DatabaseController
+import worder.update.UpdateTabView
 import worder.update.model.WordsPipeline
-import worder.update.model.impl.DefaultWordsPipeline
-import worder.update.model.impl.requesters.FakeRequester
 
 class WordsPipelineFragment : Fragment() {
-    private val database: WorderUpdateDB by param()
+    private val wordsPipeline: WordsPipeline by param()
     private val commandLineUI: CommandLineFragment = find()
-    private val wordsPipeline: WordsPipeline = DefaultWordsPipeline.createInstance(
-            database = database,
-//            usedRequesters = Requester.defaultRequesters,
-//            usedRequesters = listOf(FakeRequester()),
-            usedRequesters = listOf(FakeRequester.instance),
-            selectOrder = WorderUpdateDB.SelectOrder.RANDOM
-    )
+    private lateinit var scrollPaneUI: ScrollPane
 
 
-    override val root: Parent = borderpane {
+    override val root: BorderPane = borderpane {
         center = vbox(spacing = 20) {
             hbox {
                 fitToParentSize()
@@ -65,9 +58,8 @@ class WordsPipelineFragment : Fragment() {
                     this@hbox.add(this)
                 }
 
-                scrollpane {
+                scrollPaneUI = scrollpane {
                     fitToParentSize()
-
                     vbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
                     hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
                     isFitToWidth = true
@@ -77,34 +69,9 @@ class WordsPipelineFragment : Fragment() {
 
                     content = vbox(spacing = 30, alignment = Pos.BOTTOM_CENTER) {
                         minHeightProperty().bind(this@scrollpane.heightProperty())
-                        heightProperty().onChange {
-                            vvalue = 1.0
-                        }
-
+                        heightProperty().onChange { vvalue = 1.0 }
                         bindChildren(wordsPipeline.pipelineProperty) {
                             find<WordBlockFragment>("block" to it, "clFragment" to commandLineUI).root
-                        }
-
-                        wordsPipeline.isEmptyProperty.onChange {
-                            if (it == true) {
-                                if (children.isNotEmpty()) {
-                                    vbox(spacing = 5, alignment = Pos.CENTER) {
-                                        label("ALL THE WORDS HAVE BEEN UPDATED :)").style { fontSize = 18.px }
-                                        button("Commit the last block!") {
-                                            setOnAction {
-                                                CoroutineScope(Dispatchers.Default).launch {
-                                                    wordsPipeline.pipeline.last().commit()
-                                                }
-
-                                                isDisable = true
-                                                commandLineUI.root.isDisable = true
-                                            }
-                                        }
-                                    }
-                                } else {
-                                    content = find<EmptyPipeline>().root
-                                }
-                            }
                         }
                     }
 
@@ -133,12 +100,68 @@ class WordsPipelineFragment : Fragment() {
     }
 
 
+    init {
+        fun disableCommandLineUI() {
+            commandLineUI.apply {
+                label.isDisable = true
+                textField.isDisable = true
+                commitButton.isDisable = true
+            }
+        }
+
+        commandLineUI.apply {
+            commitButton.setOnAction {
+                find<UpdateTabView>().commitLast()
+            }
+
+            resetButton.setOnAction {
+                find<DatabaseController>().db?.let { database ->
+                    find<UpdateTabView>().onDatabaseConnection(database)
+                }
+            }
+
+            runLater { textField.requestFocus() }
+        }
+
+        wordsPipeline.isConsumedProperty.onChange {
+            if (it == true) {
+                val conveyor = scrollPaneUI.content.getChildList()!!
+
+                if (conveyor.isEmpty()) {
+                    disableCommandLineUI()
+                    scrollPaneUI.apply {
+                        isFitToHeight = true
+                        content = find<EmptyPipeline>().root
+                    }
+                    return@onChange
+                }
+
+                conveyor.add(
+                        label("ALL THE WORDS HAVE BEEN UPDATED :)").apply {
+                            style {
+                                fontSize = 18.px
+                                padding = box(0.px, 0.px, 20.px, 0.px)
+                            }
+                        }
+                )
+            }
+        }
+
+        wordsPipeline.isCommittedProperty.onChange {
+            if (it == true) {
+                disableCommandLineUI()
+            }
+        }
+    }
+
+
     class EmptyPipeline : Fragment() {
-        override val root: Parent = vbox {
-            alignment = Pos.CENTER
-            spacing = 15.0
+        override val root: Parent = vbox(spacing = 15, alignment = Pos.CENTER) {
             imageview("/images/empty-box.png")
-            label("NO WORDS TO UPDATE :(").style { fontSize = 18.px }
+            label("NO WORDS TO UPDATE :(").style {
+                fontSize = 18.px
+                padding = box(0.px, 0.px, 20.px, 0.px)
+            }
         }
     }
 }
