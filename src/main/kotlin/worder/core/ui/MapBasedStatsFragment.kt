@@ -4,19 +4,21 @@
  *
  * Name: <MapBasedStatsFragment.kt>
  * Created: <10/07/2020, 09:03:31 PM>
- * Modified: <22/07/2020, 04:43:24 PM>
- * Version: <33>
+ * Modified: <01/08/2020, 06:07:05 PM>
+ * Version: <52>
  */
 
 package worder.core.ui
 
 import javafx.collections.ObservableMap
 import javafx.geometry.Pos
+import javafx.scene.layout.Priority
+import javafx.scene.layout.VBox
 import tornadofx.Fragment
 import tornadofx.addClass
 import tornadofx.hbox
+import tornadofx.hgrow
 import tornadofx.label
-import tornadofx.paddingBottom
 import tornadofx.vbox
 import worder.core.styles.WorderDefaultStyles
 import worder.tornadofx.bindChildren
@@ -36,16 +38,16 @@ class MapBasedStatsFragment : Fragment() {
         nameMutators != null && commonNameMutator != null -> { name: String, _: Any? ->
             val common = commonNameMutator!!.invoke(name)
             val own = nameMutators!![name]?.invoke(common) ?: common
-            label("$own: ")
+            label(own)
         }
         nameMutators != null -> { name: String, _: Any? ->
-            label("${nameMutators!![name]?.invoke(name) ?: name}: ")
+            label(nameMutators!![name]?.invoke(name) ?: name)
         }
         commonNameMutator != null -> { name: String, _: Any? ->
-            label("${commonNameMutator!!.invoke(name)}: ")
+            label(commonNameMutator!!.invoke(name))
         }
         else -> { name: String, _: Any? ->
-            label("$name: ")
+            label(name)
         }
     }
     private val valueConverter = when {
@@ -66,20 +68,19 @@ class MapBasedStatsFragment : Fragment() {
     }
 
 
-    override val root = vbox {
+    override val root: VBox = vbox(spacing = 5) {
         if (blockTitle != null)
-            label(blockTitle!!) {
-                paddingBottom = 15
-            }
+            label(blockTitle!!)
 
-        hbox {
-            vbox(alignment = Pos.BASELINE_RIGHT) {
+        hbox(spacing = 30) {
+            vbox(alignment = Pos.BASELINE_LEFT) {
+                hgrow = Priority.ALWAYS
                 if (hideNullable)
                     bindChildren(this@MapBasedStatsFragment.stats, nameConverter, { _, value -> value != null })
                 else
                     bindChildren(this@MapBasedStatsFragment.stats, nameConverter)
             }
-            vbox(alignment = Pos.BASELINE_LEFT).apply {
+            vbox(alignment = Pos.BASELINE_LEFT) {
                 if (hideNullable)
                     bindChildren(this@MapBasedStatsFragment.stats, valueConverter, { _, value -> value != null })
                 else

@@ -4,8 +4,8 @@
  *
  * Name: <WorderDefaultStyles.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <25/07/2020, 05:12:29 PM>
- * Version: <123>
+ * Modified: <01/08/2020, 10:12:29 PM>
+ * Version: <172>
  */
 
 package worder.core.styles
@@ -32,22 +32,38 @@ class WorderDefaultStyles : Stylesheet() {
     companion object {
         val statsBlock by cssclass()
         val insertUnit by cssclass()
-        val insertUnits by cssclass()
         val insertBatch by cssclass()
         val unitButton by cssclass()
-
         val dragDropField by cssclass()
-        val statusBar by cssclass()
     }
 
 
     init {
         text {
-            fontSize = 14.px
+            fontSize = 12.px
         }
 
-        imageView and Stylesheet.disabled {
+        imageView and disabled {
             opacity = 0.2
+        }
+
+        scrollPane {
+            backgroundColor += Color.WHITE
+            viewport {
+                backgroundColor += Color.WHITE
+            }
+        }
+
+        form {
+            backgroundColor += Color.WHITE
+        }
+
+        titledPane {
+            title {
+                padding = box(8.px)
+                backgroundInsets += box(0.px)
+                backgroundRadius += box(0.px)
+            }
         }
 
         button {
@@ -64,29 +80,29 @@ class WorderDefaultStyles : Stylesheet() {
         statsBlock {
             alignment = Pos.TOP_CENTER
             padding = box(15.px)
-            borderRadius += box(15.px)
+            borderRadius += box(10.px)
             borderColor += box(Color.GRAY)
         }
 
-        insertUnits {
-            backgroundColor += Color.TRANSPARENT
+        insertUnit {
+            padding = box(10.px)
+            borderRadius += box(10.px)
+            borderColor += box(Color.GRAY)
 
-            insertUnit {
-                padding = box(10.px)
-                borderColor += box(Color.GRAY)
-            }
         }
 
         insertBatch {
             text {
-                fontSize = 20.px
+                fontSize = 18.px
             }
 
-            separator {
-                line {
-                    effect = DropShadow(2.0, Color.DIMGRAY)
-                }
-            }
+//            separator {
+//                padding = box(60.px, 0.px)
+//
+//                line {
+//                    effect = DropShadow(2.0, Color.DIMGRAY)
+//                }
+//            }
         }
 
         dragDropField {
@@ -105,14 +121,15 @@ class WorderDefaultStyles : Stylesheet() {
         drawer {
             backgroundImage += javaClass.getResource("/images/airplane.png").toURI()!!
             backgroundRepeat += BackgroundRepeat.NO_REPEAT to BackgroundRepeat.NO_REPEAT
-            backgroundPosition += BackgroundPosition(null, 600.0, false, null, 50.0, false)
+            backgroundPosition += BackgroundPosition.CENTER
 
             drawerItem {
-                backgroundColor += c("#f4f4f4")
+                backgroundColor += Color.WHITE
                 padding = box(20.px)
             }
 
             buttonArea {
+                backgroundColor += c("#f5f5f5")
                 toggleButton {
                     padding = box(8.px)
                 }

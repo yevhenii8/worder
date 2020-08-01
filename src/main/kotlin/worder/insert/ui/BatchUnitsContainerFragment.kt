@@ -4,8 +4,8 @@
  *
  * Name: <BatchUnitsContainerFragment.kt>
  * Created: <05/07/2020, 06:50:42 PM>
- * Modified: <26/07/2020, 06:28:07 PM>
- * Version: <67>
+ * Modified: <01/08/2020, 09:55:33 PM>
+ * Version: <93>
  */
 
 package worder.insert.ui
@@ -17,24 +17,23 @@ import javafx.geometry.Pos
 import javafx.scene.Parent
 import javafx.scene.control.ScrollBar
 import javafx.scene.control.ScrollPane
+import javafx.scene.layout.HBox
 import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
 import tornadofx.Fragment
-import tornadofx.addClass
 import tornadofx.bindComponents
 import tornadofx.hbox
 import tornadofx.imageview
 import tornadofx.label
 import tornadofx.onChange
+import tornadofx.paddingHorizontal
 import tornadofx.paddingLeft
 import tornadofx.paddingRight
-import tornadofx.paddingTop
 import tornadofx.px
 import tornadofx.scrollpane
 import tornadofx.style
 import tornadofx.vbox
 import tornadofx.visibleWhen
-import worder.core.styles.WorderDefaultStyles
 import worder.insert.model.BatchUnit
 
 class BatchUnitsContainerFragment : Fragment() {
@@ -62,12 +61,15 @@ class BatchUnitsContainerFragment : Fragment() {
         }
 
         val scrollPane = scrollpane {
-            addClass(WorderDefaultStyles.insertUnits)
-
             content = if (units.isEmpty()) find<EmptyUnitsContainer>().root else unitsUI
             vbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
             hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
             alignment = Pos.CENTER
+
+            when(direction) {
+                HorizontalDirection.LEFT -> paddingLeft = 15
+                HorizontalDirection.RIGHT -> paddingRight = 15
+            }
 
             scrollBarUI.apply {
                 minProperty().bind(vminProperty())
@@ -92,10 +94,7 @@ class BatchUnitsContainerFragment : Fragment() {
 
 
     class EmptyUnitsContainer : Fragment() {
-        override val root: Parent = vbox {
-            alignment = Pos.CENTER
-            spacing = 15.0
-            paddingTop = 200
+        override val root: Parent = vbox(spacing = 15) {
             imageview("/images/empty-box.png")
             label("NO UNITS HERE :(").style { fontSize = 18.px }
         }

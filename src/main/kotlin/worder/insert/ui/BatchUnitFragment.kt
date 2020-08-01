@@ -4,8 +4,8 @@
  *
  * Name: <BatchUnitFragment.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <22/07/2020, 06:09:59 PM>
- * Version: <31>
+ * Modified: <01/08/2020, 09:48:42 PM>
+ * Version: <38>
  */
 
 package worder.insert.ui
@@ -14,6 +14,7 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.value.ObservableValue
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
+import javafx.scene.paint.Color
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -35,6 +36,7 @@ import tornadofx.onChange
 import tornadofx.paddingTop
 import tornadofx.removeWhen
 import tornadofx.squeezebox
+import tornadofx.style
 import tornadofx.textfield
 import tornadofx.vbox
 import worder.core.styles.WorderDefaultStyles
@@ -48,10 +50,8 @@ class BatchUnitFragment : Fragment() {
     override val root = vbox {
         addClass(WorderDefaultStyles.insertUnit)
 
-        hbox(spacing = 20) {
-            imageview("/icons/blue-document_64x64.png") {
-                alignment = Pos.CENTER
-            }
+        hbox(spacing = 20, alignment = Pos.CENTER) {
+            imageview("/icons/blue-document_64x64.png")
 
             vbox(alignment = Pos.BASELINE_RIGHT, spacing = 4) {
                 hgrow = Priority.ALWAYS
@@ -73,7 +73,7 @@ class BatchUnitFragment : Fragment() {
                 label(unit.invalidWordsProperty.sizeProperty())
             }
 
-            vbox(spacing = 10) {
+            vbox(spacing = 5) {
                 button("Commit") {
                     enableWhen {
                         BatchUnit.BatchUnitAction.COMMIT.getListener()
@@ -108,6 +108,7 @@ class BatchUnitFragment : Fragment() {
         if (unit.invalidWordsProperty.isNotEmpty()) {
             squeezebox {
                 paddingTop = 15
+
                 removeWhen(unit.invalidWordsProperty.sizeProperty().isEqualTo(0))
 
                 fold("List of invalid words") {

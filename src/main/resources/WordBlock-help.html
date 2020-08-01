@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>Update Tab Help Page</title>
     <style>
         body {
             padding: 10px;
+            font-size: smaller;
         }
+
         ol {
             margin: 0;
             padding-left: 15px;
@@ -27,15 +30,16 @@
 
 
 <h2>Command Line Interface</h2>
-<p>Initially, Worder was a Java CLI application, then a Kotlin CLI application. As for now it's a GUI one :) But utilizing CLI is still the most
-    convenient and a very handy way to choose a resolution for WordBlocks. Some important notes here are: </p>
+<p>Initially, Worder was a Java CLI application, then a Kotlin CLI application. As for now it's a GUI one :) But utilizing of CLI is still the most
+    convenient way to operate on WordBlocks. Some important notes here: </p>
 <ul>
-    <li>CLI is only connected to the current NO_RESOLUTION block.</li>
-    <li>When first resolution received, you can only change it through GUI.</li>
+    <li>CLI is connected only to the current NO_RESOLUTION block.</li>
+    <li>As the first resolution received, you can only change it through GUI.</li>
 </ul>
 
-<p>The intended way of using CLI is the next: you choose DEF (definition(s)), EXP (example(s)) and then CLI sets WordBlock's resolution to UPDATED.
-    You can select from proposed options (using their indexes) or from the custom ones. Also, you can combine proposed and custom in any way.</p>
+<p>The intended way of CLI use is the next: you choose DEF (definition(s)), EXP (example(s)) and then CLI sets WordBlock's resolution to UPDATED. You
+    can select from the proposed options (using their indexes) or from the custom one(s). Also, you can combine proposed and custom options in any
+    way.</p>
 <dl>
     <dt>Possible ways to choose definition(s) - DEF?</dt>
     <dd>
@@ -60,7 +64,7 @@
         </ol>
     </dd>
 
-    <dt>At any moment (DEF or EXP stages) you can set another resolution or ask for help:</dt>
+    <dt>At any moment (DEF or EXP stages) you can set resolution different to UPDATED or ask for help:</dt>
     <dd>
         <ol>
             <li>--remove -> immediately sets Removed resolution</li>
@@ -75,8 +79,8 @@
 
 <h2>Update Tab Guide</h2>
 <p>To update a word means to pick up a non-updated word from your database, request all possible transcriptions, definitions and examples from the
-    present Requesters. Then to compose a WordBlock which allows you to choose definitions and examples for the word and consequently update the word
-    in database.</p>
+    present Requesters. Then to compose a WordBlock which will allow you to choose definitions and examples for the word and consequently update it
+    in a database.</p>
 
 <dl>
     <dt>Which words will Worder pick up for updating?</dt>
@@ -84,7 +88,7 @@
         <ol>
             <li>It doesn't not have worder's #updated Tag.</li>
             <li>Its rate &lt; 100, so it's unlearned word.</li>
-            <li>It was not skipped in current session.</li>
+            <li>It was not skipped in the current session.</li>
         </ol>
     </dd>
 
@@ -101,7 +105,7 @@
         </ol>
     </dd>
 
-    <dt>What I need to choose in order to update a word?</dt>
+    <dt>What I need to have done in order to update a word?</dt>
     <dd>
         <ol>
             <li>You have to choose only one (primary) definition. Secondary is optional.</li>

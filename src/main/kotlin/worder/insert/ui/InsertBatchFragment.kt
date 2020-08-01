@@ -4,8 +4,8 @@
  *
  * Name: <InsertBatchFragment.kt>
  * Created: <09/07/2020, 10:43:11 PM>
- * Modified: <25/07/2020, 05:12:29 PM>
- * Version: <189>
+ * Modified: <01/08/2020, 09:44:12 PM>
+ * Version: <271>
  */
 
 package worder.insert.ui
@@ -14,18 +14,15 @@ import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
 import javafx.geometry.HPos
 import javafx.geometry.HorizontalDirection
-import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.geometry.VPos
 import javafx.scene.Parent
-import javafx.scene.layout.BorderPane
-import javafx.scene.layout.Region
+import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.pdfsam.ui.RingProgressIndicator
 import tornadofx.Fragment
 import tornadofx.addClass
 import tornadofx.borderpane
@@ -34,23 +31,26 @@ import tornadofx.button
 import tornadofx.confirm
 import tornadofx.gridpane
 import tornadofx.gridpaneConstraints
+import tornadofx.hbox
+import tornadofx.insets
 import tornadofx.label
 import tornadofx.observableListOf
 import tornadofx.onChange
-import tornadofx.px
+import tornadofx.paddingAll
+import tornadofx.progressindicator
 import tornadofx.row
 import tornadofx.separator
 import tornadofx.style
+import tornadofx.useMaxSize
 import tornadofx.vbox
 import worder.core.formatGrouped
 import worder.core.listBasedStats
 import worder.core.styles.WorderDefaultStyles
 import worder.core.worderStatusLabel
 import worder.insert.InsertController
-import worder.insert.model.InsertBatch
 import worder.insert.model.BatchUnit
+import worder.insert.model.InsertBatch
 import worder.insert.model.ObservableInsertBatchStats
-import kotlin.math.roundToInt
 
 class InsertBatchFragment : Fragment() {
     private val batch: InsertBatch by param()
@@ -66,138 +66,141 @@ class InsertBatchFragment : Fragment() {
 
         res
     }
-    private val progressIndicatorUI = RingProgressIndicator().apply {
-        stats.totalProcessedProperty.onChange {
-            this.progress = ((it.toDouble() / stats.totalWords) * 100).roundToInt()
-        }
-    }
     private val uncommittedUnitsUI = find<BatchUnitsContainerFragment>(
             "units" to uncommittedUnits,
             "direction" to HorizontalDirection.LEFT
-    ).root
+    )
     private val committedUnitsUI = find<BatchUnitsContainerFragment>(
             "units" to batch.committedUnitsProperty,
             "direction" to HorizontalDirection.RIGHT
-    ).root
+    )
 
 
     override val root: Parent = borderpane {
-        left = vbox(spacing = 20, alignment = Pos.TOP_CENTER) {
-            label("UNCOMMITTED UNITS").style { fontSize = 20.px }
-            separator()
+        left = hbox(alignment = Pos.CENTER) {
             add(uncommittedUnitsUI)
         }
 
-        center = vbox(spacing = 20, alignment = Pos.TOP_CENTER) {
-            BorderPane.setMargin(this, Insets(0.0, 10.0, 0.0, 10.0))
+        center = gridpane {
             addClass(WorderDefaultStyles.insertBatch)
+            alignment = Pos.CENTER
+            hgap = 30.0
 
-            label("INSERT BATCH")
-            separator()
-            gridpane {
-                alignment = Pos.CENTER
-                hgap = 30.0
-                vgap = 60.0
-
-                row {
-                    listBasedStats(
-                            statsProperties = listOf(
-                                    stats.generatedUnitsProperty,
-                                    stats.readyToCommitUnitsProperty,
-                                    stats.actionNeededUnitsProperty,
-                                    stats.excludedUnitsProperty,
-                                    stats.committedUnitsProperty
-                            ),
-                            commonValueMutator = { (this as Int).formatGrouped() }
-                    ) {
-                        setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE)
-                        style {
-                            borderColor += box(Color.TRANSPARENT)
-                        }
+            row {
+                listBasedStats(
+                        blockTitle = "Uploaded Data Stats",
+                        statsProperties = listOf(
+                                stats.totalWordsProperty,
+                                stats.totalValidWordsProperty,
+                                stats.totalInvalidWordsProperty
+                        ),
+                        commonValueMutator = { (this as Int).formatGrouped() }
+                )
+                listBasedStats(
+                        blockTitle = "Processed Data Stats",
+                        statsProperties = listOf(
+                                stats.totalProcessedProperty,
+                                stats.insertedProperty,
+                                stats.resetProperty
+                        ),
+                        commonValueMutator = { (this as Int).formatGrouped() }
+                )
+            }
+            row {
+                separator {
+                    gridpaneConstraints {
+                        columnSpan = 2
                     }
-                    vbox(spacing = 10, alignment = Pos.BASELINE_CENTER) {
-                        setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE)
-                        add(progressIndicatorUI)
+                }
+            }
+            row {
+                vbox(spacing = 5, alignment = Pos.CENTER) {
+                    hbox(alignment = Pos.CENTER) {
+                        label("Insert Batch Status: ")
                         worderStatusLabel(batch.statusProperty)
                     }
-                }
-                row {
-                    separator {
-                        gridpaneConstraints {
-                            columnSpan = 2
-                        }
+                    label(batch.status.description)
+                    gridpaneConstraints {
+                        columnSpan = 2
+                        margin = insets(0, 0, 30, 0)
                     }
                 }
-                row {
-                    listBasedStats(
-                            blockTitle = "Uploaded Data Stats",
-                            statsProperties = listOf(
-                                    stats.totalWordsProperty,
-                                    stats.totalValidWordsProperty,
-                                    stats.totalInvalidWordsProperty
-                            ),
-                            commonValueMutator = { (this as Int).formatGrouped() }
-                    )
-                    listBasedStats(
-                            blockTitle = "Processed Data Stats",
-                            statsProperties = listOf(
-                                    stats.totalProcessedProperty,
-                                    stats.insertedProperty,
-                                    stats.resetProperty
-                            ),
-                            commonValueMutator = { (this as Int).formatGrouped() }
-                    )
-                }
-                row {
-                    separator {
-                        gridpaneConstraints {
-                            columnSpan = 2
-                        }
+            }
+            row {
+                listBasedStats(
+                        statsProperties = listOf(
+                                stats.generatedUnitsProperty,
+                                stats.readyToCommitUnitsProperty,
+                                stats.actionNeededUnitsProperty,
+                                stats.excludedUnitsProperty,
+                                stats.committedUnitsProperty
+                        ),
+                        commonValueMutator = { (this as Int).formatGrouped() }
+                ) {
+                    style {
+                        borderColor += box(Color.TRANSPARENT)
                     }
                 }
-                row {
-                    button("Reset This Batch") {
-                        batch.statusProperty.onChange {
-                            isDisable = it == InsertBatch.InsertBatchStatus.COMMITTING
-                        }
-                        setOnAction {
-                            if (uncommittedUnits.isNotEmpty())
-                                confirm("There are uncommitted units here. Are you sure you want to reset this batch?") {
-                                    find<InsertController>().resetInsertBatch()
-                                }
-                            else
-                                find<InsertController>().resetInsertBatch()
-                        }
-                    }
-                    button("Commit All Units") {
-                        batch.statusProperty.onChange {
-                            isDisable = it == InsertBatch.InsertBatchStatus.COMMITTING
-                        }
-                        setOnAction {
-                            CoroutineScope(Dispatchers.Default).launch {
-                                batch.commitAllUnits()
-                            }
-                        }
-                    }
-                }
+                progressindicator {
+                    useMaxSize = true
+                    paddingAll = 10
+                    progress = 0.0
 
-                children.forEach {
-                    it.gridpaneConstraints {
-                        this.hAlignment = HPos.CENTER
-                        this.vAlignment = VPos.CENTER
+                    stats.totalProcessedProperty.onChange {
+                        progress = (it.toDouble() / stats.totalValidWords)
                     }
+
+                    style {
+                        progressColor = Color.DODGERBLUE.deriveColor(1.0, 1.0, 1.0, 0.7)
+                    }
+                }
+            }
+            row {
+                separator {
+                    gridpaneConstraints {
+                        columnSpan = 2
+                    }
+                }
+            }
+            row {
+                button("Reset This Batch") {
+                    batch.statusProperty.onChange {
+                        isDisable = it == InsertBatch.InsertBatchStatus.COMMITTING
+                    }
+                    setOnAction {
+                        if (uncommittedUnits.isNotEmpty())
+                            confirm("There are uncommitted units here. Are you sure you want to reset this batch?") {
+                                find<InsertController>().resetInsertBatch()
+                            }
+                        else
+                            find<InsertController>().resetInsertBatch()
+                    }
+                }
+                button("Commit All Units") {
+                    batch.statusProperty.onChange {
+                        isDisable = it == InsertBatch.InsertBatchStatus.COMMITTING
+                    }
+                    setOnAction {
+                        CoroutineScope(Dispatchers.Default).launch {
+                            batch.commitAllUnits()
+                        }
+                    }
+                }
+            }
+
+            children.forEach {
+                it.gridpaneConstraints {
+                    this.hAlignment = HPos.CENTER
+                    this.vAlignment = VPos.CENTER
                 }
             }
         }
 
-        right = vbox(spacing = 20, alignment = Pos.TOP_CENTER) {
-            label("COMMITTED UNITS").style { fontSize = 20.px }
-            separator()
+        right = hbox(alignment = Pos.CENTER) {
             add(committedUnitsUI)
         }
 
-
-        (left as VBox).minWidthProperty().bind(committedUnitsUI.widthProperty())
-        (right as VBox).minWidthProperty().bind(uncommittedUnitsUI.widthProperty())
+        (left as HBox).minWidthProperty().bind(committedUnitsUI.root.widthProperty())
+        (right as HBox).minWidthProperty().bind(uncommittedUnitsUI.root.widthProperty())
     }
 }

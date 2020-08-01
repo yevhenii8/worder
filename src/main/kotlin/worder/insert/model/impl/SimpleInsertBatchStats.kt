@@ -4,8 +4,8 @@
  *
  * Name: <SimpleInsertBatchStats.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <22/07/2020, 05:48:19 PM>
- * Version: <12>
+ * Modified: <01/08/2020, 09:44:12 PM>
+ * Version: <13>
  */
 
 package worder.insert.model.impl
@@ -37,16 +37,16 @@ class SimpleInsertBatchStats(
     override val generatedUnitsProperty: IntegerProperty = SimpleIntegerProperty(null, "Generated units", generatedUnits)
     override var generatedUnits: Int by bindThroughIntegerProperty(generatedUnitsProperty)
 
-    override val readyToCommitUnitsProperty: IntegerProperty = SimpleIntegerProperty(null, "Ready to commit units", readyToCommitUnits)
+    override val readyToCommitUnitsProperty: IntegerProperty = SimpleIntegerProperty(null, "Ready to commit", readyToCommitUnits)
     override var readyToCommitUnits: Int by bindThroughIntegerProperty(readyToCommitUnitsProperty)
 
-    override val committedUnitsProperty: IntegerProperty = SimpleIntegerProperty(null, "Committed units", committedUnits)
+    override val committedUnitsProperty: IntegerProperty = SimpleIntegerProperty(null, "Committed", committedUnits)
     override var committedUnits: Int by bindThroughIntegerProperty(committedUnitsProperty)
 
-    override val excludedUnitsProperty: IntegerProperty = SimpleIntegerProperty(null, "Excluded units", excludedUnits)
+    override val excludedUnitsProperty: IntegerProperty = SimpleIntegerProperty(null, "Excluded", excludedUnits)
     override var excludedUnits: Int by bindThroughIntegerProperty(excludedUnitsProperty)
 
-    override val actionNeededUnitsProperty: IntegerProperty = SimpleIntegerProperty(null, "Action needed units", actionNeededUnits)
+    override val actionNeededUnitsProperty: IntegerProperty = SimpleIntegerProperty(null, "Action needed", actionNeededUnits)
     override var actionNeededUnits: Int by bindThroughIntegerProperty(actionNeededUnitsProperty)
 
 

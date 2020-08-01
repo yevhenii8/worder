@@ -4,8 +4,8 @@
  *
  * Name: <DatabaseTabView.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <22/07/2020, 06:41:15 PM>
- * Version: <18>
+ * Modified: <01/08/2020, 08:22:04 PM>
+ * Version: <20>
  */
 
 package worder.database
@@ -23,8 +23,10 @@ import tornadofx.button
 import tornadofx.hbox
 import tornadofx.imageview
 import tornadofx.label
+import tornadofx.px
 import tornadofx.replaceChildren
 import tornadofx.stackpane
+import tornadofx.style
 import tornadofx.vbox
 import worder.core.ui.DragAndDropFragment
 import worder.database.model.WorderDB
@@ -76,6 +78,8 @@ class DatabaseConnectedView : View() {
         }
 
         button("Disconnect") {
+            style { fontSize = 18.px }
+
             setPrefSize(400.0, 75.0)
             VBox.setMargin(this, Insets(10.0))
 

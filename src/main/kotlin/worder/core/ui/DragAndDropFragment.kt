@@ -4,8 +4,8 @@
  *
  * Name: <DragAndDropFragment.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <20/07/2020, 06:26:55 PM>
- * Version: <5>
+ * Modified: <01/08/2020, 08:51:37 PM>
+ * Version: <10>
  */
 
 package worder.core.ui
@@ -24,6 +24,8 @@ import tornadofx.hbox
 import tornadofx.hyperlink
 import tornadofx.imageview
 import tornadofx.label
+import tornadofx.paddingAll
+import tornadofx.stackpane
 import tornadofx.vbox
 import tornadofx.warning
 import worder.core.styles.WorderDefaultStyles
@@ -36,44 +38,47 @@ class DragAndDropFragment : Fragment() {
     private val action: (files: List<File>) -> Unit by param()
     private val allowMultiselect: Boolean by param()
 
-    override val root: Parent = vbox(alignment = Pos.CENTER) {
-        addClass(WorderDefaultStyles.dragDropField)
+    override val root: Parent = stackpane {
+        paddingAll = 60
+        vbox(alignment = Pos.CENTER) {
+            addClass(WorderDefaultStyles.dragDropField)
 
-        imageview("/images/different-files.png") {
-            VBox.setMargin(this, Insets(20.0))
-        }
+            imageview("/images/different-files.png") {
+                VBox.setMargin(this, Insets(20.0))
+            }
 
-        label(text)
+            label(text)
 
-        hbox(alignment = Pos.CENTER) {
-            label("Or ")
-            hyperlink("choose your file${if (allowMultiselect) "(s)" else ""}") {
-                setOnAction {
-                    val chosenFiles = chooseFile(
-                            title = windowTitle,
-                            filters = arrayOf(extensionFilter),
-                            mode = if (allowMultiselect) FileChooserMode.Multi else FileChooserMode.Single
-                    )
-                    if (chosenFiles.isNotEmpty())
-                        action.invoke(chosenFiles)
+            hbox(alignment = Pos.CENTER) {
+                label("Or ")
+                hyperlink("choose your file${if (allowMultiselect) "(s)" else ""}") {
+                    setOnAction {
+                        val chosenFiles = chooseFile(
+                                title = windowTitle,
+                                filters = arrayOf(extensionFilter),
+                                mode = if (allowMultiselect) FileChooserMode.Multi else FileChooserMode.Single
+                        )
+                        if (chosenFiles.isNotEmpty())
+                            action.invoke(chosenFiles)
+                    }
                 }
             }
-        }
 
-        setOnDragOver { dragEvent ->
-            if (dragEvent.gestureSource !== this && dragEvent.dragboard.hasFiles())
-                dragEvent.acceptTransferModes(*TransferMode.COPY_OR_MOVE)
-            dragEvent.consume()
-        }
-
-        setOnDragDropped { dragEvent ->
-            dragEvent.dragboard.files.let {
-                if (!allowMultiselect && it.size != 1)
-                    warning("Drag & Drop Selector", "Only one file is needed!")
-                else
-                    action.invoke(dragEvent.dragboard.files)
+            setOnDragOver { dragEvent ->
+                if (dragEvent.gestureSource !== this && dragEvent.dragboard.hasFiles())
+                    dragEvent.acceptTransferModes(*TransferMode.COPY_OR_MOVE)
+                dragEvent.consume()
             }
-            dragEvent.consume()
+
+            setOnDragDropped { dragEvent ->
+                dragEvent.dragboard.files.let {
+                    if (!allowMultiselect && it.size != 1)
+                        warning("Drag & Drop Selector", "Only one file is needed!")
+                    else
+                        action.invoke(dragEvent.dragboard.files)
+                }
+                dragEvent.consume()
+            }
         }
     }
 }

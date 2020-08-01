@@ -4,8 +4,8 @@
  *
  * Name: <WordsPipelineFragment.kt>
  * Created: <20/07/2020, 06:26:55 PM>
- * Modified: <31/07/2020, 11:00:45 PM>
- * Version: <234>
+ * Modified: <01/08/2020, 10:02:03 PM>
+ * Version: <237>
  */
 
 package worder.update.ui
@@ -64,10 +64,8 @@ class WordsPipelineFragment : Fragment() {
                     hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
                     isFitToWidth = true
                     paddingHorizontal = 20
-                    paddingVertical = 10
 
-
-                    content = vbox(spacing = 30, alignment = Pos.BOTTOM_CENTER) {
+                    content = vbox(spacing = 20, alignment = Pos.BOTTOM_CENTER) {
                         minHeightProperty().bind(this@scrollpane.heightProperty())
                         heightProperty().onChange { vvalue = 1.0 }
                         bindChildren(wordsPipeline.pipelineProperty) {
@@ -86,7 +84,7 @@ class WordsPipelineFragment : Fragment() {
             add(commandLineUI)
         }
 
-        right = vbox(spacing = 20, alignment = Pos.TOP_CENTER) {
+        right = vbox(spacing = 20, alignment = Pos.CENTER) {
             paddingHorizontal = 125
             wordsPipeline.usedRequesters.forEach {
                 observableStats(observableStats = it.observableStats, hideNullable = true) {

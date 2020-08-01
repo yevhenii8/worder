@@ -4,23 +4,29 @@
  *
  * Name: <MainView.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <31/07/2020, 08:57:20 PM>
- * Version: <19>
+ * Modified: <01/08/2020, 09:44:12 PM>
+ * Version: <46>
  */
 
 package worder.core
 
 import javafx.geometry.Pos
 import javafx.scene.layout.BorderPane
+import javafx.scene.layout.Priority
+import javafx.scene.paint.Color
 import tornadofx.DrawerItem
 import tornadofx.View
-import tornadofx.addClass
 import tornadofx.borderpane
+import tornadofx.c
 import tornadofx.drawer
 import tornadofx.hbox
+import tornadofx.hgrow
 import tornadofx.hyperlink
 import tornadofx.imageview
-import worder.core.styles.WorderDefaultStyles
+import tornadofx.label
+import tornadofx.paddingHorizontal
+import tornadofx.region
+import tornadofx.style
 import worder.database.DatabaseTabView
 import worder.insert.InsertTabView
 import worder.update.UpdateTabView
@@ -32,20 +38,46 @@ class MainView : View("Worder GUI") {
 
 
     override val root: BorderPane = borderpane {
-        top<DatabaseDashboardView>()
-
+        top = find<DatabaseDashboardView>().root.apply {
+            style {
+                backgroundColor += c("#f5f5f5")
+            }
+        }
         center = drawer {
             databaseTab = item<DatabaseTabView>(expanded = true)
             updaterTab = item<UpdateTabView>(expanded = false)
             inserterTab = item<InsertTabView>(expanded = false)
         }
-
         bottom = hbox(alignment = Pos.CENTER) {
-            addClass(WorderDefaultStyles.statusBar)
+            paddingHorizontal = 30
 
-            hyperlink(text = "© 2019-2020 Yevhenii Nadtochii No Rights Reserved", graphic = imageview("/icons/github-icon_32x32.png")) {
+            style {
+                backgroundColor += c("#f5f5f5")
+            }
+
+            label("Worder v1.0.0-SNAPSHOT")
+            region {
+                hgrow = Priority.ALWAYS
+            }
+            hyperlink {
+                text = "© 2019-2020 Yevhenii Nadtochii No Rights Reserved"
+                graphic = imageview("/icons/github-icon_24x24.png")
                 setOnAction {
                     hostServices.showDocument("https://github.com/yevhenii8/worder")
+                }
+            }
+            region {
+                hgrow = Priority.ALWAYS
+            }
+            hyperlink("Light") {
+                setOnAction {
+                    tornadofx.error("Not implemented yet")
+                }
+            }
+            label(" | ")
+            hyperlink("Dark") {
+                setOnAction {
+                    tornadofx.error("Not implemented yet")
                 }
             }
         }

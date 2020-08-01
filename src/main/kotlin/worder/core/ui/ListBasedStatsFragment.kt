@@ -4,18 +4,21 @@
  *
  * Name: <ListBasedStatsFragment.kt>
  * Created: <10/07/2020, 09:03:31 PM>
- * Modified: <21/07/2020, 10:10:15 PM>
- * Version: <18>
+ * Modified: <01/08/2020, 06:07:05 PM>
+ * Version: <25>
  */
 
 package worder.core.ui
 
 import javafx.beans.property.ReadOnlyProperty
 import javafx.geometry.Pos
+import javafx.scene.layout.Priority
+import javafx.scene.layout.VBox
 import javafx.util.StringConverter
 import tornadofx.Fragment
 import tornadofx.addClass
 import tornadofx.hbox
+import tornadofx.hgrow
 import tornadofx.label
 import tornadofx.paddingBottom
 import tornadofx.vbox
@@ -35,16 +38,16 @@ class ListBasedStatsFragment : Fragment() {
         nameMutators != null && commonNameMutator != null -> { name: String ->
             val common = commonNameMutator!!.invoke(name)
             val own = nameMutators!![name]?.invoke(common) ?: common
-            "$own: "
+            own
         }
         nameMutators != null -> { name: String ->
-            "${nameMutators!![name]?.invoke(name) ?: name}: "
+            nameMutators!![name]?.invoke(name) ?: name
         }
         commonNameMutator != null -> { name: String ->
-            "${commonNameMutator!!.invoke(name)}: "
+            commonNameMutator!!.invoke(name)
         }
         else -> { name: String ->
-            "$name: "
+            name
         }
     }
     private val valueConverter = when {
@@ -65,14 +68,13 @@ class ListBasedStatsFragment : Fragment() {
     }
 
 
-    override val root = vbox {
+    override val root: VBox = vbox(spacing = 5) {
         if (blockTitle != null)
-            label(blockTitle!!) {
-                paddingBottom = 15
-            }
+            label(blockTitle!!)
 
-        hbox {
-            vbox(alignment = Pos.BASELINE_RIGHT) {
+        hbox(spacing = 30) {
+            vbox(alignment = Pos.BASELINE_LEFT) {
+                hgrow = Priority.ALWAYS
                 stats.forEach {
                     label(nameConverter.invoke(it.name))
                 }

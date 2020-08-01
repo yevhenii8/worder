@@ -4,8 +4,8 @@
  *
  * Name: <WordBlockFragment.kt>
  * Created: <24/07/2020, 07:45:55 PM>
- * Modified: <31/07/2020, 10:31:00 PM>
- * Version: <357>
+ * Modified: <01/08/2020, 09:57:48 PM>
+ * Version: <378>
  */
 
 package worder.update.ui
@@ -17,6 +17,7 @@ import javafx.scene.control.ComboBox
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
+import javafx.scene.web.WebView
 import tornadofx.Fragment
 import tornadofx.View
 import tornadofx.box
@@ -108,9 +109,8 @@ class WordBlockFragment : Fragment() {
 
     override val root: Parent = vbox(spacing = 10) {
         style {
-            alignment = Pos.TOP_CENTER
-            padding = box(15.px)
-            borderRadius += box(15.px)
+            padding = box(10.px)
+            borderRadius += box(10.px)
             borderColor += box(Color.GRAY)
         }
 
@@ -287,10 +287,17 @@ class WordBlockFragment : Fragment() {
         }
     }
 
-    class WordBlockHelp : View("Update Tab Info") {
-        override val root: Parent = webview {
-            prefWidth = 1000.0
+    class WordBlockHelp : View() {
+        override val root: WebView = webview {
             engine.load(resources["/WordBlock-help.html"])
+
+            title = engine.location
+            isContextMenuEnabled = false
+            prefWidth = 1000.0
+
+            engine.titleProperty().onChangeOnce {
+                title = it!!
+            }
         }
     }
 }
