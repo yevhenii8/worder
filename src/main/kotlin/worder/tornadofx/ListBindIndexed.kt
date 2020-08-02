@@ -4,8 +4,8 @@
  *
  * Name: <ListBindIndexed.kt>
  * Created: <10/07/2020, 10:35:52 PM>
- * Modified: <30/07/2020, 10:49:54 PM>
- * Version: <5>
+ * Modified: <02/08/2020, 07:20:37 PM>
+ * Version: <6>
  */
 
 package worder.tornadofx
@@ -54,7 +54,7 @@ class IndexedListConversionListener<SourceType, TargetType>(
         targetList: MutableList<TargetType>,
         private val converter: (Int, SourceType) -> TargetType
 ) : ListChangeListener<SourceType>, WeakListener {
-    internal val targetRef: WeakReference<MutableList<TargetType>> = WeakReference(targetList)
+    private val targetRef: WeakReference<MutableList<TargetType>> = WeakReference(targetList)
 
 
     override fun onChanged(change: ListChangeListener.Change<out SourceType>) {

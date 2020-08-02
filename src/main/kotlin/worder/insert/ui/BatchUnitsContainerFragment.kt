@@ -4,8 +4,8 @@
  *
  * Name: <BatchUnitsContainerFragment.kt>
  * Created: <05/07/2020, 06:50:42 PM>
- * Modified: <01/08/2020, 09:55:33 PM>
- * Version: <93>
+ * Modified: <02/08/2020, 07:49:40 PM>
+ * Version: <110>
  */
 
 package worder.insert.ui
@@ -17,7 +17,6 @@ import javafx.geometry.Pos
 import javafx.scene.Parent
 import javafx.scene.control.ScrollBar
 import javafx.scene.control.ScrollPane
-import javafx.scene.layout.HBox
 import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
 import tornadofx.Fragment
@@ -26,7 +25,7 @@ import tornadofx.hbox
 import tornadofx.imageview
 import tornadofx.label
 import tornadofx.onChange
-import tornadofx.paddingHorizontal
+import tornadofx.paddingAll
 import tornadofx.paddingLeft
 import tornadofx.paddingRight
 import tornadofx.px
@@ -50,53 +49,70 @@ class BatchUnitsContainerFragment : Fragment() {
             find<BatchUnitFragment>("unit" to unit)
         }
     }
+    private val scrollPaneUI: ScrollPane = scrollpane {
+        content = if (units.isEmpty()) find<EmptyUnitsContainer>().root else unitsUI
+        vbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
+        hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
+
+        scrollBarUI.apply {
+            minProperty().bind(vminProperty())
+            maxProperty().bind(vmaxProperty())
+            visibleAmountProperty().bind(heightProperty().divide(unitsUI.heightProperty()))
+            vvalueProperty().bindBidirectional(valueProperty())
+        }
+    }
+
+
+    init {
+        configureScrollPanePadding()
+        units.onChange {
+            when (it.list.size) {
+                0 -> {
+                    scrollPaneUI.content = find<EmptyUnitsContainer>().root
+                    configureScrollPanePadding()
+                }
+                1 -> {
+                    scrollPaneUI.content = unitsUI
+                    configureScrollPanePadding()
+                }
+            }
+        }
+    }
 
 
     override val root = hbox {
         setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE)
 
-        if (direction == HorizontalDirection.LEFT) {
-            paddingRight = scrollBarUI.width
+        if (direction == HorizontalDirection.LEFT)
             add(scrollBarUI)
-        }
 
-        val scrollPane = scrollpane {
-            content = if (units.isEmpty()) find<EmptyUnitsContainer>().root else unitsUI
-            vbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
-            hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
-            alignment = Pos.CENTER
+        add(scrollPaneUI)
 
-            when(direction) {
+        if (direction == HorizontalDirection.RIGHT)
+            add(scrollBarUI)
+    }
+
+
+    private fun configureScrollPanePadding() {
+        with(scrollPaneUI) {
+            if (units.isEmpty()) {
+                paddingAll = 0
+                return
+            }
+
+            when (direction) {
                 HorizontalDirection.LEFT -> paddingLeft = 15
                 HorizontalDirection.RIGHT -> paddingRight = 15
-            }
-
-            scrollBarUI.apply {
-                minProperty().bind(vminProperty())
-                maxProperty().bind(vmaxProperty())
-                visibleAmountProperty().bind(heightProperty().divide(unitsUI.heightProperty()))
-                vvalueProperty().bindBidirectional(valueProperty())
-            }
-        }
-
-        if (direction == HorizontalDirection.RIGHT) {
-            paddingLeft = scrollBarUI.width
-            add(scrollBarUI)
-        }
-
-        unitsUI.children.onChange {
-            when (it.list.size) {
-                0 -> scrollPane.content = find<EmptyUnitsContainer>().root
-                1 -> scrollPane.content = unitsUI
             }
         }
     }
 
 
     class EmptyUnitsContainer : Fragment() {
-        override val root: Parent = vbox(spacing = 15) {
+        override val root: Parent = vbox(spacing = 15, alignment = Pos.CENTER) {
+            prefWidth = BatchUnitFragment.batchUnitWidth + 15
             imageview("/images/empty-box.png")
-            label("NO UNITS HERE :(").style { fontSize = 18.px }
+            label("NO UNITS HERE").style { fontSize = 18.px }
         }
     }
 }

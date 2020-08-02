@@ -4,8 +4,8 @@
  *
  * Name: <MapBasedStatsFragment.kt>
  * Created: <10/07/2020, 09:03:31 PM>
- * Modified: <01/08/2020, 06:07:05 PM>
- * Version: <52>
+ * Modified: <02/08/2020, 08:54:26 PM>
+ * Version: <54>
  */
 
 package worder.core.ui
@@ -19,7 +19,9 @@ import tornadofx.addClass
 import tornadofx.hbox
 import tornadofx.hgrow
 import tornadofx.label
+import tornadofx.style
 import tornadofx.vbox
+import worder.core.styles.WorderCustomStyles
 import worder.core.styles.WorderDefaultStyles
 import worder.tornadofx.bindChildren
 
@@ -69,6 +71,9 @@ class MapBasedStatsFragment : Fragment() {
 
 
     override val root: VBox = vbox(spacing = 5) {
+        addClass(WorderCustomStyles.worderBlock)
+        style(append = true) { alignment = Pos.TOP_CENTER }
+
         if (blockTitle != null)
             label(blockTitle!!)
 
@@ -87,7 +92,5 @@ class MapBasedStatsFragment : Fragment() {
                     bindChildren(this@MapBasedStatsFragment.stats, valueConverter)
             }
         }
-
-        addClass(WorderDefaultStyles.statsBlock)
     }
 }

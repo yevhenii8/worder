@@ -4,8 +4,8 @@
  *
  * Name: <WordsPipelineFragment.kt>
  * Created: <20/07/2020, 06:26:55 PM>
- * Modified: <01/08/2020, 10:02:03 PM>
- * Version: <237>
+ * Modified: <02/08/2020, 07:46:08 PM>
+ * Version: <239>
  */
 
 package worder.update.ui
@@ -135,7 +135,7 @@ class WordsPipelineFragment : Fragment() {
                 }
 
                 conveyor.add(
-                        label("ALL THE WORDS HAVE BEEN UPDATED :)").apply {
+                        label("ALL THE WORDS HAVE BEEN UPDATED").apply {
                             style {
                                 fontSize = 18.px
                                 padding = box(0.px, 0.px, 20.px, 0.px)
@@ -156,10 +156,7 @@ class WordsPipelineFragment : Fragment() {
     class EmptyPipeline : Fragment() {
         override val root: Parent = vbox(spacing = 15, alignment = Pos.CENTER) {
             imageview("/images/empty-box.png")
-            label("NO WORDS TO UPDATE :(").style {
-                fontSize = 18.px
-                padding = box(0.px, 0.px, 20.px, 0.px)
-            }
+            label("NO WORDS TO UPDATE").style { fontSize = 18.px }
         }
     }
 }

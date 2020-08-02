@@ -4,8 +4,8 @@
  *
  * Name: <DragAndDropFragment.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <01/08/2020, 08:51:37 PM>
- * Version: <10>
+ * Modified: <02/08/2020, 10:21:39 PM>
+ * Version: <11>
  */
 
 package worder.core.ui
@@ -28,6 +28,7 @@ import tornadofx.paddingAll
 import tornadofx.stackpane
 import tornadofx.vbox
 import tornadofx.warning
+import worder.core.styles.WorderCustomStyles
 import worder.core.styles.WorderDefaultStyles
 import java.io.File
 
@@ -41,7 +42,7 @@ class DragAndDropFragment : Fragment() {
     override val root: Parent = stackpane {
         paddingAll = 60
         vbox(alignment = Pos.CENTER) {
-            addClass(WorderDefaultStyles.dragDropField)
+            addClass(WorderCustomStyles.dragDropField)
 
             imageview("/images/different-files.png") {
                 VBox.setMargin(this, Insets(20.0))

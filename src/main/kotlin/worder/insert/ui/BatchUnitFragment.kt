@@ -4,8 +4,8 @@
  *
  * Name: <BatchUnitFragment.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <01/08/2020, 09:48:42 PM>
- * Version: <38>
+ * Modified: <02/08/2020, 07:49:40 PM>
+ * Version: <102>
  */
 
 package worder.insert.ui
@@ -14,7 +14,6 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.value.ObservableValue
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
-import javafx.scene.paint.Color
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -25,7 +24,6 @@ import tornadofx.button
 import tornadofx.enableWhen
 import tornadofx.field
 import tornadofx.fieldset
-import tornadofx.fitToParentWidth
 import tornadofx.fold
 import tornadofx.form
 import tornadofx.hbox
@@ -36,43 +34,43 @@ import tornadofx.onChange
 import tornadofx.paddingTop
 import tornadofx.removeWhen
 import tornadofx.squeezebox
-import tornadofx.style
 import tornadofx.textfield
+import tornadofx.usePrefWidth
 import tornadofx.vbox
-import worder.core.styles.WorderDefaultStyles
+import worder.core.styles.WorderCustomStyles
 import worder.core.worderStatusLabel
 import worder.insert.model.BatchUnit
 
 class BatchUnitFragment : Fragment() {
+    companion object {
+        const val batchUnitWidth: Double = 460.0
+    }
+
+
     private val unit: BatchUnit by param()
 
 
     override val root = vbox {
-        addClass(WorderDefaultStyles.insertUnit)
-
+        prefWidth = batchUnitWidth
+        addClass(WorderCustomStyles.worderBlock)
         hbox(spacing = 20, alignment = Pos.CENTER) {
             imageview("/icons/blue-document_64x64.png")
-
             vbox(alignment = Pos.BASELINE_RIGHT, spacing = 4) {
                 hgrow = Priority.ALWAYS
-
                 label("ID:")
                 label("Status:")
                 label("Source:")
                 label("Valid Words:")
                 label("Invalid Words:")
             }
-
             vbox(alignment = Pos.BASELINE_LEFT, spacing = 4) {
                 hgrow = Priority.ALWAYS
-
                 label(unit.id)
                 worderStatusLabel(unit.statusProperty)
                 label(unit.source)
                 label(unit.validWordsProperty.sizeProperty())
                 label(unit.invalidWordsProperty.sizeProperty())
             }
-
             vbox(spacing = 5) {
                 button("Commit") {
                     enableWhen {
@@ -82,7 +80,6 @@ class BatchUnitFragment : Fragment() {
                         CoroutineScope(Dispatchers.Default).launch { unit.commit() }
                     }
                 }
-
                 button("Exclude") {
                     enableWhen {
                         BatchUnit.BatchUnitAction.EXCLUDE.getListener()
@@ -91,7 +88,6 @@ class BatchUnitFragment : Fragment() {
                         unit.exclude()
                     }
                 }
-
                 button("Include") {
                     enableWhen {
                         BatchUnit.BatchUnitAction.INCLUDE.getListener()
@@ -100,38 +96,25 @@ class BatchUnitFragment : Fragment() {
                         unit.include()
                     }
                 }
-
-                children.addClass(WorderDefaultStyles.unitButton)
             }
         }
-
         if (unit.invalidWordsProperty.isNotEmpty()) {
             squeezebox {
                 paddingTop = 15
-
                 removeWhen(unit.invalidWordsProperty.sizeProperty().isEqualTo(0))
-
                 fold("List of invalid words") {
-                    form {
-                        fieldset {
-                            bindChildren(unit.invalidWordsProperty) { invalidWord ->
-                                field(invalidWord.value) {
-                                    val textFiled = textfield(invalidWord.value)
-
-                                    button("OK") {
-                                        setOnAction {
-                                            if (!invalidWord.substitute(textFiled.text))
-                                                tornadofx.error("Validation error", "Please, type a valid word!")
-                                            form.fitToParentWidth()
-                                        }
-                                    }
-
-                                    button("x") {
-                                        setOnAction {
-                                            invalidWord.reject()
-                                            form.fitToParentWidth()
-                                        }
-                                    }
+                    form().fieldset().bindChildren(unit.invalidWordsProperty) { invalidWord ->
+                        field(invalidWord.value) {
+                            val textFiled = textfield(invalidWord.value)
+                            button("OK") {
+                                setOnAction {
+                                    if (!invalidWord.substitute(textFiled.text))
+                                        tornadofx.error("Validation error", "Please, type a valid word!")
+                                }
+                            }
+                            button("X") {
+                                setOnAction {
+                                    invalidWord.reject()
                                 }
                             }
                         }

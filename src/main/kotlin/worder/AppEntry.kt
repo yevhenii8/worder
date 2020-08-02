@@ -4,8 +4,8 @@
  *
  * Name: <AppEntry.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <30/07/2020, 07:06:48 PM>
- * Version: <108>
+ * Modified: <02/08/2020, 04:41:23 PM>
+ * Version: <109>
  */
 
 package worder
@@ -15,13 +15,14 @@ import tornadofx.App
 import tornadofx.FX
 import tornadofx.find
 import worder.core.MainView
+import worder.core.styles.WorderCustomStyles
 import worder.core.styles.WorderDefaultStyles
 import worder.database.DatabaseController
 import worder.insert.InsertController
 import java.io.File
 import java.nio.file.Path
 
-class AppEntry : App(MainView::class, WorderDefaultStyles::class) {
+class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomStyles::class) {
     companion object {
         private val databaseController: DatabaseController = find()
         private val samplePath: Path = Path.of("stuff").resolve("sample")

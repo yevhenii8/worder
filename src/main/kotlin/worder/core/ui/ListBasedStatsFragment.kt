@@ -4,8 +4,8 @@
  *
  * Name: <ListBasedStatsFragment.kt>
  * Created: <10/07/2020, 09:03:31 PM>
- * Modified: <01/08/2020, 06:07:05 PM>
- * Version: <25>
+ * Modified: <02/08/2020, 08:54:26 PM>
+ * Version: <27>
  */
 
 package worder.core.ui
@@ -21,7 +21,9 @@ import tornadofx.hbox
 import tornadofx.hgrow
 import tornadofx.label
 import tornadofx.paddingBottom
+import tornadofx.style
 import tornadofx.vbox
+import worder.core.styles.WorderCustomStyles
 import worder.core.styles.WorderDefaultStyles
 
 class ListBasedStatsFragment : Fragment() {
@@ -69,6 +71,9 @@ class ListBasedStatsFragment : Fragment() {
 
 
     override val root: VBox = vbox(spacing = 5) {
+        addClass(WorderCustomStyles.worderBlock)
+        style(append = true) { alignment = Pos.TOP_CENTER }
+
         if (blockTitle != null)
             label(blockTitle!!)
 
@@ -93,7 +98,5 @@ class ListBasedStatsFragment : Fragment() {
                 }
             }
         }
-
-        addClass(WorderDefaultStyles.statsBlock)
     }
 }

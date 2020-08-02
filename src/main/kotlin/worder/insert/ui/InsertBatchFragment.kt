@@ -4,22 +4,21 @@
  *
  * Name: <InsertBatchFragment.kt>
  * Created: <09/07/2020, 10:43:11 PM>
- * Modified: <01/08/2020, 09:44:12 PM>
- * Version: <271>
+ * Modified: <02/08/2020, 10:36:38 PM>
+ * Version: <384>
  */
 
 package worder.insert.ui
 
 import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
-import javafx.geometry.HPos
 import javafx.geometry.HorizontalDirection
 import javafx.geometry.Pos
-import javafx.geometry.VPos
 import javafx.scene.Parent
 import javafx.scene.layout.HBox
-import javafx.scene.layout.VBox
+import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
+import javafx.util.StringConverter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,23 +28,24 @@ import tornadofx.borderpane
 import tornadofx.box
 import tornadofx.button
 import tornadofx.confirm
-import tornadofx.gridpane
-import tornadofx.gridpaneConstraints
 import tornadofx.hbox
-import tornadofx.insets
+import tornadofx.hgrow
 import tornadofx.label
 import tornadofx.observableListOf
 import tornadofx.onChange
 import tornadofx.paddingAll
 import tornadofx.progressindicator
-import tornadofx.row
+import tornadofx.px
+import tornadofx.region
 import tornadofx.separator
+import tornadofx.setId
 import tornadofx.style
-import tornadofx.useMaxSize
+import tornadofx.useMaxWidth
+import tornadofx.usePrefSize
 import tornadofx.vbox
 import worder.core.formatGrouped
 import worder.core.listBasedStats
-import worder.core.styles.WorderDefaultStyles
+import worder.core.styles.WorderCustomStyles
 import worder.core.worderStatusLabel
 import worder.insert.InsertController
 import worder.insert.model.BatchUnit
@@ -55,25 +55,32 @@ import worder.insert.model.ObservableInsertBatchStats
 class InsertBatchFragment : Fragment() {
     private val batch: InsertBatch by param()
     private val stats: ObservableInsertBatchStats = batch.observableStats
+    private val uncommittedUnits: ObservableList<BatchUnit>
+    private val uncommittedUnitsUI: HBox
+    private val committedUnitsUI: HBox
+    private val rowSpacing: Number = 100
 
-    private val uncommittedUnits: ObservableList<BatchUnit> = batch.run {
-        val res = observableListOf(actionNeededUnits + readyToCommitUnits)
 
-        committedUnitsProperty.onChange { op: ListChangeListener.Change<out BatchUnit> ->
-            if (op.next() && op.wasAdded())
-                res.removeAll(op.addedSubList)
+    init {
+        uncommittedUnits = batch.run {
+            val res = observableListOf(actionNeededUnits + readyToCommitUnits)
+
+            committedUnitsProperty.onChange { op: ListChangeListener.Change<out BatchUnit> ->
+                if (op.next() && op.wasAdded())
+                    res.removeAll(op.addedSubList)
+            }
+
+            res
         }
-
-        res
+        uncommittedUnitsUI = find<BatchUnitsContainerFragment>(
+                "units" to uncommittedUnits,
+                "direction" to HorizontalDirection.LEFT
+        ).root
+        committedUnitsUI = find<BatchUnitsContainerFragment>(
+                "units" to batch.committedUnitsProperty,
+                "direction" to HorizontalDirection.RIGHT
+        ).root
     }
-    private val uncommittedUnitsUI = find<BatchUnitsContainerFragment>(
-            "units" to uncommittedUnits,
-            "direction" to HorizontalDirection.LEFT
-    )
-    private val committedUnitsUI = find<BatchUnitsContainerFragment>(
-            "units" to batch.committedUnitsProperty,
-            "direction" to HorizontalDirection.RIGHT
-    )
 
 
     override val root: Parent = borderpane {
@@ -81,126 +88,106 @@ class InsertBatchFragment : Fragment() {
             add(uncommittedUnitsUI)
         }
 
-        center = gridpane {
-            addClass(WorderDefaultStyles.insertBatch)
-            alignment = Pos.CENTER
-            hgap = 30.0
-
-            row {
-                listBasedStats(
-                        blockTitle = "Uploaded Data Stats",
-                        statsProperties = listOf(
-                                stats.totalWordsProperty,
-                                stats.totalValidWordsProperty,
-                                stats.totalInvalidWordsProperty
-                        ),
-                        commonValueMutator = { (this as Int).formatGrouped() }
-                )
-                listBasedStats(
-                        blockTitle = "Processed Data Stats",
-                        statsProperties = listOf(
-                                stats.totalProcessedProperty,
-                                stats.insertedProperty,
-                                stats.resetProperty
-                        ),
-                        commonValueMutator = { (this as Int).formatGrouped() }
-                )
+        center = vbox(spacing = rowSpacing, alignment = Pos.CENTER) {
+            style {
+                padding = box(0.px, 70.px)
+                fontSize = 18.px
             }
-            row {
-                separator {
-                    gridpaneConstraints {
-                        columnSpan = 2
-                    }
-                }
-            }
-            row {
-                vbox(spacing = 5, alignment = Pos.CENTER) {
-                    hbox(alignment = Pos.CENTER) {
-                        label("Insert Batch Status: ")
-                        worderStatusLabel(batch.statusProperty)
-                    }
-                    label(batch.status.description)
-                    gridpaneConstraints {
-                        columnSpan = 2
-                        margin = insets(0, 0, 30, 0)
-                    }
-                }
-            }
-            row {
-                listBasedStats(
-                        statsProperties = listOf(
-                                stats.generatedUnitsProperty,
-                                stats.readyToCommitUnitsProperty,
-                                stats.actionNeededUnitsProperty,
-                                stats.excludedUnitsProperty,
-                                stats.committedUnitsProperty
-                        ),
-                        commonValueMutator = { (this as Int).formatGrouped() }
-                ) {
-                    style {
-                        borderColor += box(Color.TRANSPARENT)
-                    }
-                }
+            hbox {
+                addClass(WorderCustomStyles.worderBlock)
+                style(append = true) { padding = box(20.px) }
                 progressindicator {
-                    useMaxSize = true
-                    paddingAll = 10
-                    progress = 0.0
-
+                    setId(WorderCustomStyles.batchProgress)
                     stats.totalProcessedProperty.onChange {
                         progress = (it.toDouble() / stats.totalValidWords)
                     }
-
-                    style {
-                        progressColor = Color.DODGERBLUE.deriveColor(1.0, 1.0, 1.0, 0.7)
-                    }
+                    usePrefSize = true
+                    progress = 0.0
                 }
-            }
-            row {
-                separator {
-                    gridpaneConstraints {
-                        columnSpan = 2
-                    }
+                region {
+                    hgrow = Priority.ALWAYS
                 }
-            }
-            row {
-                button("Reset This Batch") {
-                    batch.statusProperty.onChange {
-                        isDisable = it == InsertBatch.InsertBatchStatus.COMMITTING
-                    }
-                    setOnAction {
-                        if (uncommittedUnits.isNotEmpty())
-                            confirm("There are uncommitted units here. Are you sure you want to reset this batch?") {
-                                find<InsertController>().resetInsertBatch()
+                vbox(spacing = 15, alignment = Pos.CENTER) {
+                    worderStatusLabel(batch.statusProperty)
+                    separator()
+                    label(
+                            observable = batch.statusProperty,
+                            converter = object : StringConverter<InsertBatch.InsertBatchStatus>() {
+                                override fun toString(status: InsertBatch.InsertBatchStatus): String = status.description
+                                override fun fromString(string: String?): InsertBatch.InsertBatchStatus = throw IllegalStateException()
                             }
-                        else
-                            find<InsertController>().resetInsertBatch()
-                    }
-                }
-                button("Commit All Units") {
-                    batch.statusProperty.onChange {
-                        isDisable = it == InsertBatch.InsertBatchStatus.COMMITTING
-                    }
-                    setOnAction {
-                        CoroutineScope(Dispatchers.Default).launch {
-                            batch.commitAllUnits()
+                    ) {
+                        style {
+                            textFill = Color.GRAY
+                            padding = box(0.px, 15.px)
                         }
                     }
                 }
-            }
-
-            children.forEach {
-                it.gridpaneConstraints {
-                    this.hAlignment = HPos.CENTER
-                    this.vAlignment = VPos.CENTER
+                region {
+                    hgrow = Priority.ALWAYS
                 }
             }
+            hbox {
+                val uploadedVbox = vbox(spacing = rowSpacing) {
+                    listBasedStats(
+                            blockTitle = "Uploaded Data Stats",
+                            statsProperties = listOf(
+                                    stats.totalWordsProperty,
+                                    stats.totalValidWordsProperty,
+                                    stats.totalInvalidWordsProperty
+                            ),
+                            commonValueMutator = { (this as Int).formatGrouped() }
+                    ).addClass(WorderCustomStyles.batchStatBlock)
+                    button("Reset This Batch") {
+                        useMaxWidth = true
+                        batch.statusProperty.onChange {
+                            isDisable = it == InsertBatch.InsertBatchStatus.COMMITTING
+                        }
+                        setOnAction {
+                            if (uncommittedUnits.isEmpty()) {
+                                find<InsertController>().resetInsertBatch()
+                                return@setOnAction
+                            }
+                            confirm("There are uncommitted units here. Are you sure you want to reset this batch?") {
+                                find<InsertController>().resetInsertBatch()
+                            }
+                        }
+                    }.style(append = true) { padding = box(15.px) }
+                }
+                region {
+                    hgrow = Priority.ALWAYS
+                }
+                val processedVbox = vbox(spacing = rowSpacing) {
+                    listBasedStats(
+                            blockTitle = "Processed Data Stats",
+                            statsProperties = listOf(
+                                    stats.totalProcessedProperty,
+                                    stats.insertedProperty,
+                                    stats.resetProperty
+                            ),
+                            commonValueMutator = { (this as Int).formatGrouped() }
+                    ).addClass(WorderCustomStyles.batchStatBlock)
+                    button("Commit All Units") {
+                        useMaxWidth = true
+                        batch.statusProperty.onChange {
+                            isDisable = it == InsertBatch.InsertBatchStatus.COMMITTING
+                        }
+                        setOnAction {
+                            CoroutineScope(Dispatchers.Default).launch {
+                                batch.commitAllUnits()
+                            }
+                        }
+                    }.style(append = true) { padding = box(15.px) }
+                }
+
+                processedVbox.minWidthProperty().bind(uploadedVbox.widthProperty())
+                uploadedVbox.minWidthProperty().bind(processedVbox.widthProperty())
+            }
         }
+
 
         right = hbox(alignment = Pos.CENTER) {
             add(committedUnitsUI)
         }
-
-        (left as HBox).minWidthProperty().bind(committedUnitsUI.root.widthProperty())
-        (right as HBox).minWidthProperty().bind(uncommittedUnitsUI.root.widthProperty())
     }
 }

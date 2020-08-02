@@ -4,14 +4,13 @@
  *
  * Name: <WorderDefaultStyles.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <01/08/2020, 10:12:29 PM>
- * Version: <172>
+ * Modified: <02/08/2020, 10:21:20 PM>
+ * Version: <200>
  */
 
 package worder.core.styles
 
 import javafx.geometry.Pos
-import javafx.scene.effect.DropShadow
 import javafx.scene.layout.BackgroundPosition
 import javafx.scene.layout.BackgroundRepeat
 import javafx.scene.layout.BorderStrokeStyle
@@ -29,15 +28,6 @@ import tornadofx.cssclass
 import tornadofx.px
 
 class WorderDefaultStyles : Stylesheet() {
-    companion object {
-        val statsBlock by cssclass()
-        val insertUnit by cssclass()
-        val insertBatch by cssclass()
-        val unitButton by cssclass()
-        val dragDropField by cssclass()
-    }
-
-
     init {
         text {
             fontSize = 12.px
@@ -55,7 +45,16 @@ class WorderDefaultStyles : Stylesheet() {
         }
 
         form {
+            alignment = Pos.CENTER
             backgroundColor += Color.WHITE
+
+            fieldset {
+                alignment = Pos.CENTER
+                padding = box(0.px)
+                button {
+                    padding = box(6.px)
+                }
+            }
         }
 
         titledPane {
@@ -75,47 +74,6 @@ class WorderDefaultStyles : Stylesheet() {
         comboBox {
             backgroundInsets += box(0.px)
             backgroundRadius += box(0.px)
-        }
-
-        statsBlock {
-            alignment = Pos.TOP_CENTER
-            padding = box(15.px)
-            borderRadius += box(10.px)
-            borderColor += box(Color.GRAY)
-        }
-
-        insertUnit {
-            padding = box(10.px)
-            borderRadius += box(10.px)
-            borderColor += box(Color.GRAY)
-
-        }
-
-        insertBatch {
-            text {
-                fontSize = 18.px
-            }
-
-//            separator {
-//                padding = box(60.px, 0.px)
-//
-//                line {
-//                    effect = DropShadow(2.0, Color.DIMGRAY)
-//                }
-//            }
-        }
-
-        dragDropField {
-            backgroundColor += c(Color.GRAY.toString(), 0.1)
-            borderColor += box(Color.DARKGRAY)
-            borderStyle += BorderStrokeStyle(
-                    StrokeType.OUTSIDE,
-                    StrokeLineJoin.MITER,
-                    StrokeLineCap.BUTT,
-                    10.0,
-                    0.0,
-                    listOf(20.0, 14.0)
-            )
         }
 
         drawer {
