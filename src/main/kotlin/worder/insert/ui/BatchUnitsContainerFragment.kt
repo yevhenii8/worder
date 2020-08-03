@@ -4,8 +4,8 @@
  *
  * Name: <BatchUnitsContainerFragment.kt>
  * Created: <05/07/2020, 06:50:42 PM>
- * Modified: <02/08/2020, 07:49:40 PM>
- * Version: <110>
+ * Modified: <03/08/2020, 04:49:35 PM>
+ * Version: <132>
  */
 
 package worder.insert.ui
@@ -17,7 +17,6 @@ import javafx.geometry.Pos
 import javafx.scene.Parent
 import javafx.scene.control.ScrollBar
 import javafx.scene.control.ScrollPane
-import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
 import tornadofx.Fragment
 import tornadofx.bindComponents
@@ -44,7 +43,7 @@ class BatchUnitsContainerFragment : Fragment() {
             visibleAmountProperty().lessThan(1.0)
         }
     }
-    private val unitsUI: VBox = vbox(spacing = 20) {
+    private val unitsUI: VBox = vbox(spacing = 20, alignment = Pos.CENTER) {
         bindComponents(units) { unit ->
             find<BatchUnitFragment>("unit" to unit)
         }
@@ -53,6 +52,7 @@ class BatchUnitsContainerFragment : Fragment() {
         content = if (units.isEmpty()) find<EmptyUnitsContainer>().root else unitsUI
         vbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
         hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
+        isFitToHeight = true
 
         scrollBarUI.apply {
             minProperty().bind(vminProperty())
@@ -81,8 +81,6 @@ class BatchUnitsContainerFragment : Fragment() {
 
 
     override val root = hbox {
-        setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE)
-
         if (direction == HorizontalDirection.LEFT)
             add(scrollBarUI)
 

@@ -4,8 +4,8 @@
  *
  * Name: <DefaultInsertBatch.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <24/07/2020, 07:45:55 PM>
- * Version: <23>
+ * Modified: <03/08/2020, 05:02:53 PM>
+ * Version: <24>
  */
 
 package worder.insert.model.impl
@@ -26,16 +26,16 @@ import tornadofx.setValue
 import tornadofx.toObservable
 import worder.core.model.BareWord
 import worder.database.model.WorderInsertDB
-import worder.insert.model.InsertBatch
-import worder.insert.model.InsertBatch.InsertBatchStatus
 import worder.insert.model.BatchUnit
 import worder.insert.model.BatchUnit.BatchUnitStatus
 import worder.insert.model.BatchUnit.InvalidWord
+import worder.insert.model.InsertBatch
+import worder.insert.model.InsertBatch.InsertBatchStatus
 import java.io.File
 
-class DefaultInsertBatch private constructor(private val database: WorderInsertDB, files: List<File>) : InsertBatch {
+class DefaultInsertBatch private constructor(private val database: WorderInsertDB, files: Collection<File>) : InsertBatch {
     companion object {
-        fun createInstance(database: WorderInsertDB, files: List<File>): InsertBatch = DefaultInsertBatch(database, files)
+        fun createInstance(database: WorderInsertDB, files: Collection<File>): InsertBatch = DefaultInsertBatch(database, files)
     }
 
 

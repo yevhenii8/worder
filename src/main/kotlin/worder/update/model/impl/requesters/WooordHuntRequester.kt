@@ -4,8 +4,8 @@
  *
  * Name: <WooordHuntRequester.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <24/07/2020, 07:45:55 PM>
- * Version: <10>
+ * Modified: <03/08/2020, 08:07:28 PM>
+ * Version: <11>
  */
 
 package worder.update.model.impl.requesters
@@ -37,7 +37,7 @@ class WooordHuntRequester private constructor() : TranslationRequester, Transcri
 
 
     override suspend fun requestWord(word: BareWord) {
-        val body = sendGetRequest(SITE_URL + word.name)
+        val body = sendGetRequest(SITE_URL + word.name.replace(" ", "%20"))
 
         translations = (TRANSLATION_PATTERN.find(body)?.value ?: "")
                 .split(", ")

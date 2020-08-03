@@ -4,8 +4,8 @@
  *
  * Name: <CambridgeRequester.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <24/07/2020, 07:46:58 PM>
- * Version: <13>
+ * Modified: <03/08/2020, 06:49:09 PM>
+ * Version: <17>
  */
 
 package worder.update.model.impl.requesters
@@ -19,7 +19,7 @@ import worder.update.model.impl.WebsiteRequesterDecorator.Companion.sendGetReque
 
 class CambridgeRequester private constructor() : DefinitionRequester, ExampleRequester {
     companion object {
-        private const val SITE_URL = "https://dictionary.cambridge.org/dictionary/english/"
+        private const val SITE_URL = "https://dictionary.cambridge.org/search/direct/?datasetsearch=english&q="
 
         private val DEFINITION_PATTERN = Regex("(?<=<div class=\"def ddef_d db\">).*?(?=</div>)")
         private val EXAMPLE_PATTERN = Regex("(?<=<span class=\"eg deg\">).*?(?=</span></div>)")
@@ -39,7 +39,7 @@ class CambridgeRequester private constructor() : DefinitionRequester, ExampleReq
 
 
     override suspend fun requestWord(word: BareWord) {
-        val body = sendGetRequest(SITE_URL + word.name)
+        val body = sendGetRequest(SITE_URL + word.name.replace(' ', '+'))
 
         definitions = DEFINITION_PATTERN.findAll(body)
                 .map { COMMON_FILTER.replace(it.value, "").trim() }

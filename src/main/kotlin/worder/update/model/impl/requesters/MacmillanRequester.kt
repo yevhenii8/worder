@@ -4,8 +4,8 @@
  *
  * Name: <MacmillanRequester.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <24/07/2020, 07:45:55 PM>
- * Version: <10>
+ * Modified: <03/08/2020, 07:59:45 PM>
+ * Version: <19>
  */
 
 package worder.update.model.impl.requesters
@@ -22,9 +22,10 @@ class MacmillanRequester private constructor() : DefinitionRequester, ExampleReq
     companion object {
         private const val SITE_URL = "https://www.macmillandictionary.com/dictionary/british/"
 
-        private val TRANSCRIPTION_PATTERN = Regex("(?<=<span class=\"SEP PRON-before\"> /</span>).*?(?=<)")
-        private val DEFINITION_PATTERN = Regex("(?<=<span class=\"DEFINITION\">).*?(?=</span><div)")
-        private val EXAMPLE_PATTERN = Regex("(?<=<p class=\"EXAMPLE\").*?(?=</p>)")
+        private val TRANSCRIPTION_PATTERN = Regex("(?<=<span class=\"PRON\">).*?(?=</div>)")
+        private val TRANSCRIPTION_FILTER = Regex("( /)|(/)")
+        private val DEFINITION_PATTERN = Regex("(?<=<span class=\"DEFINITION\">).*?(?=</span></?div)")
+        private val EXAMPLE_PATTERN = Regex("((?<=<p class=\"EXAMPLE\").*?(?=</p>))|((?<=<div class=\"openEx\").*?(?=</div>))")
         private val COMMON_FILTER = Regex("(<.*?>)|(resource=\"dict_british\">)")
 
         val instance: Requester by lazy {
@@ -42,7 +43,8 @@ class MacmillanRequester private constructor() : DefinitionRequester, ExampleReq
 
 
     override suspend fun requestWord(word: BareWord) {
-        val body = sendGetRequest(SITE_URL + word.name) + sendGetRequest("$SITE_URL${word.name}_1")
+        val body = sendGetRequest(SITE_URL + word.name.replace(' ', '-'))
+                .plus(sendGetRequest("$SITE_URL${word.name.replace(' ', '-')}_1"))
 
         definitions = DEFINITION_PATTERN.findAll(body)
                 .map { COMMON_FILTER.replace(it.value, "").trim() }
@@ -53,7 +55,12 @@ class MacmillanRequester private constructor() : DefinitionRequester, ExampleReq
                 .toList()
 
         transcriptions = TRANSCRIPTION_PATTERN.findAll(body)
-                .map { "[${it.value}]" }
+                .map {
+                    var str = it.value
+                    str = COMMON_FILTER.replace(str, "").trim()
+                    str = TRANSCRIPTION_FILTER.replace(str, "")
+                    "[$str]"
+                }
                 .toList()
     }
 }

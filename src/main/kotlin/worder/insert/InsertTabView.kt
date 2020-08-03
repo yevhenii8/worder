@@ -4,8 +4,8 @@
  *
  * Name: <InsertTabView.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <22/07/2020, 06:41:15 PM>
- * Version: <459>
+ * Modified: <03/08/2020, 05:03:46 PM>
+ * Version: <462>
  */
 
 package worder.insert
@@ -19,37 +19,42 @@ import worder.database.DatabaseController
 import worder.database.DatabaseEventListener
 import worder.database.model.WorderDB
 import worder.database.ui.NoConnectionFragment
-import worder.insert.model.InsertBatch
+import worder.insert.model.impl.DefaultInsertBatch
 import worder.insert.ui.InsertBatchFragment
 import worder.tornadofx.replaceChildren
 import java.io.File
 
 class InsertTabView : View("Insert"), DatabaseEventListener {
-    private val insertController: InsertController by inject()
+    private val databaseController: DatabaseController by inject()
     private val notConnectedFragment = find<NoConnectionFragment>()
-    private val notUploadedFragment = find<DragAndDropFragment>(
-            "text" to "Drag one or more plain files here to process them",
-            "windowTitle" to "Inserter Files Selection",
-            "extensionFilter" to ExtensionFilter("Text Files (*.txt)", "*.txt"),
-            "action" to { files: List<File> -> insertController.generateInsertBatch(files) },
-            "allowMultiselect" to true
-    )
+    private val notUploadedFragment: DragAndDropFragment
 
 
     override val root: Parent = stackpane()
 
 
     init {
+        notUploadedFragment = find(
+                "text" to "Drag one or more plain files here to process them",
+                "windowTitle" to "Inserter Files Selection",
+                "extensionFilter" to ExtensionFilter("Text Files (*.txt)", "*.txt"),
+                "action" to { files: List<File> -> generateInsertBatch(files) },
+                "allowMultiselect" to true
+        )
         find<DatabaseController>().subscribeAndRaise(this)
     }
 
 
-    override fun onDatabaseConnection(db: WorderDB) = toNotUploadedState()
+    override fun onDatabaseConnection(db: WorderDB) = root.replaceChildren(notUploadedFragment)
 
     override fun onDatabaseDisconnection() = root.replaceChildren(notConnectedFragment)
 
+    fun generateInsertBatch(files: Collection<File>) {
+        val insertBatch = DefaultInsertBatch.createInstance(databaseController.db!!.inserter, files)
+        root.replaceChildren(find<InsertBatchFragment>("batch" to insertBatch))
+    }
 
-    fun toNotUploadedState() = root.replaceChildren(notUploadedFragment)
-
-    fun toUploadedState(insertBatch: InsertBatch) = root.replaceChildren(find<InsertBatchFragment>("batch" to insertBatch))
+    fun resetInsertBatch() {
+        root.replaceChildren(notUploadedFragment)
+    }
 }

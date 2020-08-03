@@ -4,8 +4,8 @@
  *
  * Name: <AppEntry.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <02/08/2020, 04:41:23 PM>
- * Version: <109>
+ * Modified: <03/08/2020, 05:02:53 PM>
+ * Version: <111>
  */
 
 package worder
@@ -18,7 +18,7 @@ import worder.core.MainView
 import worder.core.styles.WorderCustomStyles
 import worder.core.styles.WorderDefaultStyles
 import worder.database.DatabaseController
-import worder.insert.InsertController
+import worder.insert.InsertTabView
 import java.io.File
 import java.nio.file.Path
 
@@ -61,7 +61,7 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomSt
 
         fun runDevInsert() = withSampleDB {
             mainView.switchToInsertTab()
-            find<InsertController>().generateInsertBatch(devInsertFiles)
+            find<InsertTabView>().generateInsertBatch(devInsertFiles)
         }
 
         fun runDevInsertHard() = withSampleDB {
@@ -72,7 +72,7 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomSt
             }
 
             mainView.switchToInsertTab()
-            find<InsertController>().generateInsertBatch(devInsertFilesMany)
+            find<InsertTabView>().generateInsertBatch(devInsertFilesMany)
         }
 
         fun runDevUpdate() = withSampleDB {

@@ -4,8 +4,8 @@
  *
  * Name: <InsertBatchFragment.kt>
  * Created: <09/07/2020, 10:43:11 PM>
- * Modified: <02/08/2020, 10:36:38 PM>
- * Version: <384>
+ * Modified: <03/08/2020, 05:03:46 PM>
+ * Version: <400>
  */
 
 package worder.insert.ui
@@ -15,7 +15,6 @@ import javafx.collections.ObservableList
 import javafx.geometry.HorizontalDirection
 import javafx.geometry.Pos
 import javafx.scene.Parent
-import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import javafx.util.StringConverter
@@ -33,7 +32,6 @@ import tornadofx.hgrow
 import tornadofx.label
 import tornadofx.observableListOf
 import tornadofx.onChange
-import tornadofx.paddingAll
 import tornadofx.progressindicator
 import tornadofx.px
 import tornadofx.region
@@ -47,7 +45,7 @@ import worder.core.formatGrouped
 import worder.core.listBasedStats
 import worder.core.styles.WorderCustomStyles
 import worder.core.worderStatusLabel
-import worder.insert.InsertController
+import worder.insert.InsertTabView
 import worder.insert.model.BatchUnit
 import worder.insert.model.InsertBatch
 import worder.insert.model.ObservableInsertBatchStats
@@ -56,8 +54,6 @@ class InsertBatchFragment : Fragment() {
     private val batch: InsertBatch by param()
     private val stats: ObservableInsertBatchStats = batch.observableStats
     private val uncommittedUnits: ObservableList<BatchUnit>
-    private val uncommittedUnitsUI: HBox
-    private val committedUnitsUI: HBox
     private val rowSpacing: Number = 100
 
 
@@ -72,21 +68,14 @@ class InsertBatchFragment : Fragment() {
 
             res
         }
-        uncommittedUnitsUI = find<BatchUnitsContainerFragment>(
-                "units" to uncommittedUnits,
-                "direction" to HorizontalDirection.LEFT
-        ).root
-        committedUnitsUI = find<BatchUnitsContainerFragment>(
-                "units" to batch.committedUnitsProperty,
-                "direction" to HorizontalDirection.RIGHT
-        ).root
     }
 
 
     override val root: Parent = borderpane {
-        left = hbox(alignment = Pos.CENTER) {
-            add(uncommittedUnitsUI)
-        }
+        left = find<BatchUnitsContainerFragment>(
+                "units" to uncommittedUnits,
+                "direction" to HorizontalDirection.LEFT
+        ).root
 
         center = vbox(spacing = rowSpacing, alignment = Pos.CENTER) {
             style {
@@ -145,11 +134,11 @@ class InsertBatchFragment : Fragment() {
                         }
                         setOnAction {
                             if (uncommittedUnits.isEmpty()) {
-                                find<InsertController>().resetInsertBatch()
+                                find<InsertTabView>().resetInsertBatch()
                                 return@setOnAction
                             }
                             confirm("There are uncommitted units here. Are you sure you want to reset this batch?") {
-                                find<InsertController>().resetInsertBatch()
+                                find<InsertTabView>().resetInsertBatch()
                             }
                         }
                     }.style(append = true) { padding = box(15.px) }
@@ -186,8 +175,9 @@ class InsertBatchFragment : Fragment() {
         }
 
 
-        right = hbox(alignment = Pos.CENTER) {
-            add(committedUnitsUI)
-        }
+        right = find<BatchUnitsContainerFragment>(
+                "units" to batch.committedUnitsProperty,
+                "direction" to HorizontalDirection.RIGHT
+        ).root
     }
 }
