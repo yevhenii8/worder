@@ -21,15 +21,4 @@ tasks {
     withType<KotlinCompile> {
         kotlinOptions.jvmTarget = "1.8"
     }
-
-    withType<Test> {
-        useJUnitPlatform()
-        //testLogging.setEvents(listOf("passed", "skipped", "failed"))
-        //testLogging.showStandardStreams = true
-    }
-
-    withType<Wrapper> {
-        distributionType = Wrapper.DistributionType.ALL
-        gradleVersion = "6.5"
-    }
 }

@@ -1,4 +1,4 @@
-package worder.kotest
+package worder.buildsrc.kotest
 
 import io.kotest.core.spec.style.ShouldSpec
 

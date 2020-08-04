@@ -4,8 +4,8 @@
  *
  * Name: <Words.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <24/07/2020, 07:45:55 PM>
- * Version: <6>
+ * Modified: <04/08/2020, 07:11:08 PM>
+ * Version: <7>
  */
 
 package worder.gui.core.model

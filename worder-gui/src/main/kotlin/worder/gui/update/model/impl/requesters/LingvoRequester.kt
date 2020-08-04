@@ -4,8 +4,8 @@
  *
  * Name: <LingvoRequester.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <03/08/2020, 06:49:09 PM>
- * Version: <11>
+ * Modified: <04/08/2020, 07:11:08 PM>
+ * Version: <12>
  */
 
 package worder.gui.update.model.impl.requesters

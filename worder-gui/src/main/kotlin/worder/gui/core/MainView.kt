@@ -4,8 +4,8 @@
  *
  * Name: <MainView.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <01/08/2020, 09:44:12 PM>
- * Version: <46>
+ * Modified: <04/08/2020, 08:02:59 PM>
+ * Version: <48>
  */
 
 package worder.gui.core
@@ -26,6 +26,7 @@ import tornadofx.label
 import tornadofx.paddingHorizontal
 import tornadofx.region
 import tornadofx.style
+import worder.gui.AppEntry
 import worder.gui.database.DatabaseTabView
 import worder.gui.insert.InsertTabView
 import worder.gui.update.UpdateTabView
@@ -54,7 +55,7 @@ class MainView : View("Worder GUI") {
                 backgroundColor += c("#f5f5f5")
             }
 
-            label("Worder v1.0.0-SNAPSHOT")
+            label(AppEntry.worderVersion)
             region {
                 hgrow = Priority.ALWAYS
             }

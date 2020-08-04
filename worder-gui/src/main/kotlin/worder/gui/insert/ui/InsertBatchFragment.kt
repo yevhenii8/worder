@@ -4,8 +4,8 @@
  *
  * Name: <InsertBatchFragment.kt>
  * Created: <09/07/2020, 10:43:11 PM>
- * Modified: <03/08/2020, 05:03:46 PM>
- * Version: <400>
+ * Modified: <04/08/2020, 07:11:08 PM>
+ * Version: <401>
  */
 
 package worder.gui.insert.ui

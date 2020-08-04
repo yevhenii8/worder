@@ -1,3 +1,5 @@
+version = "1.0.0-DEV"
+
 plugins {
     application
     java
@@ -10,4 +12,13 @@ dependencies {
 
 application {
     mainClassName = "worder.launcher.App"
+}
+
+tasks {
+    withType<worder.buildsrc.UpdateFileStampsTask> {
+        sourcesDir = projectDir.resolve("src")
+        sourcesFormats = listOf(".java")
+
+        compileJava.get().dependsOn(this)
+    }
 }

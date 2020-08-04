@@ -4,8 +4,8 @@
  *
  * Name: <DefaultInsertBatch.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <03/08/2020, 05:02:53 PM>
- * Version: <24>
+ * Modified: <04/08/2020, 07:11:08 PM>
+ * Version: <25>
  */
 
 package worder.gui.insert.model.impl

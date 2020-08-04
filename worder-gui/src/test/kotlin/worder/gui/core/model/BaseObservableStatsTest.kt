@@ -4,11 +4,11 @@
  *
  * Name: <BaseObservableStatsTest.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <17/07/2020, 07:21:19 PM>
- * Version: <6>
+ * Modified: <04/08/2020, 07:11:08 PM>
+ * Version: <7>
  */
 
-package worder.core.model
+package worder.gui.core.model
 
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.shouldBe
@@ -16,8 +16,6 @@ import io.kotest.matchers.shouldNotBe
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import worder.gui.core.model.BaseObservableStats
-import worder.gui.core.model.applyWithMainUI
 
 class BaseObservableStatsTest : ShouldSpec({
     @Suppress("BlockingMethodInNonBlockingContext")

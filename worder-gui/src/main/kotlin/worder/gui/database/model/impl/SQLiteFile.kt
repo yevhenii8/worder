@@ -4,8 +4,8 @@
  *
  * Name: <SQLiteFile.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <30/07/2020, 09:34:37 PM>
- * Version: <56>
+ * Modified: <04/08/2020, 07:11:08 PM>
+ * Version: <57>
  */
 
 package worder.gui.database.model.impl

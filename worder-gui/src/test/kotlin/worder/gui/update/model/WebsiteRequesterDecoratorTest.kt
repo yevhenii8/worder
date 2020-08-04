@@ -4,11 +4,11 @@
  *
  * Name: <WebsiteRequesterDecoratorTest.kt>
  * Created: <22/07/2020, 09:12:45 PM>
- * Modified: <22/07/2020, 09:41:48 PM>
- * Version: <16>
+ * Modified: <04/08/2020, 07:11:08 PM>
+ * Version: <17>
  */
 
-package worder.update.model
+package worder.gui.update.model
 
 import io.kotest.core.spec.style.ShouldSpec
 import kotlinx.coroutines.Dispatchers
@@ -17,7 +17,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import worder.gui.core.log
 import worder.gui.core.model.BareWord
-import worder.gui.update.model.Requester
 import worder.gui.update.model.impl.WebsiteRequesterDecorator
 import worder.gui.update.model.impl.requesters.CambridgeRequester
 

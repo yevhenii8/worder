@@ -1,4 +1,4 @@
-package worder
+package worder.buildsrc
 
 import java.io.File
 import java.time.LocalDateTime

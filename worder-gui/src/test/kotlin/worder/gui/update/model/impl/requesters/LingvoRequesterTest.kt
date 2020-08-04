@@ -4,16 +4,15 @@
  *
  * Name: <LingvoRequesterTest.kt>
  * Created: <03/08/2020, 06:49:09 PM>
- * Modified: <03/08/2020, 08:09:37 PM>
- * Version: <5>
+ * Modified: <04/08/2020, 07:11:08 PM>
+ * Version: <6>
  */
 
-package worder.update.model.impl.requesters
+package worder.gui.update.model.impl.requesters
 
 import io.kotest.core.spec.style.ShouldSpec
 import kotlinx.coroutines.runBlocking
 import worder.gui.core.model.BareWord
-import worder.gui.update.model.impl.requesters.LingvoRequester
 import worder.gui.update.model.TranscriptionRequester
 import worder.gui.update.model.TranslationRequester
 

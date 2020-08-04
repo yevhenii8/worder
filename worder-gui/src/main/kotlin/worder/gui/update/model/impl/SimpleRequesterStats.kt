@@ -4,8 +4,8 @@
  *
  * Name: <SimpleRequesterStats.kt>
  * Created: <20/07/2020, 11:22:35 PM>
- * Modified: <21/07/2020, 10:15:37 PM>
- * Version: <3>
+ * Modified: <04/08/2020, 07:11:08 PM>
+ * Version: <4>
  */
 
 package worder.gui.update.model.impl

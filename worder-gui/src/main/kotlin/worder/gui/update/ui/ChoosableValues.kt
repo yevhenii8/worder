@@ -4,8 +4,8 @@
  *
  * Name: <ChoosableValues.kt>
  * Created: <31/07/2020, 04:56:09 PM>
- * Modified: <31/07/2020, 07:41:22 PM>
- * Version: <7>
+ * Modified: <04/08/2020, 07:11:08 PM>
+ * Version: <8>
  */
 
 package worder.gui.update.ui

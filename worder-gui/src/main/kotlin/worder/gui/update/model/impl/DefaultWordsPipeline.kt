@@ -4,8 +4,8 @@
  *
  * Name: <DefaultWordsPipeline.kt>
  * Created: <20/07/2020, 11:22:35 PM>
- * Modified: <31/07/2020, 10:39:17 PM>
- * Version: <86>
+ * Modified: <04/08/2020, 07:11:08 PM>
+ * Version: <87>
  */
 
 package worder.gui.update.model.impl

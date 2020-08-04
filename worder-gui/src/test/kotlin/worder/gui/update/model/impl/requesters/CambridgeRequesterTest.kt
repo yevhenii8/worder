@@ -4,16 +4,15 @@
  *
  * Name: <CambridgeRequesterTest.kt>
  * Created: <03/08/2020, 06:23:52 PM>
- * Modified: <03/08/2020, 08:07:28 PM>
- * Version: <4>
+ * Modified: <04/08/2020, 07:11:08 PM>
+ * Version: <5>
  */
 
-package worder.update.model.impl.requesters
+package worder.gui.update.model.impl.requesters
 
 import io.kotest.core.spec.style.ShouldSpec
 import kotlinx.coroutines.runBlocking
 import worder.gui.core.model.BareWord
-import worder.gui.update.model.impl.requesters.CambridgeRequester
 import worder.gui.update.model.DefinitionRequester
 import worder.gui.update.model.ExampleRequester
 

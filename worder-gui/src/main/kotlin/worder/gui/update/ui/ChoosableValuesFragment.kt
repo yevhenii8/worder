@@ -4,8 +4,8 @@
  *
  * Name: <ChoosableValuesFragment.kt>
  * Created: <29/07/2020, 07:38:48 PM>
- * Modified: <31/07/2020, 11:13:18 PM>
- * Version: <63>
+ * Modified: <04/08/2020, 07:11:08 PM>
+ * Version: <64>
  */
 
 package worder.gui.update.ui

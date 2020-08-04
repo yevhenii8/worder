@@ -4,8 +4,8 @@
  *
  * Name: <ListBindIndexed.kt>
  * Created: <10/07/2020, 10:35:52 PM>
- * Modified: <02/08/2020, 07:20:37 PM>
- * Version: <6>
+ * Modified: <04/08/2020, 07:11:08 PM>
+ * Version: <7>
  */
 
 package worder.gui.tornadofx

@@ -4,18 +4,17 @@
  *
  * Name: <WooordHuntRequesterTest.kt>
  * Created: <03/08/2020, 08:07:28 PM>
- * Modified: <03/08/2020, 08:09:37 PM>
- * Version: <2>
+ * Modified: <04/08/2020, 07:11:08 PM>
+ * Version: <3>
  */
 
-package worder.update.model.impl.requesters
+package worder.gui.update.model.impl.requesters
 
 import io.kotest.core.spec.style.ShouldSpec
 import kotlinx.coroutines.runBlocking
 import worder.gui.core.model.BareWord
 import worder.gui.update.model.TranscriptionRequester
 import worder.gui.update.model.TranslationRequester
-import worder.gui.update.model.impl.requesters.WooordHuntRequester
 
 @Suppress("BlockingMethodInNonBlockingContext")
 class WooordHuntRequesterTest : ShouldSpec({

@@ -4,8 +4,8 @@
  *
  * Name: <MacmillanRequester.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <03/08/2020, 07:59:45 PM>
- * Version: <19>
+ * Modified: <04/08/2020, 07:11:08 PM>
+ * Version: <20>
  */
 
 package worder.gui.update.model.impl.requesters

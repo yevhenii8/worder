@@ -4,8 +4,8 @@
  *
  * Name: <WorderInsertDB.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <06/07/2020, 07:25:08 PM>
- * Version: <3>
+ * Modified: <04/08/2020, 07:11:08 PM>
+ * Version: <4>
  */
 
 package worder.gui.database.model

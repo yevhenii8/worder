@@ -1,15 +1,19 @@
-package worder
+package worder.buildsrc
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
 import java.io.File
-import javax.inject.Inject
 
-open class UpdateFileStampsTask @Inject constructor(
-        private val sourcesDir: File,
-        private val sourcesFormats: List<String>
-) : DefaultTask() {
+open class UpdateFileStampsTask : DefaultTask() {
+    @InputDirectory
+    var sourcesDir: File? = null
+
+    @Input
+    var sourcesFormats: List<String> = emptyList()
+
     @Option(description = "Run the task in the Transit mode. Use when updating a stamp structure.")
     var useTransit = false
 
@@ -22,7 +26,10 @@ open class UpdateFileStampsTask @Inject constructor(
 
     @TaskAction
     fun execute() {
-        val (valid, invalid) = sourcesDir.walk()
+        if (sourcesDir == null)
+            error("sourceDir input has not been set!")
+
+        val (valid, invalid) = sourcesDir!!.walk()
                 .filter { file -> sourcesFormats.any { file.name.endsWith(it) } }
                 .map { file -> file to StampedFile(file, useTransit) }
                 .partition { it.second.isStampValid }

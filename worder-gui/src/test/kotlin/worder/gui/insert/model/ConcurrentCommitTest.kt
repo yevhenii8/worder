@@ -4,11 +4,11 @@
  *
  * Name: <ConcurrentCommitTest.kt>
  * Created: <17/07/2020, 11:29:59 PM>
- * Modified: <22/07/2020, 05:48:19 PM>
- * Version: <35>
+ * Modified: <04/08/2020, 07:11:08 PM>
+ * Version: <36>
  */
 
-package worder.insert.model
+package worder.gui.insert.model
 
 import io.kotest.core.spec.style.ShouldSpec
 import kotlinx.coroutines.Dispatchers

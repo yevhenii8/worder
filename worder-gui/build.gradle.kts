@@ -1,4 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import worder.buildsrc.WorderVersionDescriptor
+
+version = "1.0.0-SNAPSHOT"
 
 plugins {
     application
@@ -43,5 +46,35 @@ application {
 tasks {
     withType<KotlinCompile> {
         kotlinOptions.jvmTarget = "1.8"
+    }
+
+    withType<worder.buildsrc.UpdateFileStampsTask> {
+        sourcesDir = projectDir.resolve("src")
+        sourcesFormats = listOf(".kt")
+
+        compileKotlin.get().dependsOn(this)
+    }
+
+    register("updateVersion") {
+        doFirst {
+            val worderVersion = WorderVersionDescriptor.parseWorderVersion(version.toString()).apply {
+                buildNumber++
+            }
+
+            with(projectDir) {
+                val buildScript = resolve("build.gradle.kts")
+                val buildScriptContent = buildScript.readText()
+                buildScript.writeText(buildScriptContent.replace("^version=.*$".toRegex(RegexOption.MULTILINE), "version=$worderVersion"))
+
+                resolve("src")
+                        .resolve("main")
+                        .resolve("resources")
+                        .resolve("version.txt")
+                        .writeText(worderVersion.toString())
+            }
+
+        }
+
+        build.get().dependsOn(this)
     }
 }

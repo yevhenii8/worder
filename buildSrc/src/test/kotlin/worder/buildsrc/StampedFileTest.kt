@@ -1,4 +1,4 @@
-package worder
+package worder.buildsrc
 
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.collections.containNull
@@ -18,7 +18,7 @@ class StampedFileTest : ShouldSpec({
              * Version: <1>
              */
 
-            package worder.core.model
+            package worder.gui.core.model
 
             import javafx.scene.paint.Paint
 
@@ -38,7 +38,7 @@ class StampedFileTest : ShouldSpec({
              * Version: #<1>
              */
 
-            package worder.core.model
+            package worder.gui.core.model
 
             import javafx.scene.paint.Paint
 
@@ -58,7 +58,7 @@ class StampedFileTest : ShouldSpec({
              * Version: <1>
              */
 
-            package worder.core.model
+            package worder.gui.core.model
 
             import javafx.scene.paint.Paint
 
@@ -69,7 +69,7 @@ class StampedFileTest : ShouldSpec({
 
         """.trimIndent()
     val noStamp = """
-            package worder.core.model
+            package worder.gui.core.model
 
             import javafx.scene.paint.Paint
 

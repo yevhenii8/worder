@@ -4,11 +4,11 @@
  *
  * Name: <ObservableStatsSyncTest.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <17/07/2020, 07:21:19 PM>
- * Version: <6>
+ * Modified: <04/08/2020, 07:11:08 PM>
+ * Version: <7>
  */
 
-package worder.core.model
+package worder.gui.core.model
 
 import io.kotest.core.listeners.TestListener
 import io.kotest.core.spec.style.ShouldSpec
@@ -21,7 +21,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import worder.gui.core.model.BaseObservableStats
 
 class ObservableStatsSyncTest : ShouldSpec({
     class TestStats : BaseObservableStats("Testing Stats Object") {

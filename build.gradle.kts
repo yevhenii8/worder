@@ -12,15 +12,11 @@ subprojects {
 
         withType<Wrapper> {
             distributionType = Wrapper.DistributionType.ALL
-            gradleVersion = "6.5"
+            gradleVersion = "6.5.1"
         }
 
-//    register<UpdateFileStampsTask>(
-//            "updateFileStamps",
-//            projectDir.resolve("src"),
-//            listOf(".kt", ".kts")
-//    ).also {
-//        compileKotlin.get().dependsOn(it.get())
-//    }
+        register<worder.buildsrc.UpdateFileStampsTask>(
+                name = "updateFileStamps"
+        )
     }
 }

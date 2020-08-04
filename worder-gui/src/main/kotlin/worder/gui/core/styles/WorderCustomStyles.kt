@@ -4,8 +4,8 @@
  *
  * Name: <WorderCustomStyles.kt>
  * Created: <02/08/2020, 04:33:41 PM>
- * Modified: <02/08/2020, 10:33:07 PM>
- * Version: <17>
+ * Modified: <04/08/2020, 07:11:08 PM>
+ * Version: <18>
  */
 
 package worder.gui.core.styles
