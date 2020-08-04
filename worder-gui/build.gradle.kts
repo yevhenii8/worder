@@ -1,7 +1,8 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import worder.buildsrc.UpdateFileStampsTask
 import worder.buildsrc.WorderVersionDescriptor
 
-version = "1.0.0-SNAPSHOT"
+version = "1.0.5-SNAPSHOT"
 
 plugins {
     application
@@ -48,7 +49,7 @@ tasks {
         kotlinOptions.jvmTarget = "1.8"
     }
 
-    withType<worder.buildsrc.UpdateFileStampsTask> {
+    withType<UpdateFileStampsTask> {
         sourcesDir = projectDir.resolve("src")
         sourcesFormats = listOf(".kt")
 
@@ -57,14 +58,20 @@ tasks {
 
     register("updateVersion") {
         doFirst {
-            val worderVersion = WorderVersionDescriptor.parseWorderVersion(version.toString()).apply {
+            val worderVersion = WorderVersionDescriptor.fromString(version.toString()).apply {
                 buildNumber++
             }
 
             with(projectDir) {
                 val buildScript = resolve("build.gradle.kts")
                 val buildScriptContent = buildScript.readText()
-                buildScript.writeText(buildScriptContent.replace("^version=.*$".toRegex(RegexOption.MULTILINE), "version=$worderVersion"))
+
+                buildScript.writeText(
+                        buildScriptContent.replace(
+                                "^version = .*$".toRegex(RegexOption.MULTILINE),
+                                "version = \"$worderVersion\""
+                        )
+                )
 
                 resolve("src")
                         .resolve("main")
@@ -72,9 +79,8 @@ tasks {
                         .resolve("version.txt")
                         .writeText(worderVersion.toString())
             }
-
         }
-
-        build.get().dependsOn(this)
+    }.also {
+        compileKotlin.get().dependsOn(it.get())
     }
 }

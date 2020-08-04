@@ -4,8 +4,8 @@
  *
  * Name: <AppEntry.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <04/08/2020, 08:02:59 PM>
- * Version: <113>
+ * Modified: <04/08/2020, 08:49:49 PM>
+ * Version: <116>
  */
 
 package worder.gui
@@ -36,7 +36,7 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomSt
                 File("$samplePath/inserting/words5.txt")
         )
 
-        val worderVersion: String by lazy { Companion::class.java.getResource("/version").readText() }
+        val worderVersion: String by lazy { Companion::class.java.getResource("/version.txt").readText() }
         val mainView: MainView = find()
         val sampleDB: File = samplePath.resolve("sample-db_TMP.bck").toFile()
         val isConnectedToSample: Boolean
