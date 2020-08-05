@@ -1,8 +1,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import worder.buildsrc.UpdateFileStampsTask
-import worder.buildsrc.WorderVersionDescriptor
+import worder.buildsrc.tasks.UpdateFileStampsTask
+import worder.buildsrc.tasks.UpdateVersionTask
+import worder.buildsrc.tasks.DeployToBintrayTask
 
-version = "1.0.5-SNAPSHOT"
+version = "1.0.13-SNAPSHOT"
 
 plugins {
     application
@@ -56,31 +57,10 @@ tasks {
         compileKotlin.get().dependsOn(this)
     }
 
-    register("updateVersion") {
-        doFirst {
-            val worderVersion = WorderVersionDescriptor.fromString(version.toString()).apply {
-                buildNumber++
+    register<DeployToBintrayTask>("deployToBintray")
+
+    register<UpdateVersionTask>("updateVersion")
+            .also {
+                compileKotlin.get().dependsOn(it.get())
             }
-
-            with(projectDir) {
-                val buildScript = resolve("build.gradle.kts")
-                val buildScriptContent = buildScript.readText()
-
-                buildScript.writeText(
-                        buildScriptContent.replace(
-                                "^version = .*$".toRegex(RegexOption.MULTILINE),
-                                "version = \"$worderVersion\""
-                        )
-                )
-
-                resolve("src")
-                        .resolve("main")
-                        .resolve("resources")
-                        .resolve("version.txt")
-                        .writeText(worderVersion.toString())
-            }
-        }
-    }.also {
-        compileKotlin.get().dependsOn(it.get())
-    }
 }

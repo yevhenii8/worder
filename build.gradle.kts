@@ -1,3 +1,5 @@
+import worder.buildsrc.tasks.UpdateFileStampsTask
+
 subprojects {
     repositories {
         jcenter()
@@ -15,7 +17,7 @@ subprojects {
             gradleVersion = "6.5.1"
         }
 
-        register<worder.buildsrc.UpdateFileStampsTask>(
+        register<UpdateFileStampsTask>(
                 name = "updateFileStamps"
         )
     }

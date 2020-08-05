@@ -1,0 +1,2 @@
+[2020-08-05 21:54:35] java --version
+[2020-08-05 21:54:46] java -Xmx64m -Xms64m -Dorg.gradle.appname=gradlew -classpath /home/yevhenii/Projects/worder/gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain run

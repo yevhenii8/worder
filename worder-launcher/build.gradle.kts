@@ -1,3 +1,5 @@
+import worder.buildsrc.tasks.UpdateFileStampsTask
+
 plugins {
     application
     java
@@ -13,7 +15,7 @@ application {
 }
 
 tasks {
-    withType<worder.buildsrc.UpdateFileStampsTask> {
+    withType<UpdateFileStampsTask> {
         sourcesDir = projectDir.resolve("src")
         sourcesFormats = listOf(".java")
 
