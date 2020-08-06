@@ -15,10 +15,9 @@ application {
 }
 
 tasks {
-    withType<UpdateFileStampsTask> {
-        sourcesDir = projectDir.resolve("src")
-        sourcesFormats = listOf(".java")
-
-        compileJava.get().dependsOn(this)
-    }
+//    withType<UpdateFileStampsTask> {
+//        sourcesDir = projectDir.resolve("src")
+//        sourcesFormats = listOf(".java")
+//        compileJava.get().dependsOn(this)
+//    }
 }

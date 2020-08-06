@@ -16,9 +16,5 @@ subprojects {
             distributionType = Wrapper.DistributionType.ALL
             gradleVersion = "6.5.1"
         }
-
-        register<UpdateFileStampsTask>(
-                name = "updateFileStamps"
-        )
     }
 }

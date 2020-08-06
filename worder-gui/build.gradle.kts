@@ -3,7 +3,7 @@ import worder.buildsrc.tasks.UpdateFileStampsTask
 import worder.buildsrc.tasks.UpdateVersionTask
 import worder.buildsrc.tasks.DeployToBintrayTask
 
-version = "1.0.13-SNAPSHOT"
+version = "1.0.37-SNAPSHOT"
 
 plugins {
     application
@@ -31,7 +31,6 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-core:0.26.1")
     implementation("org.jetbrains.exposed:exposed-jdbc:0.26.1")
 
-
     testImplementation("io.kotest:kotest-runner-junit5-jvm:4.1.1")
     testImplementation("io.mockk:mockk:1.10.0")
 }
@@ -46,6 +45,22 @@ application {
 }
 
 tasks {
+    val updateFileStampsTask by register<UpdateFileStampsTask>("updateFileStamps")
+    val updateVersionTask by register<UpdateVersionTask>("updateVersion")
+    val deployToBintrayTask by register<DeployToBintrayTask>("deployToBintray")
+
+    with(compileKotlin.get()) {
+        dependsOn(updateFileStampsTask)
+        dependsOn(updateVersionTask)
+    }
+
+    gradle.taskGraph.whenReady {
+        if (hasTask(deployToBintrayTask)) {
+            updateVersionTask.enabled = false
+            updateFileStampsTask.enabled = false
+        }
+    }
+
     withType<KotlinCompile> {
         kotlinOptions.jvmTarget = "1.8"
     }
@@ -53,14 +68,5 @@ tasks {
     withType<UpdateFileStampsTask> {
         sourcesDir = projectDir.resolve("src")
         sourcesFormats = listOf(".kt")
-
-        compileKotlin.get().dependsOn(this)
     }
-
-    register<DeployToBintrayTask>("deployToBintray")
-
-    register<UpdateVersionTask>("updateVersion")
-            .also {
-                compileKotlin.get().dependsOn(it.get())
-            }
 }
