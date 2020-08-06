@@ -1,7 +1,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.nio.file.Path
 import worder.buildsrc.tasks.UpdateFileStampsTask
 import worder.buildsrc.tasks.UpdateVersionTask
-import worder.buildsrc.tasks.DeployToBintrayTask
+import worder.buildsrc.tasks.DeployApplicationTask
+import worder.buildsrc.LocalFileSystemDeployer
 
 version = "1.0.37-SNAPSHOT"
 
@@ -47,7 +49,8 @@ application {
 tasks {
     val updateFileStampsTask by register<UpdateFileStampsTask>("updateFileStamps")
     val updateVersionTask by register<UpdateVersionTask>("updateVersion")
-    val deployToBintrayTask by register<DeployToBintrayTask>("deployToBintray")
+    val deployApplicationTask by register<DeployApplicationTask>("deployApplication")
+
 
     with(compileKotlin.get()) {
         dependsOn(updateFileStampsTask)
@@ -55,11 +58,12 @@ tasks {
     }
 
     gradle.taskGraph.whenReady {
-        if (hasTask(deployToBintrayTask)) {
+        if (hasTask(deployApplicationTask)) {
             updateVersionTask.enabled = false
             updateFileStampsTask.enabled = false
         }
     }
+
 
     withType<KotlinCompile> {
         kotlinOptions.jvmTarget = "1.8"
@@ -68,5 +72,9 @@ tasks {
     withType<UpdateFileStampsTask> {
         sourcesDir = projectDir.resolve("src")
         sourcesFormats = listOf(".kt")
+    }
+
+    withType<DeployApplicationTask> {
+        deployer = LocalFileSystemDeployer(Path.of("/home/yevhenii/WorderDeployTest"))
     }
 }

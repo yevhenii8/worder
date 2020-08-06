@@ -1,6 +1,5 @@
 package worder.buildsrc.tasks
 
-import com.beust.klaxon.Klaxon
 import org.gradle.api.DefaultTask
 import org.gradle.api.plugins.ApplicationPlugin
 import org.gradle.api.plugins.JavaPlugin
@@ -8,10 +7,14 @@ import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.TaskAction
 import org.gradle.jvm.tasks.Jar
 import worder.buildsrc.ApplicationDescriptor
+import worder.buildsrc.ApplicationDeployer
 import java.io.File
 
 @Suppress("LeakingThis")
-open class DeployToBintrayTask : DefaultTask() {
+open class DeployApplicationTask : DefaultTask() {
+    lateinit var deployer: ApplicationDeployer
+
+
     init {
         group = "Distribution"
         description = "Publishes Worder's artifacts, dependencies and descriptor to bintray. It's OS-dependent!"
@@ -23,6 +26,10 @@ open class DeployToBintrayTask : DefaultTask() {
 
     @TaskAction
     fun execute() {
+        require(this::deployer.isInitialized) {
+            "Please make sure you have specified deployer object!"
+        }
+
         val execTask = project.tasks.findByName(ApplicationPlugin.TASK_RUN_NAME) as JavaExec
         val jarTask = project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as Jar
         val projectPath = project.projectDir.absolutePath
@@ -30,6 +37,23 @@ open class DeployToBintrayTask : DefaultTask() {
             addAll(execTask.allJvmArgs)
         }
 
+        val newDescriptor = generateNewDescriptor(allJvmArgs, projectPath, jarTask.outputs.files.files)
+
+        with(deployer) {
+            uploadFile("$newDescriptor", newDescriptor.toJson().toByteArray())
+
+            newDescriptor.modulePath.forEach {
+                uploadFile(it.path, it.file!!)
+            }
+
+            newDescriptor.classPath.forEach {
+                uploadFile(it.path, it.file!!)
+            }
+        }
+    }
+
+
+    private fun generateNewDescriptor(allJvmArgs: MutableList<String>, projectPath: String, appArtifacts: Collection<File>): ApplicationDescriptor {
         val usedModules: String = findOption(allJvmArgs, "--add-modules")
         val envArguments: List<String> = findEnvArguments(allJvmArgs)
         val mainClass: String = allJvmArgs.last()
@@ -49,24 +73,14 @@ open class DeployToBintrayTask : DefaultTask() {
             "Unprocessed JVMArgs occurred! Please check it!"
         }
 
-        val descriptor = ApplicationDescriptor(
+        return ApplicationDescriptor(
                 mainClass = mainClass,
                 envArguments = envArguments,
                 usedModules = usedModules,
                 modulePath = modulePath,
-                classPath = classPath + jarTask.outputs.files.files.map { ApplicationDescriptor.Library(it) }
+                classPath = classPath + appArtifacts.map { ApplicationDescriptor.Library(it) }
         )
-
-        val json = descriptor.toJson()
-        println(json)
-
-        println()
-        println()
-
-        val newDescriptor = ApplicationDescriptor.fromJson(json)
-        println(newDescriptor.toJson())
     }
-
 
     private fun findOption(allJvmArgs: MutableList<String>, option: String): String {
         allJvmArgs.forEachIndexed { index, value ->

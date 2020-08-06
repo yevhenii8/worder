@@ -6,6 +6,7 @@ import java.io.File
 import java.util.zip.Adler32
 
 class ApplicationDescriptor(
+        @Json(index = 1) val OS: String = System.getProperty("os.name"),
         @Json(index = 2) val mainClass: String,
         @Json(index = 3) val envArguments: List<String>,
         @Json(index = 4) val usedModules: String,
@@ -29,11 +30,10 @@ class ApplicationDescriptor(
             it.path = "classPath/${it.path}"
     }
 
-    @Json(index = 1)
-    val OS: String = System.getProperty("os.name")
-
 
     fun toJson(): String = Klaxon().toJsonString(this)
+
+    override fun toString(): String = "WorderAppDescriptor-$OS.json"
 
 
     class Library(
@@ -55,7 +55,7 @@ class ApplicationDescriptor(
 
 
         override fun hashCode(): Int {
-            var result = path.hashCode()
+            var result = path.substringAfterLast("/").hashCode()
             result = 31 * result + size.hashCode()
             result = 31 * result + checksum.hashCode()
             return result
@@ -65,9 +65,9 @@ class ApplicationDescriptor(
             if (this === other) return true
             if (other !is Library) return false
 
-            if (path != other.path) return false
             if (size != other.size) return false
             if (checksum != other.checksum) return false
+            if (path.substringAfterLast("/") != other.path.substringAfterLast("/")) return false
 
             return true
         }
