@@ -9,7 +9,7 @@ dependencies {
 }
 
 application {
-    mainClassName = "worder.launcher.App"
+    mainClass.set("worder.launcher.App")
 }
 
 tasks {
