@@ -10,8 +10,8 @@ repositories {
 
 dependencies {
     implementation(gradleApi())
-    implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.3.72"))
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.72")
     implementation("com.beust:klaxon:5.4")
 
     testImplementation("io.kotest:kotest-runner-junit5-jvm:4.1.1")

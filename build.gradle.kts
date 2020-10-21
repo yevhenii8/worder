@@ -1,5 +1,3 @@
-import worder.buildsrc.tasks.UpdateFileStampsTask
-
 subprojects {
     repositories {
         jcenter()
@@ -14,7 +12,7 @@ subprojects {
 
         withType<Wrapper> {
             distributionType = Wrapper.DistributionType.ALL
-            gradleVersion = "6.5.1"
+            gradleVersion = "6.7"
         }
     }
 }

@@ -4,8 +4,8 @@
  *
  * Name: <AppEntry.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <06/08/2020, 05:48:15 PM>
- * Version: <117>
+ * Modified: <20/10/2020, 10:24:39 PM>
+ * Version: <120>
  */
 
 package worder.gui
@@ -36,7 +36,7 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomSt
                 File("$samplePath/inserting/words5.txt")
         )
 
-        val worderVersion: String by lazy { Companion::class.java.getResource("/version.txt").readText() }
+        val worderVersion: String by lazy { Companion::class.java.getResource("/version").readText() }
         val mainView: MainView = find()
         val sampleDB: File = samplePath.resolve("sample-db_TMP.bck").toFile()
         val isConnectedToSample: Boolean
@@ -79,6 +79,11 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomSt
         fun runDevUpdate() = withSampleDB {
             mainView.switchToUpdateTab()
         }
+
+        fun runDevDebug() {
+            println("Used JRE: ${Runtime.version()}")
+            println("Used KotlinC: ${KotlinVersion.CURRENT}")
+        }
     }
 
 
@@ -120,6 +125,7 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomSt
 
     @Suppress("unused")
     enum class WorderArgument(val value: String, val description: String, val action: () -> Unit) {
+        DEV_DEBUG("--dev-debug", "Prints some debug info to connected terminal.", AppEntry.Companion::runDevDebug),
         DEV_DATABASE("--dev-sample", "Automatically connects to the sampleDB.", AppEntry.Companion::runDevSample),
         DEV_DATABASE_KEEP("--dev-sample-keep", "Automatically connects to the sampleDB and does NOT remove it on exit.", { withSampleDB { keepSample = true } }),
         DEV_INSERT("--dev-insert", "Development stage for the Insert Tab.", AppEntry.Companion::runDevInsert),

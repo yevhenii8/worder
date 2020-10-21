@@ -31,7 +31,7 @@ open class UpdateVersionTask : DefaultTask() {
             resolve("src")
                     .resolve("main")
                     .resolve("resources")
-                    .resolve("version.txt")
+                    .resolve("version")
                     .writeText(worderVersion.toString())
         }
     }
