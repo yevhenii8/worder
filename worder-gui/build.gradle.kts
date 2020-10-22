@@ -5,7 +5,7 @@ import worder.buildsrc.tasks.UpdateVersionTask
 import worder.buildsrc.tasks.DeployApplicationTask
 import worder.buildsrc.LocalFileSystemDeployer
 
-version = "1.0.93-SNAPSHOT"
+version = "1.0.98-SNAPSHOT"
 
 plugins {
     application
@@ -76,5 +76,22 @@ tasks {
 
     withType<DeployApplicationTask> {
         deployer = LocalFileSystemDeployer(Path.of("/home/yevhenii/WorderDeployTest"))
+    }
+
+
+    register("testArgs") {
+        dependsOn(project.tasks.getByName("configJavafxRun"))
+        dependsOn(project.tasks.getByName(JavaPlugin.JAR_TASK_NAME))
+
+        doLast {
+            val execTask = project.tasks.findByName(ApplicationPlugin.TASK_RUN_NAME) as JavaExec
+            val jarTask = project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as org.gradle.jvm.tasks.Jar
+            
+            println(execTask.allJvmArgs)
+            println()
+            println(execTask.classpath.files)
+            println()
+            println(execTask.jvmArgs)
+        }
     }
 }

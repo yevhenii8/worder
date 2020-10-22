@@ -92,7 +92,7 @@ open class DeployApplicationTask : DefaultTask() {
             }
         }
 
-        error("The requested option has not been found in JvmArguments: $option")
+        error("The requested option \"$option\" has not been found in JvmArguments: $allJvmArgs")
     }
 
     private fun findEnvArguments(allJvmArgs: MutableList<String>): List<String> {
