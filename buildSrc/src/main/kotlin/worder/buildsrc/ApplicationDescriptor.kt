@@ -10,24 +10,11 @@ class ApplicationDescriptor(
         @Json(index = 2) val mainClass: String,
         @Json(index = 3) val envArguments: List<String>,
         @Json(index = 4) val usedModules: String,
-        modulePath: List<Library>,
-        classPath: List<Library>
+        @Json(index = 5) val modulePath: List<Artifact>,
+        @Json(index = 6) val classPath: List<Artifact>
 ) {
     companion object {
         fun fromJson(jsonString: String): ApplicationDescriptor = Klaxon().parse(jsonString)!!
-    }
-
-
-    @Json(index = 5)
-    val modulePath: List<Library> = modulePath.onEach {
-        if (!it.path.startsWith("modulePath"))
-            it.path = "modulePath/${it.path}"
-    }
-
-    @Json(index = 6)
-    val classPath: List<Library> = classPath.filter { !modulePath.contains(it) }.onEach {
-        if (!it.path.startsWith("classPath"))
-            it.path = "classPath/${it.path}"
     }
 
 
@@ -36,13 +23,13 @@ class ApplicationDescriptor(
     override fun toString(): String = "WorderAppDescriptor-$OS.json"
 
 
-    class Library(
-            @Json(index = 1) var path: String,
+    class Artifact(
+            @Json(index = 1) var name: String,
             @Json(index = 2) val checksum: Long,
             @Json(index = 3) val size: Long
     ) {
         constructor(file: File) : this(
-                path = file.name,
+                name = file.name,
                 checksum = file.checksum(),
                 size = file.length()
         ) {
@@ -55,7 +42,7 @@ class ApplicationDescriptor(
 
 
         override fun hashCode(): Int {
-            var result = path.substringAfterLast("/").hashCode()
+            var result = name.substringAfterLast("/").hashCode()
             result = 31 * result + size.hashCode()
             result = 31 * result + checksum.hashCode()
             return result
@@ -63,11 +50,11 @@ class ApplicationDescriptor(
 
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
-            if (other !is Library) return false
+            if (other !is Artifact) return false
 
             if (size != other.size) return false
             if (checksum != other.checksum) return false
-            if (path.substringAfterLast("/") != other.path.substringAfterLast("/")) return false
+            if (name.substringAfterLast("/") != other.name.substringAfterLast("/")) return false
 
             return true
         }

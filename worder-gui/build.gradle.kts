@@ -5,7 +5,7 @@ import worder.buildsrc.tasks.UpdateVersionTask
 import worder.buildsrc.tasks.DeployApplicationTask
 import worder.buildsrc.LocalFileSystemDeployer
 
-version = "1.0.98-SNAPSHOT"
+version = "1.0.99-SNAPSHOT"
 
 plugins {
     application

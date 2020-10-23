@@ -31,73 +31,48 @@ open class DeployApplicationTask : DefaultTask() {
         }
 
         val execTask = project.tasks.findByName(ApplicationPlugin.TASK_RUN_NAME) as JavaExec
-        val jarTask = project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as Jar
+        val appArtifacts = (project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as Jar).outputs.files.files
         val projectPath = project.projectDir.absolutePath
-        val allJvmArgs = mutableListOf<String>().apply {
-            addAll(execTask.allJvmArgs)
-        }
+        val allJvmArgs = execTask.allJvmArgs
 
-        val newDescriptor = generateNewDescriptor(allJvmArgs, projectPath, jarTask.outputs.files.files)
+        val modulePath = findOption(allJvmArgs, "--module-path")
+                .split(":")
+                .filterNot { it.startsWith(projectPath) }
+                .map { ApplicationDescriptor.Artifact(File(it)) }
+        val classPath = execTask.classpath
+                .filterNot { it.path.startsWith(projectPath) }
+                .map { ApplicationDescriptor.Artifact(it) }
+                .filterNot { modulePath.contains(it) }
+
+        val newDescriptor = ApplicationDescriptor(
+                mainClass = execTask.mainClass.get(),
+                envArguments = allJvmArgs.filter { it.startsWith("-D") },
+                usedModules = findOption(execTask.allJvmArgs, "--add-modules"),
+                modulePath = modulePath,
+                classPath = classPath + appArtifacts.map { ApplicationDescriptor.Artifact(it) }
+        )
 
         with(deployer) {
             uploadFile("$newDescriptor", newDescriptor.toJson().toByteArray())
 
             newDescriptor.modulePath.forEach {
-                uploadFile(it.path, it.file!!)
+                uploadFile("artifacts/" + it.name, it.file!!)
             }
 
             newDescriptor.classPath.forEach {
-                uploadFile(it.path, it.file!!)
+                uploadFile("artifacts/" + it.name, it.file!!)
             }
         }
     }
 
 
-    private fun generateNewDescriptor(allJvmArgs: MutableList<String>, projectPath: String, appArtifacts: Collection<File>): ApplicationDescriptor {
-        val usedModules: String = findOption(allJvmArgs, "--add-modules")
-        val envArguments: List<String> = findEnvArguments(allJvmArgs)
-        val mainClass: String = allJvmArgs.last()
-
-        val modulePath: List<ApplicationDescriptor.Library> = findOption(allJvmArgs, "--module-path")
-                .split(":")
-                .filterNot { it.startsWith(projectPath) }
-                .map { ApplicationDescriptor.Library(File(it)) }
-
-        val classPath: List<ApplicationDescriptor.Library> = findOption(allJvmArgs, "-cp")
-                .split(":")
-                .filterNot { it.startsWith(projectPath) }
-                .map { ApplicationDescriptor.Library(File(it)) }
-
-        check(allJvmArgs.size == 1) {
-            allJvmArgs.forEach { println(it) }
-            "Unprocessed JVMArgs occurred! Please check it!"
-        }
-
-        return ApplicationDescriptor(
-                mainClass = mainClass,
-                envArguments = envArguments,
-                usedModules = usedModules,
-                modulePath = modulePath,
-                classPath = classPath + appArtifacts.map { ApplicationDescriptor.Library(it) }
-        )
-    }
-
-    private fun findOption(allJvmArgs: MutableList<String>, option: String): String {
+    private fun findOption(allJvmArgs: List<String>, option: String): String {
         allJvmArgs.forEachIndexed { index, value ->
             if (value == option) {
-                val res = allJvmArgs[index + 1]
-                allJvmArgs.removeAt(index)
-                allJvmArgs.removeAt(index)
-                return res
+                return allJvmArgs[index + 1]
             }
         }
 
         error("The requested option \"$option\" has not been found in JvmArguments: $allJvmArgs")
-    }
-
-    private fun findEnvArguments(allJvmArgs: MutableList<String>): List<String> {
-        val res = allJvmArgs.filter { it.startsWith("-D") }
-        allJvmArgs.removeIf { it.startsWith("-D") }
-        return res
     }
 }
