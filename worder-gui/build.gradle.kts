@@ -26,12 +26,11 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.7")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.3.7")
 
-    implementation("no.tornado:tornadofx:2.0.0-SNAPSHOT")
-
-    runtimeOnly("org.slf4j:slf4j-nop:1.7.30")
     implementation("org.xerial:sqlite-jdbc:3.32.3.1")
     implementation("org.jetbrains.exposed:exposed-core:0.26.1")
     implementation("org.jetbrains.exposed:exposed-jdbc:0.26.1")
+    implementation("no.tornado:tornadofx:2.0.0-SNAPSHOT")
+    runtimeOnly("org.slf4j:slf4j-nop:1.7.30")
 
     testImplementation("io.kotest:kotest-runner-junit5-jvm:4.1.1")
     testImplementation("io.mockk:mockk:1.10.0")
@@ -79,6 +78,7 @@ tasks {
     }
 
 
+    // FOR DEV PURPOSES ONLY
     register("testArgs") {
         dependsOn(project.tasks.getByName("configJavafxRun"))
         dependsOn(project.tasks.getByName(JavaPlugin.JAR_TASK_NAME))

@@ -3,20 +3,26 @@ package worder.buildsrc
 import com.beust.klaxon.Json
 import com.beust.klaxon.Klaxon
 import java.io.File
+import java.time.LocalDateTime
 import java.util.zip.Adler32
 
 class ApplicationDescriptor(
         @Json(index = 1) val OS: String = System.getProperty("os.name"),
-        @Json(index = 2) val mainClass: String,
-        @Json(index = 3) val envArguments: List<String>,
-        @Json(index = 4) val usedModules: String,
-        @Json(index = 5) val modulePath: List<Artifact>,
-        @Json(index = 6) val classPath: List<Artifact>
+        @Json(index = 2) val descriptorVersion: Int = 0,
+        @Json(index = 3) val mainClass: String,
+        @Json(index = 4) val envArguments: List<String>,
+        @Json(index = 5) val usedModules: String,
+        @Json(index = 6) val modulePath: List<Artifact>,
+        @Json(index = 7) val classPath: List<Artifact>
 ) {
     companion object {
         fun fromJson(jsonString: String): ApplicationDescriptor = Klaxon().parse(jsonString)!!
+        fun calculatedName(): String = "WorderAppDescriptor-${System.getProperty("os.name")}.json"
     }
 
+
+    @Json(ignored = true)
+    val allArtifacts = modulePath + classPath
 
     fun toJson(): String = Klaxon().toJsonString(this)
 
@@ -29,7 +35,7 @@ class ApplicationDescriptor(
             @Json(index = 3) val size: Long
     ) {
         constructor(file: File) : this(
-                name = file.name,
+                name = "artifacts/${file.name}",
                 checksum = file.checksum(),
                 size = file.length()
         ) {

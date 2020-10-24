@@ -9,9 +9,11 @@ import org.gradle.jvm.tasks.Jar
 import worder.buildsrc.ApplicationDescriptor
 import worder.buildsrc.ApplicationDeployer
 import java.io.File
+import java.nio.charset.Charset
 
 @Suppress("LeakingThis")
 open class DeployApplicationTask : DefaultTask() {
+    @Suppress("MemberVisibilityCanBePrivate")
     lateinit var deployer: ApplicationDeployer
 
 
@@ -44,24 +46,49 @@ open class DeployApplicationTask : DefaultTask() {
                 .map { ApplicationDescriptor.Artifact(it) }
                 .filterNot { modulePath.contains(it) }
 
-        val newDescriptor = ApplicationDescriptor(
-                mainClass = execTask.mainClass.get(),
-                envArguments = allJvmArgs.filter { it.startsWith("-D") },
-                usedModules = findOption(execTask.allJvmArgs, "--add-modules"),
-                modulePath = modulePath,
-                classPath = classPath + appArtifacts.map { ApplicationDescriptor.Artifact(it) }
-        )
-
         with(deployer) {
+            val oldDescriptor = downloadFile(ApplicationDescriptor.calculatedName())
+                    ?.toString(Charset.defaultCharset())
+                    ?.let { ApplicationDescriptor.fromJson(it) }
+            val newDescriptor = ApplicationDescriptor(
+                    descriptorVersion = if (oldDescriptor != null) oldDescriptor.descriptorVersion + 1 else 1,
+                    mainClass = execTask.mainClass.get(),
+                    envArguments = allJvmArgs.filter { it.startsWith("-D") },
+                    usedModules = findOption(execTask.allJvmArgs, "--add-modules"),
+                    modulePath = modulePath,
+                    classPath = classPath + appArtifacts.map { ApplicationDescriptor.Artifact(it) }
+            )
+            val oldDescriptorArtifacts = oldDescriptor?.allArtifacts
+            val newDescriptorArtifacts = newDescriptor.allArtifacts
+            val otherDescriptors = listCatalog()
+                    .filter { it.startsWith("WorderAppDescriptor-") && it.endsWith(".json") }
+                    .map { ApplicationDescriptor.fromJson(downloadFile(it)!!.toString(Charset.defaultCharset())) }
+            val artifacts = otherDescriptors
+                    .flatMap { it.allArtifacts }
+                    .groupBy({ it.name }, { 1 })
+                    .mapValues { it.value.size }
+                    .toMutableMap()
+
+            if (oldDescriptor != null && oldDescriptorArtifacts != null) {
+                (oldDescriptorArtifacts subtract newDescriptorArtifacts).forEach {
+                    if (artifacts[it.name]!! - 1 == 0) {
+                        removeFile(it.name)
+                    }
+                }
+                (newDescriptorArtifacts subtract oldDescriptorArtifacts).forEach {
+                    if (!artifacts.containsKey(it.name)) {
+                        uploadFile(it.name, it.file!!.readBytes())
+                    }
+                }
+            } else {
+                newDescriptorArtifacts.forEach {
+                    if (!artifacts.contains(it.name)) {
+                        uploadFile(it.name, it.file!!.readBytes())
+                    }
+                }
+            }
+
             uploadFile("$newDescriptor", newDescriptor.toJson().toByteArray())
-
-            newDescriptor.modulePath.forEach {
-                uploadFile("artifacts/" + it.name, it.file!!)
-            }
-
-            newDescriptor.classPath.forEach {
-                uploadFile("artifacts/" + it.name, it.file!!)
-            }
         }
     }
 
