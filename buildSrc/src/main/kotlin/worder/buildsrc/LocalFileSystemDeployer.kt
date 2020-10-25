@@ -9,12 +9,12 @@ class LocalFileSystemDeployer(rootPath: Path) : ApplicationDeployer {
     }
 
 
-    override fun listCatalog(path: String): List<String> {
+    override fun listCatalog(path: String): List<String>? {
         require(!path.startsWith("/")) {
             "You can't use absolute path here, passed value: $path"
         }
 
-        return rootAsFile.resolve(path).list()!!.toList()
+        return rootAsFile.resolve(path).list()?.toList()
     }
 
     override fun downloadFile(path: String): ByteArray? {
@@ -27,20 +27,25 @@ class LocalFileSystemDeployer(rootPath: Path) : ApplicationDeployer {
         return if (requestedFile.isFile) rootAsFile.resolve(path).readBytes() else null
     }
 
-    override fun uploadFile(path: String, byteArray: ByteArray) {
+    override fun uploadFile(path: String, byteArray: ByteArray, override: Boolean): Boolean {
         require(!path.startsWith("/")) {
             "You can't use absolute path here, passed value: $path"
         }
+
+        val pathToUpload = rootAsFile.resolve(path)
+        if (!override && pathToUpload.exists())
+            return false
 
         rootAsFile.resolve(path.substringBeforeLast("/", "")).mkdirs()
-        rootAsFile.resolve(path).writeBytes(byteArray)
+        pathToUpload.writeBytes(byteArray)
+        return true
     }
 
-    override fun removeFile(path: String) {
+    override fun removeFile(path: String): Boolean {
         require(!path.startsWith("/")) {
             "You can't use absolute path here, passed value: $path"
         }
 
-        rootAsFile.resolve(path).deleteRecursively()
+        return rootAsFile.resolve(path).deleteRecursively()
     }
 }

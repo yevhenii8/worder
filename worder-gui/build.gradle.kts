@@ -1,9 +1,8 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.nio.file.Path
 import worder.buildsrc.tasks.UpdateFileStampsTask
 import worder.buildsrc.tasks.UpdateVersionTask
 import worder.buildsrc.tasks.DeployApplicationTask
-import worder.buildsrc.LocalFileSystemDeployer
+import worder.buildsrc.BintrayDeployer
 
 version = "1.0.99-SNAPSHOT"
 
@@ -74,7 +73,14 @@ tasks {
     }
 
     withType<DeployApplicationTask> {
-        deployer = LocalFileSystemDeployer(Path.of("/home/yevhenii/WorderDeployTest"))
+//        deployer = LocalFileSystemDeployer(Path.of("/home/yevhenii/WorderDeployTest"))
+        deployer = BintrayDeployer(
+                bintrayUser = project.properties["bintrayUser"] as String,
+                bintrayKey = project.properties["bintrayKey"] as String,
+                repository = "generic",
+                `package` = "worder-gui",
+                version = "Latest"
+        )
     }
 
 
@@ -86,7 +92,7 @@ tasks {
         doLast {
             val execTask = project.tasks.findByName(ApplicationPlugin.TASK_RUN_NAME) as JavaExec
             val jarTask = project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as org.gradle.jvm.tasks.Jar
-            
+
             println(execTask.allJvmArgs)
             println()
             println(execTask.classpath.files)
