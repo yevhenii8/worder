@@ -2,7 +2,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import worder.buildsrc.tasks.UpdateFileStampsTask
 import worder.buildsrc.tasks.UpdateVersionTask
 import worder.buildsrc.tasks.DeployApplicationTask
+import worder.buildsrc.LocalFileSystemDeployer
 import worder.buildsrc.BintrayDeployer
+import java.nio.file.Path
 
 version = "1.0.99-SNAPSHOT"
 
@@ -47,33 +49,21 @@ application {
 tasks {
     val updateFileStampsTask by register<UpdateFileStampsTask>("updateFileStamps")
     val updateVersionTask by register<UpdateVersionTask>("updateVersion")
-    val deployApplicationTask by register<DeployApplicationTask>("deployApplication")
+    val deployLocalTask by register<DeployApplicationTask>("deployLocal")
+    val deployBintrayTask by register<DeployApplicationTask>("deployBintray")
 
 
     with(compileKotlin.get()) {
         dependsOn(updateFileStampsTask)
         dependsOn(updateVersionTask)
     }
-
     gradle.taskGraph.whenReady {
-        if (hasTask(deployApplicationTask)) {
+        if (hasTask(deployLocalTask) || hasTask(deployBintrayTask)) {
             updateVersionTask.enabled = false
             updateFileStampsTask.enabled = false
         }
     }
-
-
-    withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "1.8"
-    }
-
-    withType<UpdateFileStampsTask> {
-        sourcesDir = projectDir.resolve("src")
-        sourcesFormats = listOf(".kt")
-    }
-
-    withType<DeployApplicationTask> {
-//        deployer = LocalFileSystemDeployer(Path.of("/home/yevhenii/WorderDeployTest"))
+    deployBintrayTask.apply {
         deployer = BintrayDeployer(
                 bintrayUser = project.properties["bintrayUser"] as String,
                 bintrayKey = project.properties["bintrayKey"] as String,
@@ -81,6 +71,21 @@ tasks {
                 `package` = "worder-gui",
                 version = "Latest"
         )
+    }
+    deployLocalTask.apply {
+        deployer = LocalFileSystemDeployer(Path.of("/home/yevhenii/WorderDeployTest"))
+    }
+
+
+    withType<KotlinCompile> {
+        kotlinOptions.jvmTarget = "1.8"
+    }
+    withType<UpdateFileStampsTask> {
+        sourcesDir = projectDir.resolve("src")
+        sourcesFormats = listOf(".kt")
+    }
+    withType<DeployApplicationTask> {
+
     }
 
 

@@ -4,16 +4,19 @@ import com.beust.klaxon.Json
 import com.beust.klaxon.Klaxon
 import java.io.File
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.util.zip.Adler32
 
 class ApplicationDescriptor(
         @Json(index = 1) val OS: String = System.getProperty("os.name"),
-        @Json(index = 2) val descriptorVersion: Int = 0,
-        @Json(index = 3) val mainClass: String,
-        @Json(index = 4) val envArguments: List<String>,
-        @Json(index = 5) val usedModules: String,
-        @Json(index = 6) val modulePath: List<Artifact>,
-        @Json(index = 7) val classPath: List<Artifact>
+        @Json(index = 2) val generated: String = LocalDateTime.now().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)),
+        @Json(index = 3) val appVersion: String,
+        @Json(index = 4) val mainClass: String,
+        @Json(index = 5) val envArguments: List<String>,
+        @Json(index = 6) val usedModules: String,
+        @Json(index = 7) val modulePath: List<Artifact>,
+        @Json(index = 8) val classPath: List<Artifact>
 ) {
     companion object {
         fun fromJson(jsonString: String): ApplicationDescriptor = Klaxon().parse(jsonString)!!
@@ -22,7 +25,7 @@ class ApplicationDescriptor(
 
 
     @Json(ignored = true)
-    val allArtifacts = modulePath + classPath
+    val allArtifacts: List<Artifact> = modulePath + classPath
 
     fun toJson(): String = Klaxon().toJsonString(this)
 

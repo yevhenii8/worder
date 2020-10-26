@@ -1,5 +1,6 @@
 package worder.buildsrc
 
+import java.io.FileNotFoundException
 import java.io.IOException
 import java.net.Authenticator
 import java.net.PasswordAuthentication
@@ -33,7 +34,7 @@ class BintrayDeployer(
             .build()
 
 
-    override fun listCatalog(path: String): List<String>? {
+    override fun listCatalog(path: String): List<String> {
         require(!path.startsWith("/")) {
             "You can't use absolute path here, passed value: $path"
         }
@@ -44,24 +45,20 @@ class BintrayDeployer(
                     .lines()
                     .filter { downstreamFilter.matches(it) }
                     .map { downstreamPattern.replace(it, "") }
-        } catch (e: IOException) {
-            null
+        } catch (e: FileNotFoundException) {
+            emptyList()
         }
     }
 
-    override fun downloadFile(path: String): ByteArray? {
+    override fun downloadFile(path: String): ByteArray {
         require(!path.startsWith("/")) {
             "You can't use absolute path here, passed value: $path"
         }
 
-        return try {
-            URL(downstreamURL + path).readBytes()
-        } catch (e: IOException) {
-            null
-        }
+        return URL(downstreamURL + path).readBytes()
     }
 
-    override fun uploadFile(path: String, byteArray: ByteArray, override: Boolean): Boolean {
+    override fun uploadFile(path: String, byteArray: ByteArray, override: Boolean) {
         require(!path.startsWith("/")) {
             "You can't use absolute path here, passed value: $path"
         }
@@ -69,16 +66,13 @@ class BintrayDeployer(
         val request = HttpRequest.newBuilder(URI.create("$upstreamURL$path?publish=1&override=${if (override) 1 else 0}"))
                 .PUT(HttpRequest.BodyPublishers.ofByteArray(byteArray))
                 .build()
-
         val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
 
-        println(response.statusCode())
-        println(response.body())
-
-        return true
+        if (response.statusCode() != 201)
+            throw IOException("BintrayAPI response code - ${response.statusCode()}: \n${response.body()}")
     }
 
-    override fun removeFile(path: String): Boolean {
+    override fun removeFile(path: String) {
         require(!path.startsWith("/")) {
             "You can't use absolute path here, passed value: $path"
         }
@@ -86,12 +80,9 @@ class BintrayDeployer(
         val request = HttpRequest.newBuilder(URI.create("https://api.bintray.com/content/$bintrayUser/$repository/$path"))
                 .DELETE()
                 .build()
-
         val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
 
-        println(response.statusCode())
-        println(response.body())
-
-        return true
+        if (response.statusCode() != 200)
+            throw IOException("BintrayAPI response code - ${response.statusCode()}: \n${response.body()}")
     }
 }

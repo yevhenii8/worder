@@ -1,6 +1,7 @@
 package worder.buildsrc
 
 import java.io.File
+import java.io.IOException
 import java.nio.file.Path
 
 class LocalFileSystemDeployer(rootPath: Path) : ApplicationDeployer {
@@ -9,43 +10,40 @@ class LocalFileSystemDeployer(rootPath: Path) : ApplicationDeployer {
     }
 
 
-    override fun listCatalog(path: String): List<String>? {
+    override fun listCatalog(path: String): List<String> {
         require(!path.startsWith("/")) {
             "You can't use absolute path here, passed value: $path"
         }
 
-        return rootAsFile.resolve(path).list()?.toList()
+        return rootAsFile.resolve(path).list()!!.toList()
     }
 
-    override fun downloadFile(path: String): ByteArray? {
+    override fun downloadFile(path: String): ByteArray {
         require(!path.startsWith("/")) {
             "You can't use absolute path here, passed value: $path"
         }
 
-        val requestedFile = rootAsFile.resolve(path)
-
-        return if (requestedFile.isFile) rootAsFile.resolve(path).readBytes() else null
+        return rootAsFile.resolve(path).readBytes()
     }
 
-    override fun uploadFile(path: String, byteArray: ByteArray, override: Boolean): Boolean {
+    override fun uploadFile(path: String, byteArray: ByteArray, override: Boolean) {
         require(!path.startsWith("/")) {
             "You can't use absolute path here, passed value: $path"
         }
 
         val pathToUpload = rootAsFile.resolve(path)
         if (!override && pathToUpload.exists())
-            return false
+            throw IOException("File already exists!")
 
         rootAsFile.resolve(path.substringBeforeLast("/", "")).mkdirs()
         pathToUpload.writeBytes(byteArray)
-        return true
     }
 
-    override fun removeFile(path: String): Boolean {
+    override fun removeFile(path: String) {
         require(!path.startsWith("/")) {
             "You can't use absolute path here, passed value: $path"
         }
 
-        return rootAsFile.resolve(path).deleteRecursively()
+        rootAsFile.resolve(path).deleteRecursively()
     }
 }
