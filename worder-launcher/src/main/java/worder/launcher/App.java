@@ -4,14 +4,45 @@
  *
  * Name: <App.java>
  * Created: <04/08/2020, 07:03:59 PM>
- * Modified: <04/08/2020, 07:03:59 PM>
- * Version: <1>
+ * Modified: <27/10/2020, 02:59:06 PM>
+ * Version: <4>
  */
 
 package worder.launcher;
 
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
+import java.io.IOException;
+
 public class App {
-    public static void main(String[] args) {
-        System.out.println("Hello world.");
+    public static void main(String[] args) throws IOException {
+        JFrame frame = new JFrame();
+        frame.setSize(500, 300);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.getContentPane().setBackground(Color.WHITE);
+        frame.setUndecorated(true);
+        frame.getRootPane().setWindowDecorationStyle(JRootPane.NONE);
+        frame.setLocationRelativeTo(null);
+
+        JPanel panel = new JPanel();
+        frame.add(panel);
+
+        JButton button = new JButton(new ImageIcon(ImageIO.read(ClassLoader.getSystemResource("icons/close-icon_32x32.png"))));
+        button.setBorder(BorderFactory.createEmptyBorder());
+        button.setContentAreaFilled(false);
+        button.addActionListener(e -> System.exit(0));
+        panel.add(button);
+
+
+        frame.setVisible(true);
+    }
+
+    private static void configureMainFrame(JFrame frame) {
+
+    }
+
+    private static void addCloseButton(JPanel panel) {
+
     }
 }
