@@ -4,8 +4,8 @@
  *
  * Name: <JHyperlink.java>
  * Created: <27/10/2020, 05:20:42 PM>
- * Modified: <27/10/2020, 09:01:15 PM>
- * Version: <99>
+ * Modified: <28/10/2020, 10:27:32 PM>
+ * Version: <129>
  */
 
 package worder.launcher;
@@ -16,7 +16,6 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-
 import javax.swing.*;
 
 /**
