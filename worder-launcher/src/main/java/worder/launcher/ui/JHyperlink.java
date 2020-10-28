@@ -4,11 +4,11 @@
  *
  * Name: <JHyperlink.java>
  * Created: <27/10/2020, 05:20:42 PM>
- * Modified: <28/10/2020, 10:27:32 PM>
- * Version: <129>
+ * Modified: <29/10/2020, 12:40:15 AM>
+ * Version: <166>
  */
 
-package worder.launcher;
+package worder.launcher.ui;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;

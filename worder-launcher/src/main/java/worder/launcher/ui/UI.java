@@ -4,11 +4,11 @@
  *
  * Name: <UI.java>
  * Created: <28/10/2020, 05:53:10 PM>
- * Modified: <28/10/2020, 10:27:32 PM>
- * Version: <28>
+ * Modified: <29/10/2020, 12:40:15 AM>
+ * Version: <65>
  */
 
-package worder.launcher;
+package worder.launcher.ui;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -18,10 +18,11 @@ import java.io.IOException;
 
 public class UI {
     private JLabel progress;
+    private JFrame frame;
     private long lastProgressUpdate = 0L;
 
 
-    UI() {
+    public UI() {
         BufferedImage worderIcon = null;
         BufferedImage closeIcon = null;
         BufferedImage githubIcon = null;
@@ -34,12 +35,10 @@ public class UI {
             e.printStackTrace();
         }
 
-        JFrame frame = composeFrame(worderIcon);
+        frame = composeFrame(worderIcon);
         frame.add(composeCloseButtonPanel(closeIcon), BorderLayout.NORTH);
         frame.add(composeLogoAndProgressPanel(), BorderLayout.CENTER);
         frame.add(composeCopyrightPanel(githubIcon), BorderLayout.SOUTH);
-
-        frame.setVisible(true);
     }
 
 
@@ -56,6 +55,10 @@ public class UI {
 
         progress.setText(value);
         lastProgressUpdate = System.currentTimeMillis();
+    }
+
+    public void show() {
+        frame.setVisible(true);
     }
 
 
