@@ -4,20 +4,22 @@
  *
  * Name: <App.java>
  * Created: <04/08/2020, 07:03:59 PM>
- * Modified: <29/10/2020, 12:40:15 AM>
- * Version: <205>
+ * Modified: <29/10/2020, 05:39:33 PM>
+ * Version: <227>
  */
 
 package worder.launcher;
 
 import worder.launcher.ui.UI;
 
+import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 public class App {
@@ -25,10 +27,10 @@ public class App {
         UI ui = new UI();
         ui.show();
 
-        runWorder(Path.of("/home/yevhenii/WorderDeployTest/"));
+        runWorder(Path.of("/home/yevhenii/WorderDeployTest/"), ui);
     }
 
-    public static void runWorder(Path worderHomeCatalog) {
+    public static void runWorder(Path worderHomeCatalog, UI ui) {
         URL[] urls = Arrays.stream(Objects.requireNonNull(worderHomeCatalog.resolve("artifacts").toFile().listFiles()))
                 .map(file -> {
                     try {
@@ -41,21 +43,43 @@ public class App {
                 .toArray(URL[]::new);
 
         ClassLoader loader = URLClassLoader.newInstance(urls, App.class.getClassLoader());
-
         try {
-            Class<?> javafxPlatform = Class.forName("javafx.application.Platform", true, loader);
-
-            javafxPlatform.getMethod("startup", Runnable.class).invoke(null, (Runnable) () -> {
-                Thread.currentThread().setContextClassLoader(loader);
+            Thread.currentThread().setContextClassLoader(loader);
+            Class<?> mainClass = Class.forName("worder.gui.AppEntry", false, loader);
+            var method = mainClass.getMethod("launch", Class.class, String[].class);
+            SwingUtilities.invokeLater(() -> {
                 try {
-                    Class<?> javafxApplication = Class.forName("javafx.application.Application", true, loader);
-                    Class<?> worderMainClass = Class.forName("worder.gui.AppEntry", true, loader);
-                    javafxApplication.getMethod("launch", Class.class, String[].class).invoke(null, worderMainClass, new String[0]);
-                } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+                ui.dispose();
             });
+            method.invoke(null, mainClass, new String[0]);
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void test(ClassLoader loader) {
+        try {
+            var classes = List.of(
+                    Class.forName("worder.gui.AppEntry", false, loader),
+                    Class.forName("tornadofx.App", false, loader),
+                    Class.forName("tornadofx.AppKt", false, loader),
+                    Class.forName("javafx.application.Application", false, loader)
+            );
+
+            classes.forEach(cl -> {
+                System.out.println(cl.getSimpleName() + "(" + cl.getCanonicalName() + ")");
+                Arrays.stream(cl.getMethods())
+                        .filter(method -> method.getName().contains("launch"))
+                        .forEach(System.out::println);
+
+                System.out.println();
+                System.out.println();
+            });
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
     }

@@ -4,8 +4,8 @@
  *
  * Name: <UI.java>
  * Created: <28/10/2020, 05:53:10 PM>
- * Modified: <29/10/2020, 12:40:15 AM>
- * Version: <65>
+ * Modified: <29/10/2020, 05:39:33 PM>
+ * Version: <87>
  */
 
 package worder.launcher.ui;
@@ -59,6 +59,10 @@ public class UI {
 
     public void show() {
         frame.setVisible(true);
+    }
+
+    public void dispose() {
+        frame.dispose();
     }
 
 
