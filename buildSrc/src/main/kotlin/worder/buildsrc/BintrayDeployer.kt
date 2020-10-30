@@ -16,7 +16,7 @@ class BintrayDeployer(
         private val repository: String,
         private val `package`: String,
         private val version: String
-) : ApplicationDeployer {
+) : AppDeployer {
     companion object {
         private val downstreamFilter = Regex("<pre>.*</pre>")
         private val downstreamPattern = Regex("<.*?>")

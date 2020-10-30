@@ -6,14 +6,12 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.TaskAction
 import org.gradle.jvm.tasks.Jar
-import worder.buildsrc.ApplicationDeployer
-import java.io.File
-import java.nio.charset.Charset
+import worder.buildsrc.AppDeployer
 
 @Suppress("LeakingThis")
-open class DeployApplicationTask : DefaultTask() {
+open class DeployAppTask : DefaultTask() {
     @Suppress("MemberVisibilityCanBePrivate")
-    lateinit var deployer: ApplicationDeployer
+    lateinit var deployer: AppDeployer
 
 
     init {
@@ -35,6 +33,7 @@ open class DeployApplicationTask : DefaultTask() {
         val appArtifacts = (project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as Jar).outputs.files.files
         val projectPath = project.projectDir.absolutePath
         val allJvmArgs = execTask.allJvmArgs
+
 
 //        val modulePath = findOption(allJvmArgs, "--module-path")
 //                .split(":")

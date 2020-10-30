@@ -4,7 +4,7 @@ import java.io.File
 import java.io.IOException
 import java.nio.file.Path
 
-class LocalFileSystemDeployer(rootPath: Path) : ApplicationDeployer {
+class FileSystemDeployer(rootPath: Path) : AppDeployer {
     private val rootAsFile: File = rootPath.toFile().also {
         it.mkdirs()
     }

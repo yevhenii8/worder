@@ -1,15 +1,15 @@
 package worder.commons;
 
 import java.io.File;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.List;
 import java.util.Objects;
 
-public class JavaApplicationDescriptor {
-    private final String OS = System.getProperty("os.name");
-    private final String name = "WorderAppDescriptor-" + OS + ".xml";
+public class AppDescriptor implements Serializable {
+    private final String name = "WorderAppDescriptor-" + System.getProperty("os.name");
     private final String generated = LocalDateTime.now().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM));
 
     private final String appVersion;
@@ -18,17 +18,17 @@ public class JavaApplicationDescriptor {
     private final List<String> envArguments;
     private final List<File> modulePath;
     private final List<File> classPath;
-    private final long descriptorID;
+    private final long descriptorVersion;
 
 
-    private JavaApplicationDescriptor(
+    private AppDescriptor(
             String appVersion,
             String appMainClass,
             String usedModules,
             List<String> envArguments,
             List<File> modulePath,
             List<File> classPath,
-            long descriptorID
+            long descriptorVersion
     ) {
         this.appVersion = appVersion;
         this.appMainClass = appMainClass;
@@ -36,12 +36,12 @@ public class JavaApplicationDescriptor {
         this.envArguments = envArguments;
         this.modulePath = modulePath;
         this.classPath = classPath;
-        this.descriptorID = descriptorID;
+        this.descriptorVersion = descriptorVersion;
     }
 
 
-    static class Artifact {
-        private final File file;
+    public static class Artifact {
+        transient private final File file;
         private final String name;
         private final long size;
 
@@ -85,7 +85,7 @@ public class JavaApplicationDescriptor {
         }
     }
 
-    static class Builder {
+    public static class Builder {
         private String appVersion;
         private String appMainClass;
         private String usedModules;
@@ -95,7 +95,7 @@ public class JavaApplicationDescriptor {
         private Long descriptorID;
 
 
-        public JavaApplicationDescriptor build() {
+        public AppDescriptor build() {
             Objects.requireNonNull(appVersion, "'appVersion' should be specified!");
             Objects.requireNonNull(appMainClass, "'appMainClass' should be specified!");
             Objects.requireNonNull(usedModules, "'usedModules' should be specified!");
@@ -104,7 +104,7 @@ public class JavaApplicationDescriptor {
             Objects.requireNonNull(classPath, "'classPath' should be specified!");
             Objects.requireNonNull(descriptorID, "'descriptorID' should be specified!");
 
-            return new JavaApplicationDescriptor(
+            return new AppDescriptor(
                     appVersion,
                     appMainClass,
                     usedModules,

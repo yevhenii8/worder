@@ -1,6 +1,6 @@
 package worder.buildsrc
 
-interface ApplicationDeployer {
+interface AppDeployer {
     fun listCatalog(path: String = ""): List<String>
     fun downloadFile(path: String): ByteArray
     fun uploadFile(path: String, byteArray: ByteArray, override: Boolean = false)

@@ -6,7 +6,7 @@ plugins {
 }
 
 dependencies {
-    implementation(fileTree("${project.rootDir}/buildSrc/build/libs/"))
+    implementation(":worder-commons")
 }
 
 application {

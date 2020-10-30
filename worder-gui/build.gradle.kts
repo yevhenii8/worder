@@ -1,8 +1,8 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import worder.buildsrc.tasks.UpdateFileStampsTask
 import worder.buildsrc.tasks.UpdateVersionTask
-import worder.buildsrc.tasks.DeployApplicationTask
-import worder.buildsrc.LocalFileSystemDeployer
+import worder.buildsrc.tasks.DeployAppTask
+import worder.buildsrc.FileSystemDeployer
 import worder.buildsrc.BintrayDeployer
 import java.nio.file.Path
 
@@ -49,8 +49,8 @@ application {
 tasks {
     val updateFileStampsTask by register<UpdateFileStampsTask>("updateFileStamps")
     val updateVersionTask by register<UpdateVersionTask>("updateVersion")
-    val deployLocalTask by register<DeployApplicationTask>("deployLocal")
-    val deployBintrayTask by register<DeployApplicationTask>("deployBintray")
+    val deployLocalTask by register<DeployAppTask>("deployLocal")
+    val deployBintrayTask by register<DeployAppTask>("deployBintray")
 
 
     with(compileKotlin.get()) {
@@ -73,7 +73,7 @@ tasks {
         )
     }
     deployLocalTask.apply {
-        deployer = LocalFileSystemDeployer(Path.of("/home/yevhenii/WorderDeployTest"))
+        deployer = FileSystemDeployer(Path.of("/home/yevhenii/WorderDeployTest"))
     }
 
 
@@ -84,7 +84,7 @@ tasks {
         sourcesDir = projectDir.resolve("src")
         sourcesFormats = listOf(".kt")
     }
-    withType<DeployApplicationTask> {
+    withType<DeployAppTask> {
 
     }
 

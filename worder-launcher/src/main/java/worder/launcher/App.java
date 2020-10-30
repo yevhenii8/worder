@@ -4,13 +4,13 @@
  *
  * Name: <App.java>
  * Created: <04/08/2020, 07:03:59 PM>
- * Modified: <30/10/2020, 05:38:27 PM>
- * Version: <236>
+ * Modified: <30/10/2020, 09:47:25 PM>
+ * Version: <242>
  */
 
 package worder.launcher;
 
-import worder.buildsrc.ApplicationDescriptor;
+import worder.commons.AppDescriptor;
 import worder.launcher.ui.LauncherUI;
 
 import javax.swing.*;
@@ -20,22 +20,12 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 public class App {
     public static void main(String[] args) {
-        ApplicationDescriptor descriptor = new ApplicationDescriptor(
-                "",
-                "",
-                "",
-                "",
-                Collections.emptyList(),
-                "",
-                Collections.emptyList(),
-                Collections.emptyList()
-        );
+        AppDescriptor.Builder appDescriptorBuilder = new AppDescriptor.Builder();
         LauncherUI launcherUi = new LauncherUI();
         launcherUi.show();
 
