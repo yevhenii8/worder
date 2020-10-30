@@ -4,13 +4,14 @@
  *
  * Name: <App.java>
  * Created: <04/08/2020, 07:03:59 PM>
- * Modified: <29/10/2020, 05:39:33 PM>
- * Version: <227>
+ * Modified: <30/10/2020, 05:38:27 PM>
+ * Version: <236>
  */
 
 package worder.launcher;
 
-import worder.launcher.ui.UI;
+import worder.buildsrc.ApplicationDescriptor;
+import worder.launcher.ui.LauncherUI;
 
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
@@ -19,18 +20,29 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 public class App {
     public static void main(String[] args) {
-        UI ui = new UI();
-        ui.show();
+        ApplicationDescriptor descriptor = new ApplicationDescriptor(
+                "",
+                "",
+                "",
+                "",
+                Collections.emptyList(),
+                "",
+                Collections.emptyList(),
+                Collections.emptyList()
+        );
+        LauncherUI launcherUi = new LauncherUI();
+        launcherUi.show();
 
-        runWorder(Path.of("/home/yevhenii/WorderDeployTest/"), ui);
+        runWorder(Path.of("/home/yevhenii/WorderDeployTest/"), launcherUi);
     }
 
-    public static void runWorder(Path worderHomeCatalog, UI ui) {
+    public static void runWorder(Path worderHomeCatalog, LauncherUI launcherUi) {
         URL[] urls = Arrays.stream(Objects.requireNonNull(worderHomeCatalog.resolve("artifacts").toFile().listFiles()))
                 .map(file -> {
                     try {
@@ -53,7 +65,7 @@ public class App {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                ui.dispose();
+                launcherUi.dispose();
             });
             method.invoke(null, mainClass, new String[0]);
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
