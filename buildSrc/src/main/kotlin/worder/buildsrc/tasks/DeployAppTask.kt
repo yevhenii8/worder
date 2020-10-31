@@ -18,22 +18,24 @@ open class DeployAppTask : DefaultTask() {
         group = "Distribution"
         description = "Publishes Worder's artifacts, dependencies and descriptor to bintray. It's OS-dependent!"
 
-        dependsOn(project.tasks.getByName("configJavafxRun"))
-        dependsOn(project.tasks.getByName(JavaPlugin.JAR_TASK_NAME))
+//        dependsOn(project.tasks.getByName("configJavafxRun"))
+//        dependsOn(project.tasks.getByName(JavaPlugin.JAR_TASK_NAME))
     }
 
 
     @TaskAction
     fun execute() {
-        require(this::deployer.isInitialized) {
-            "Please make sure you have specified deployer object!"
-        }
+//        require(this::deployer.isInitialized) {
+//            "Please make sure you have specified deployer object!"
+//        }
+//
+//        val execTask = project.tasks.findByName(ApplicationPlugin.TASK_RUN_NAME) as JavaExec
+//        val appArtifacts = (project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as Jar).outputs.files.files
+//        val projectPath = project.projectDir.absolutePath
+//        val allJvmArgs = execTask.allJvmArgs
 
-        val execTask = project.tasks.findByName(ApplicationPlugin.TASK_RUN_NAME) as JavaExec
-        val appArtifacts = (project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as Jar).outputs.files.files
-        val projectPath = project.projectDir.absolutePath
-        val allJvmArgs = execTask.allJvmArgs
-
+        worder.buildsrc.BuildsrcPackageTest() // should print "worder.buildsrc.PackageTest has been initialized!"
+        worder.commons.CommonsPackageTest() // should print "worder.commons.CommonsPackageTest has been initialized!"
 
 //        val modulePath = findOption(allJvmArgs, "--module-path")
 //                .split(":")

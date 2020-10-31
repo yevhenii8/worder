@@ -6,7 +6,7 @@ import worder.buildsrc.FileSystemDeployer
 import worder.buildsrc.BintrayDeployer
 import java.nio.file.Path
 
-version = "1.0.110-SNAPSHOT"
+version = "1.0.111-SNAPSHOT"
 
 plugins {
     application

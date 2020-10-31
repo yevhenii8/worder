@@ -4,13 +4,14 @@
  *
  * Name: <App.java>
  * Created: <04/08/2020, 07:03:59 PM>
- * Modified: <30/10/2020, 09:47:25 PM>
- * Version: <242>
+ * Modified: <31/10/2020, 02:11:44 PM>
+ * Version: <255>
  */
 
 package worder.launcher;
 
-import worder.commons.AppDescriptor;
+import worder.buildsrc.BuildsrcPackageTest;
+import worder.commons.CommonsPackageTest;
 import worder.launcher.ui.LauncherUI;
 
 import javax.swing.*;
@@ -25,11 +26,13 @@ import java.util.Objects;
 
 public class App {
     public static void main(String[] args) {
-        AppDescriptor.Builder appDescriptorBuilder = new AppDescriptor.Builder();
-        LauncherUI launcherUi = new LauncherUI();
-        launcherUi.show();
+        new BuildsrcPackageTest(); // should print "worder.buildsrc.BuildsrcPackageTest has been initialized!"
+        new CommonsPackageTest(); // should print "worder.commons.CommonsPackageTest has been initialized!"
 
-        runWorder(Path.of("/home/yevhenii/WorderDeployTest/"), launcherUi);
+//        LauncherUI launcherUi = new LauncherUI();
+//        launcherUi.show();
+//
+//        runWorder(Path.of("/home/yevhenii/WorderDeployTest/"), launcherUi);
     }
 
     public static void runWorder(Path worderHomeCatalog, LauncherUI launcherUi) {
