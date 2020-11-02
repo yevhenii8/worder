@@ -4,8 +4,8 @@
  *
  * Name: <App.java>
  * Created: <04/08/2020, 07:03:59 PM>
- * Modified: <31/10/2020, 02:11:44 PM>
- * Version: <255>
+ * Modified: <02/11/2020, 09:53:39 PM>
+ * Version: <264>
  */
 
 package worder.launcher;
@@ -26,13 +26,18 @@ import java.util.Objects;
 
 public class App {
     public static void main(String[] args) {
-        new BuildsrcPackageTest(); // should print "worder.buildsrc.BuildsrcPackageTest has been initialized!"
-        new CommonsPackageTest(); // should print "worder.commons.CommonsPackageTest has been initialized!"
+        new BuildsrcPackageTest();
+        new CommonsPackageTest();
 
-//        LauncherUI launcherUi = new LauncherUI();
-//        launcherUi.show();
+        LauncherUI launcherUi = new LauncherUI();
+        launcherUi.show();
+
+        launcherUi.updateProgress("Downloading javafx... ");
+        launcherUi.updateProgress("Downloading java 8... ");
+        launcherUi.updateProgress("Downloading worder-gui 2.0... ");
+        launcherUi.updateProgress("Runnig worder... ");
 //
-//        runWorder(Path.of("/home/yevhenii/WorderDeployTest/"), launcherUi);
+        runWorder(Path.of("/home/yevhenii/WorderDeployTest/"), launcherUi);
     }
 
     public static void runWorder(Path worderHomeCatalog, LauncherUI launcherUi) {

@@ -7,6 +7,7 @@ import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.TaskAction
 import org.gradle.jvm.tasks.Jar
 import worder.buildsrc.AppDeployer
+import worder.buildsrc.BuildsrcPackageTest
 
 @Suppress("LeakingThis")
 open class DeployAppTask : DefaultTask() {
@@ -34,8 +35,6 @@ open class DeployAppTask : DefaultTask() {
 //        val projectPath = project.projectDir.absolutePath
 //        val allJvmArgs = execTask.allJvmArgs
 
-        worder.buildsrc.BuildsrcPackageTest() // should print "worder.buildsrc.PackageTest has been initialized!"
-        worder.commons.CommonsPackageTest() // should print "worder.commons.CommonsPackageTest has been initialized!"
 
 //        val modulePath = findOption(allJvmArgs, "--module-path")
 //                .split(":")

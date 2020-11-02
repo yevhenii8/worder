@@ -6,12 +6,12 @@ import worder.buildsrc.FileSystemDeployer
 import worder.buildsrc.BintrayDeployer
 import java.nio.file.Path
 
-version = "1.0.111-SNAPSHOT"
+version = "1.0.114-SNAPSHOT"
 
 plugins {
     application
 
-    id("org.jetbrains.kotlin.jvm") version "1.3.72"
+    kotlin("jvm") version "1.3.72"
     id("org.openjfx.javafxplugin") version "0.0.9"
 }
 
