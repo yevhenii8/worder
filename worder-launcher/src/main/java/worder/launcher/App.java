@@ -10,7 +10,9 @@
 
 package worder.launcher;
 
+import worder.launcher.model.DescriptorsHandler;
 import worder.launcher.ui.LauncherUI;
+import worder.launcher.model.Action;
 
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
@@ -19,23 +21,22 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 public class App {
     public static void main(String[] args) {
+        processArguments(args);
+
         LauncherUI launcherUi = new LauncherUI();
         launcherUi.show();
 
-        launcherUi.updateProgress("Downloading javafx... ");
-        launcherUi.updateProgress("Downloading java 8... ");
-        launcherUi.updateProgress("Downloading worder-gui 2.0... ");
-        launcherUi.updateProgress("Runnig worder... ");
-//
+        DescriptorsHandler descriptorsHandler = new DescriptorsHandler(launcherUi);
+        descriptorsHandler.prepareWorderHome();
+
         runWorder(Path.of("/home/yevhenii/WorderDeployTest/"), launcherUi);
     }
 
-    public static void runWorder(Path worderHomeCatalog, LauncherUI launcherUi) {
+    private static void runWorder(Path worderHomeCatalog, LauncherUI launcherUi) {
         URL[] urls = Arrays.stream(Objects.requireNonNull(worderHomeCatalog.resolve("artifacts").toFile().listFiles()))
                 .map(file -> {
                     try {
@@ -66,26 +67,41 @@ public class App {
         }
     }
 
-    private static void test(ClassLoader loader) {
-        try {
-            var classes = List.of(
-                    Class.forName("worder.gui.AppEntry", false, loader),
-                    Class.forName("tornadofx.App", false, loader),
-                    Class.forName("tornadofx.AppKt", false, loader),
-                    Class.forName("javafx.application.Application", false, loader)
-            );
+    private static void processArguments(String[] args) {
+        Arrays.stream(args)
+                .map(it -> {
+                    var launcherArgument = LauncherArgument.valueOf(it);
+                    var index = it.indexOf("=");
+                    launcherArgument.value = it.substring(index + 1);
+                    return launcherArgument;
+                })
+                .forEach(it -> it.action.execute());
+    }
 
-            classes.forEach(cl -> {
-                System.out.println(cl.getSimpleName() + "(" + cl.getCanonicalName() + ")");
-                Arrays.stream(cl.getMethods())
-                        .filter(method -> method.getName().contains("launch"))
-                        .forEach(System.out::println);
+    private static void setCustomWorderHome() {
+        DescriptorsHandler.worderHome = LauncherArgument.WORDER_HOME.value;
+        DescriptorsHandler.useCustomWorderHome = true;
+    }
 
-                System.out.println();
-                System.out.println();
-            });
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+
+    enum LauncherArgument {
+        WORDER_HOME(
+                "--worder-home",
+                "Uses specified catalog as a Worder Home Catalog.",
+                App::setCustomWorderHome
+        );
+
+
+        private final String name;
+        private final String description;
+        private final Action action;
+        private String value;
+
+
+        LauncherArgument(String name, String description, Action action) {
+            this.name = name;
+            this.description = description;
+            this.action = action;
         }
     }
 }

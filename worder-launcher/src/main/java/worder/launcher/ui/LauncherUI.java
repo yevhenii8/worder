@@ -10,13 +10,15 @@
 
 package worder.launcher.ui;
 
+import worder.launcher.model.ProgressHolder;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-public class LauncherUI {
+public class LauncherUI implements ProgressHolder {
     private JLabel progress;
     private JFrame frame;
     private long lastProgressUpdate = 0L;
@@ -42,7 +44,8 @@ public class LauncherUI {
     }
 
 
-    public void updateProgress(String value) {
+    @Override
+    public void status(String value) {
         long sinceLastUpdate = System.currentTimeMillis() - lastProgressUpdate;
         long PROGRESS_UPDATE_INTERVAL = 500L;
 
