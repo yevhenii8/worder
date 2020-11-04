@@ -46,4 +46,6 @@ class FileSystemDeployer(rootPath: Path) : AppDeployer {
 
         rootAsFile.resolve(path).deleteRecursively()
     }
+
+    override fun toString(): String = "${javaClass.simpleName}($rootAsFile)"
 }

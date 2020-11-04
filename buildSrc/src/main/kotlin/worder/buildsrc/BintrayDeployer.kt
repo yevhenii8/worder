@@ -85,4 +85,6 @@ class BintrayDeployer(
         if (response.statusCode() != 200)
             throw IOException("BintrayAPI response code - ${response.statusCode()}: \n${response.body()}")
     }
+
+    override fun toString() = "${javaClass.simpleName}($upstreamURL)"
 }

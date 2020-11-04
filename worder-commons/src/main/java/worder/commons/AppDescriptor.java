@@ -1,14 +1,19 @@
 package worder.commons;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class AppDescriptor implements Serializable {
+    private static final SerializationUtil<AppDescriptor> serializator = new SerializationUtil<>();
+    transient private List<Artifact> allArtifacts;
     private final String name = "WorderAppDescriptor-" + System.getProperty("os.name");
     private final String generated = LocalDateTime.now().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM));
 
@@ -16,9 +21,9 @@ public class AppDescriptor implements Serializable {
     private final String appMainClass;
     private final String usedModules;
     private final List<String> envArguments;
-    private final List<File> modulePath;
-    private final List<File> classPath;
-    private final long descriptorVersion;
+    private final List<Artifact> modulePath;
+    private final List<Artifact> classPath;
+    private final long version;
 
 
     private AppDescriptor(
@@ -28,19 +33,55 @@ public class AppDescriptor implements Serializable {
             List<String> envArguments,
             List<File> modulePath,
             List<File> classPath,
-            long descriptorVersion
+            long version
     ) {
         this.appVersion = appVersion;
         this.appMainClass = appMainClass;
         this.usedModules = usedModules;
         this.envArguments = envArguments;
-        this.modulePath = modulePath;
-        this.classPath = classPath;
-        this.descriptorVersion = descriptorVersion;
+        this.modulePath = modulePath.stream().map(Artifact::new).collect(Collectors.toList());
+        this.classPath = classPath.stream().map(Artifact::new).collect(Collectors.toList());
+        this.version = version;
     }
 
 
-    public static class Artifact {
+    public List<Artifact> getModulePath() {
+        return modulePath;
+    }
+
+    public List<Artifact> getClassPath() {
+        return classPath;
+    }
+
+    public List<Artifact> getAllArtifacts() {
+        if (allArtifacts == null) {
+            allArtifacts = new ArrayList<>(classPath);
+            allArtifacts.addAll(modulePath);
+        }
+
+        return allArtifacts;
+    }
+
+    public byte[] toByteArray() {
+        try {
+            return serializator.serialize(this);
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public long getVersion() {
+        return version;
+    }
+
+
+    public static class Artifact implements Serializable {
         transient private final File file;
         private final String name;
         private final long size;
@@ -92,7 +133,7 @@ public class AppDescriptor implements Serializable {
         private List<String> envArguments;
         private List<File> modulePath;
         private List<File> classPath;
-        private Long descriptorID;
+        private Long version;
 
 
         public AppDescriptor build() {
@@ -102,7 +143,7 @@ public class AppDescriptor implements Serializable {
             Objects.requireNonNull(envArguments, "'envArguments' should be specified!");
             Objects.requireNonNull(modulePath, "'modulePath' should be specified!");
             Objects.requireNonNull(classPath, "'classPath' should be specified!");
-            Objects.requireNonNull(descriptorID, "'descriptorID' should be specified!");
+            Objects.requireNonNull(version, "'version' should be specified!");
 
             return new AppDescriptor(
                     appVersion,
@@ -111,7 +152,7 @@ public class AppDescriptor implements Serializable {
                     envArguments,
                     modulePath,
                     classPath,
-                    descriptorID
+                    version
             );
         }
 
@@ -146,9 +187,24 @@ public class AppDescriptor implements Serializable {
             return this;
         }
 
-        public Builder descriptorID(Long descriptorID) {
-            this.descriptorID = descriptorID;
+        public Builder version(Long version) {
+            this.version = version;
             return this;
         }
+    }
+
+
+    public static AppDescriptor fromByteArray(byte[] bytes) {
+        try {
+            return serializator.deserialize(bytes);
+        } catch (IOException | ClassNotFoundException exception) {
+            exception.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public static String getCalculatedName() {
+        return "WorderAppDescriptor-" + System.getProperty("os.name");
     }
 }

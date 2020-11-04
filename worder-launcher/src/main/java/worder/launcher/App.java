@@ -10,8 +10,6 @@
 
 package worder.launcher;
 
-import worder.buildsrc.BuildsrcPackageTest;
-import worder.commons.CommonsPackageTest;
 import worder.launcher.ui.LauncherUI;
 
 import javax.swing.*;
@@ -26,9 +24,6 @@ import java.util.Objects;
 
 public class App {
     public static void main(String[] args) {
-        new BuildsrcPackageTest();
-        new CommonsPackageTest();
-
         LauncherUI launcherUi = new LauncherUI();
         launcherUi.show();
 
