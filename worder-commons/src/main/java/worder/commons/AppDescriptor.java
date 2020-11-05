@@ -1,8 +1,8 @@
 package worder.commons;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -31,8 +31,8 @@ public class AppDescriptor implements Serializable {
             String appMainClass,
             String usedModules,
             List<String> envArguments,
-            List<File> modulePath,
-            List<File> classPath,
+            List<Path> modulePath,
+            List<Path> classPath,
             long version
     ) {
         this.appVersion = appVersion;
@@ -82,28 +82,22 @@ public class AppDescriptor implements Serializable {
 
 
     public static class Artifact implements Serializable {
-        transient private final File file;
+        transient private final Path pathToFile;
         private final String name;
-        private final long size;
 
 
-        Artifact(File file) {
-            this.file = file;
-            name = "artifacts/" + file.getName();
-            size = file.length();
+        Artifact(Path pathToFile) {
+            this.pathToFile = pathToFile;
+            this.name = pathToFile.getFileName().toString();
         }
 
 
-        public File getFile() {
-            return file;
+        public Path getPathToFile() {
+            return pathToFile;
         }
 
         public String getName() {
             return name;
-        }
-
-        public long getSize() {
-            return size;
         }
 
 
@@ -114,15 +108,12 @@ public class AppDescriptor implements Serializable {
 
             Artifact artifact = (Artifact) o;
 
-            if (size != artifact.size) return false;
             return name.equals(artifact.name);
         }
 
         @Override
         public int hashCode() {
-            int result = name.hashCode();
-            result = 31 * result + (int) (size ^ (size >>> 32));
-            return result;
+            return name.hashCode();
         }
     }
 
@@ -131,8 +122,8 @@ public class AppDescriptor implements Serializable {
         private String appMainClass;
         private String usedModules;
         private List<String> envArguments;
-        private List<File> modulePath;
-        private List<File> classPath;
+        private List<Path> modulePath;
+        private List<Path> classPath;
         private Long version;
 
 
@@ -177,12 +168,12 @@ public class AppDescriptor implements Serializable {
             return this;
         }
 
-        public Builder modulePath(List<File> modulePath) {
+        public Builder modulePath(List<Path> modulePath) {
             this.modulePath = modulePath;
             return this;
         }
 
-        public Builder classPath(List<File> classPath) {
+        public Builder classPath(List<Path> classPath) {
             this.classPath = classPath;
             return this;
         }

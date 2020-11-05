@@ -4,75 +4,122 @@
  *
  * Name: <DescriptorsHandler.java>
  * Created: <28/10/2020, 10:50:39 PM>
- * Modified: <02/11/2020, 09:53:39 PM>
- * Version: <94>
+ * Modified: <05/11/2020, 10:28:14 PM>
+ * Version: <118>
  */
 
 package worder.launcher.model;
 
 import worder.commons.AppDescriptor;
-import worder.launcher.App;
+import worder.launcher.ui.UiHandler;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedList;
 import java.util.Objects;
 
 public class DescriptorsHandler {
-    public static boolean useCustomWorderHome = false;
-    public static String worderDistribution = "https://dl.bintray.com/evgen8/generic/";
-    public static String worderHome;
+    private static boolean useCustomWorderHome = false;
+    private static final String worderDistribution = "https://dl.bintray.com/evgen8/generic/";
+    private static Path localArtifactsPath;
+    private static Path worderHomePath;
 
-    private final ProgressHolder progressHolder;
+    private final UiHandler uiHandler;
 
 
-    public DescriptorsHandler(ProgressHolder progressHolder) {
-        progressHolder.status("Detecting Worder-GUI's home catalog...");
+    public DescriptorsHandler(UiHandler uiHandler) {
+        this.uiHandler = uiHandler;
+
+        uiHandler.status("Detecting Worder-GUI's home catalog ...");
+
         if (!useCustomWorderHome)
-            worderHome = detectWorderHome();
-
-        this.progressHolder = progressHolder;
+            setWorderHome(detectWorderHome());
     }
 
 
     public void prepareWorderHome() {
-        progressHolder.status("Obtaining local & remote descriptors...");
+        uiHandler.status("Obtaining local & remote descriptors ...");
 
-        var worderHomeCatalog = Path.of(worderHome);
-        AppDescriptor localDescriptor;
-        AppDescriptor remoteDescriptor;
-
-        try {
-            localDescriptor = AppDescriptor.fromByteArray(
-                    Files.readAllBytes(
-                            worderHomeCatalog.resolve(AppDescriptor.getCalculatedName())
-                    )
-            );
-            remoteDescriptor = AppDescriptor.fromByteArray(
-                    downloadFile(AppDescriptor.getCalculatedName())
-            );
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
-            return;
-        }
+        String requiredDescriptorName = AppDescriptor.getCalculatedName();
+        AppDescriptor localDescriptor = obtainLocalDescriptor(requiredDescriptorName);
+        AppDescriptor remoteDescriptor = obtainRemoteDescriptor(requiredDescriptorName);
 
         if (localDescriptor == null && remoteDescriptor == null)
-            throw new IllegalStateException("Neither local nor remote descriptor found!");
-
+            uiHandler.criticalError("Neither local nor remote descriptor is accessible!");
         if (localDescriptor != null && remoteDescriptor == null)
             return;
-
         if (localDescriptor != null && localDescriptor.getVersion() == remoteDescriptor.getVersion())
             return;
 
-        syncWorderHome(localDescriptor, remoteDescriptor);
+        if (localDescriptor == null)
+            //noinspection ConstantConditions
+            syncWorderHome(remoteDescriptor);
+        else
+            syncWorderHome(localDescriptor, remoteDescriptor);
+    }
+
+    public Path getWorderHomePath() {
+        return worderHomePath;
     }
 
 
-    private void syncWorderHome(AppDescriptor localDescriptor, AppDescriptor remoteDescriptor) {
+    public static void setCustomWorderHome(String customWorderHome) {
+        useCustomWorderHome = true;
+        setWorderHome(customWorderHome);
+    }
 
+    private static void setWorderHome(String newWorderHome) {
+        worderHomePath = Path.of(newWorderHome);
+        localArtifactsPath = worderHomePath.resolve("artifacts");
+    }
+
+
+    private void syncWorderHome(AppDescriptor remoteDescriptor, AppDescriptor localDescriptor) {
+        var toRemove = new LinkedList<>(localDescriptor.getAllArtifacts());
+        var toDownload = new LinkedList<>(remoteDescriptor.getAllArtifacts());
+
+        toRemove.removeAll(remoteDescriptor.getAllArtifacts());
+        toDownload.removeAll(localDescriptor.getAllArtifacts());
+
+        toRemove.forEach(artifacts -> {
+            uiHandler.status("Removing " + artifacts.getName() + " ...");
+            try {
+                Files.delete(localArtifactsPath.resolve(artifacts.getName()));
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+        });
+
+        toDownload.forEach(artifact -> {
+            uiHandler.status("Downloading " + artifact.getName() + " ...");
+            try {
+                Files.write(
+                        localArtifactsPath.resolve(artifact.getName()),
+                        Objects.requireNonNull(downloadFile("artifacts/" + artifact.getName()))
+                );
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+        });
+    }
+
+    private void syncWorderHome(AppDescriptor remoteDescriptor) {
+        try {
+            Files.createDirectories(localArtifactsPath);
+            Files.write(worderHomePath.resolve(remoteDescriptor.getName()), remoteDescriptor.toByteArray());
+
+            for (AppDescriptor.Artifact artifact : remoteDescriptor.getAllArtifacts()) {
+                uiHandler.status("Downloading " + artifact.getName() + " ...");
+                Files.write(
+                        localArtifactsPath.resolve(artifact.getName()),
+                        Objects.requireNonNull(downloadFile("artifacts/" + artifact.getName()))
+                );
+            }
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
     }
 
     private String detectWorderHome() {
@@ -96,5 +143,28 @@ public class DescriptorsHandler {
             e.printStackTrace();
             return null;
         }
+    }
+
+    private AppDescriptor obtainLocalDescriptor(String requiredDescriptorName) {
+        var requiredFile = worderHomePath.resolve(requiredDescriptorName);
+
+        if (Files.notExists(requiredFile))
+            return null;
+
+        try {
+            return AppDescriptor.fromByteArray(Files.readAllBytes(requiredFile));
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+            return null;
+        }
+    }
+
+    private AppDescriptor obtainRemoteDescriptor(String requiredDescriptorName) {
+        var remoteDescriptorBytes = downloadFile(requiredDescriptorName);
+
+        if (remoteDescriptorBytes == null)
+            return null;
+
+        return AppDescriptor.fromByteArray(remoteDescriptorBytes);
     }
 }

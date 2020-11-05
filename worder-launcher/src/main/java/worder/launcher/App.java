@@ -4,8 +4,8 @@
  *
  * Name: <App.java>
  * Created: <04/08/2020, 07:03:59 PM>
- * Modified: <02/11/2020, 09:53:39 PM>
- * Version: <264>
+ * Modified: <05/11/2020, 10:28:14 PM>
+ * Version: <288>
  */
 
 package worder.launcher;
@@ -33,7 +33,7 @@ public class App {
         DescriptorsHandler descriptorsHandler = new DescriptorsHandler(launcherUi);
         descriptorsHandler.prepareWorderHome();
 
-        runWorder(Path.of("/home/yevhenii/WorderDeployTest/"), launcherUi);
+        runWorder(descriptorsHandler.getWorderHomePath(), launcherUi);
     }
 
     private static void runWorder(Path worderHomeCatalog, LauncherUI launcherUi) {
@@ -69,18 +69,20 @@ public class App {
 
     private static void processArguments(String[] args) {
         Arrays.stream(args)
-                .map(it -> {
-                    var launcherArgument = LauncherArgument.valueOf(it);
-                    var index = it.indexOf("=");
-                    launcherArgument.value = it.substring(index + 1);
+                .map(passedArgument -> {
+                    var index = passedArgument.indexOf("=");
+                    var launcherArgument = Arrays.stream(LauncherArgument.values())
+                            .filter(it -> it.name.equals(passedArgument.substring(0, index)))
+                            .findFirst()
+                            .orElseThrow();
+                    launcherArgument.value = passedArgument.substring(index + 1);
                     return launcherArgument;
                 })
                 .forEach(it -> it.action.execute());
     }
 
     private static void setCustomWorderHome() {
-        DescriptorsHandler.worderHome = LauncherArgument.WORDER_HOME.value;
-        DescriptorsHandler.useCustomWorderHome = true;
+        DescriptorsHandler.setCustomWorderHome(LauncherArgument.WORDER_HOME.value);
     }
 
 

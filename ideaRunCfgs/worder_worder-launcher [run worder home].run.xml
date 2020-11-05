@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="worder:worder-launcher [run home catalog]" type="GradleRunConfiguration" factoryName="Gradle">
+  <configuration default="false" name="worder:worder-launcher [run worder home]" type="GradleRunConfiguration" factoryName="Gradle">
     <ExternalSystemSettings>
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$/worder-launcher" />
@@ -11,7 +11,7 @@
       <option name="taskNames">
         <list>
           <option value="run" />
-          <option value="--args=&quot;--home-catalog=&quot;$USER_HOME$/WorderDeployTest&quot;&quot;" />
+          <option value="--args=&quot;--worder-home=&quot;$USER_HOME$/WorderDeployTest&quot;&quot;" />
         </list>
       </option>
       <option name="vmOptions" value="" />

@@ -4,13 +4,11 @@
  *
  * Name: <LauncherUI.java>
  * Created: <28/10/2020, 05:53:10 PM>
- * Modified: <02/11/2020, 09:53:39 PM>
- * Version: <124>
+ * Modified: <05/11/2020, 10:28:14 PM>
+ * Version: <148>
  */
 
 package worder.launcher.ui;
-
-import worder.launcher.model.ProgressHolder;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -18,7 +16,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-public class LauncherUI implements ProgressHolder {
+public class LauncherUI implements UiHandler {
     private JLabel progress;
     private JFrame frame;
     private long lastProgressUpdate = 0L;
@@ -58,6 +56,12 @@ public class LauncherUI implements ProgressHolder {
 
         progress.setText(value);
         lastProgressUpdate = System.currentTimeMillis();
+    }
+
+    @Override
+    public void criticalError(String message) {
+        JOptionPane.showMessageDialog(new JFrame(), message, "Critical error", JOptionPane.ERROR_MESSAGE);
+        System.exit(1);
     }
 
     public void show() {

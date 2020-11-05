@@ -5,15 +5,20 @@ import org.gradle.api.plugins.ApplicationPlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.options.Option
 import org.gradle.jvm.tasks.Jar
 import worder.buildsrc.AppDeployer
 import worder.commons.AppDescriptor
-import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
 
 @Suppress("LeakingThis")
 open class DeployAppTask : DefaultTask() {
     @Suppress("MemberVisibilityCanBePrivate")
     lateinit var deployer: AppDeployer
+
+    @Option(description = "Run the task in the Transit mode. Use when updating a descriptor structure.")
+    var onlyDescriptor = false
 
 
     init {
@@ -33,16 +38,17 @@ open class DeployAppTask : DefaultTask() {
 
         val gradleLogger = logger
         val execTask = project.tasks.findByName(ApplicationPlugin.TASK_RUN_NAME) as JavaExec
-        val appArtifacts = (project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as Jar).outputs.files.files
+        val appArtifacts = (project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as Jar).outputs.files.files.map { it.toPath() }
         val projectPath = project.projectDir.absolutePath
         val allJvmArgs = execTask.allJvmArgs
 
         val modulePath = findOption(allJvmArgs, "--module-path")
                 .split(":")
                 .filterNot { it.startsWith(projectPath) }
-                .map { File(it) }
+                .map { Path.of(it) }
         val classPath = execTask.classpath
-                .filterNot { it.absolutePath.startsWith(projectPath) || modulePath.contains(it) }
+                .map { it.toPath() }
+                .filterNot { it.startsWith(projectPath) || modulePath.contains(it) }
 
         with(deployer) {
             gradleLogger.info("Deploying to $this has been started!")
@@ -69,7 +75,7 @@ open class DeployAppTask : DefaultTask() {
             newDescriptor.allArtifacts.forEach {
                 if (!remoteArtifacts.contains(it.name)) {
                     gradleLogger.info("Uploading ${it.name}")
-                    uploadFile(it.name, it.file!!.readBytes())
+                    uploadFile("artifacts/${it.name}", Files.readAllBytes(it.pathToFile))
                 }
             }
 
@@ -77,7 +83,7 @@ open class DeployAppTask : DefaultTask() {
                 (previous.allArtifacts subtract newDescriptor.allArtifacts).forEach {
                     if (remoteArtifacts[it.name]!! - 1 == 0) {
                         gradleLogger.info("Removing ${it.name}")
-                        removeFile(it.name)
+                        removeFile("artifacts/${it.name}")
                     }
                 }
             }
