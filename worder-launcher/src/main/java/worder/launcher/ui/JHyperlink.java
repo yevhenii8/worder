@@ -4,19 +4,19 @@
  *
  * Name: <JHyperlink.java>
  * Created: <27/10/2020, 05:20:42 PM>
- * Modified: <07/11/2020, 02:24:33 PM>
- * Version: <252>
+ * Modified: <07/11/2020, 07:54:00 PM>
+ * Version: <260>
  */
 
 package worder.launcher.ui;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import javax.swing.*;
 
 /**
  * A hyperlink component that is based on JLabel.
@@ -25,7 +25,6 @@ import javax.swing.*;
 public class JHyperlink extends JLabel {
     private final String html = "<html><a href=''>%s</a></html>";
     private final String url;
-
 
     public JHyperlink(String text, String url, Icon icon, int horizontalAlignment) {
         super(text, icon, horizontalAlignment);

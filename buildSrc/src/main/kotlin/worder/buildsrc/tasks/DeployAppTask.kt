@@ -1,6 +1,7 @@
 package worder.buildsrc.tasks
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.logging.Logger
 import org.gradle.api.plugins.ApplicationPlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.JavaExec
@@ -21,8 +22,8 @@ open class DeployAppTask : DefaultTask() {
     var removeAllDescriptors = false
 
 
-    val gradleLogger = logger
-    val loggingDeployer = object : AppDeployer {
+    private val gradleLogger: Logger = logger
+    private val loggingDeployer: AppDeployer = object : AppDeployer {
         override fun listCatalog(path: String): List<String> {
             gradleLogger.info("Requesting '$path' ...")
             return deployer.listCatalog(path)
@@ -100,7 +101,7 @@ open class DeployAppTask : DefaultTask() {
             remoteDescriptorNames.remove(newDescriptor.name)
 
             val actualRemoteDescriptors = remoteDescriptorNames.map { AppDescriptor.fromByteArray(downloadFile(it)) } + newDescriptor
-            val actualArtifacts = listCatalog("artifacts").associateTo(mutableMapOf()) { it to 0 }
+            val actualArtifacts = listCatalog("artifacts").associateWithTo(mutableMapOf()) { 0 }
 
             actualRemoteDescriptors
                     .flatMap { it.artifacts }

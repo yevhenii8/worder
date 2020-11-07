@@ -3,4 +3,6 @@
 build
 sample-db_TMP.bck
 gradle.properties
+WorderLocalDistribution
+WorderLocalHome
 

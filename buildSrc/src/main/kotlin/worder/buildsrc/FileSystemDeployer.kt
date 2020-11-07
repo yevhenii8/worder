@@ -15,7 +15,7 @@ class FileSystemDeployer(rootPath: Path) : AppDeployer {
             "You can't use absolute path here, passed value: $path"
         }
 
-        return rootAsFile.resolve(path).list()!!.toList()
+        return rootAsFile.resolve(path).list()?.toList() ?: emptyList()
     }
 
     override fun downloadFile(path: String): ByteArray {

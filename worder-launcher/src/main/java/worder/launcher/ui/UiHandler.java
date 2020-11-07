@@ -4,13 +4,15 @@
  *
  * Name: <UiHandler.java>
  * Created: <05/11/2020, 08:36:34 PM>
- * Modified: <07/11/2020, 02:24:33 PM>
- * Version: <27>
+ * Modified: <07/11/2020, 07:54:00 PM>
+ * Version: <35>
  */
 
 package worder.launcher.ui;
 
 public interface UiHandler {
+    void show();
+    void dispose();
     void status(String status);
     void criticalError(String message);
 }

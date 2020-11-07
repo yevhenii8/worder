@@ -4,8 +4,8 @@
  *
  * Name: <MoveableJFrame.java>
  * Created: <27/10/2020, 08:51:08 PM>
- * Modified: <07/11/2020, 02:24:33 PM>
- * Version: <165>
+ * Modified: <07/11/2020, 07:54:00 PM>
+ * Version: <173>
  */
 
 package worder.launcher.ui;
@@ -23,8 +23,8 @@ public class MoveableJFrame extends JFrame {
     }
 
     public static class FrameDragListener extends MouseAdapter {
-        private Point mouseDownCompCords = null;
         private final JFrame frame;
+        private Point mouseDownCompCords = null;
 
 
         public FrameDragListener(JFrame frame) {

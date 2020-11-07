@@ -73,7 +73,7 @@ tasks {
         )
     }
     deployLocalTask.apply {
-        deployer = FileSystemDeployer(Path.of("/home/yevhenii/WorderDeployTest"))
+        deployer = FileSystemDeployer(rootDir.toPath().resolve("WorderLocalDistribution"))
     }
 
 
@@ -89,20 +89,24 @@ tasks {
     }
 
 
-    // FOR DEV PURPOSES ONLY
-    register("testArgs") {
-        dependsOn(project.tasks.getByName("configJavafxRun"))
-        dependsOn(project.tasks.getByName(JavaPlugin.JAR_TASK_NAME))
-
-        doLast {
-            val execTask = project.tasks.findByName(ApplicationPlugin.TASK_RUN_NAME) as JavaExec
-            val jarTask = project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as org.gradle.jvm.tasks.Jar
-
-            println(execTask.allJvmArgs)
-            println()
-            println(execTask.classpath.files)
-            println()
-            println(execTask.jvmArgs)
-        }
+    register("devTest") {
+        println(project.projectDir)
+        println(project.rootDir)
+        println(projectDir)
+        println(rootDir)
+//
+//        dependsOn(project.tasks.getByName("configJavafxRun"))
+//        dependsOn(project.tasks.getByName(JavaPlugin.JAR_TASK_NAME))
+//
+//        doLast {
+//            val execTask = project.tasks.findByName(ApplicationPlugin.TASK_RUN_NAME) as JavaExec
+//            val jarTask = project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as org.gradle.jvm.tasks.Jar
+//
+//            println(execTask.allJvmArgs)
+//            println()
+//            println(execTask.classpath.files)
+//            println()
+//            println(execTask.jvmArgs)
+//        }
     }
 }

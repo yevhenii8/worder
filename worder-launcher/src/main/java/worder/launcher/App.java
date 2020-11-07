@@ -4,93 +4,94 @@
  *
  * Name: <App.java>
  * Created: <04/08/2020, 07:03:59 PM>
- * Modified: <07/11/2020, 02:24:33 PM>
- * Version: <291>
+ * Modified: <07/11/2020, 07:54:00 PM>
+ * Version: <299>
  */
 
 package worder.launcher;
 
-import worder.launcher.model.DescriptorsHandler;
-import worder.launcher.ui.LauncherUI;
 import worder.launcher.model.Action;
+import worder.launcher.model.DescriptorsHandler;
+import worder.launcher.model.WorderRunner;
+import worder.launcher.ui.SwingUI;
+import worder.launcher.ui.UiHandler;
 
-import javax.swing.*;
-import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Objects;
 
 public class App {
-    public static void main(String[] args) {
+    private static boolean useLocalDistribution;
+    private static URL remoteWorderDistribution;
+    private static Path localWorderDistribution;
+    private static Path worderHome;
+
+
+    public static void main(String[] args) throws MalformedURLException {
+        initDefaults();
         processArguments(args);
 
-        LauncherUI launcherUi = new LauncherUI();
-        launcherUi.show();
+        UiHandler uiHandler = new SwingUI();
+        uiHandler.show();
 
-        DescriptorsHandler descriptorsHandler = new DescriptorsHandler(launcherUi);
-        descriptorsHandler.prepareWorderHome();
-
-        runWorder(descriptorsHandler.getWorderHomePath(), launcherUi);
+//        DescriptorsHandler descriptorsHandler = new DescriptorsHandler(uiHandler);
+//        descriptorsHandler.prepareWorderHome();
+//
+//        WorderRunner worderRunner = new WorderRunner(uiHandler, descriptorsHandler.getWorderHomePath());
+//        worderRunner.runWorder();
     }
 
-    private static void runWorder(Path worderHomeCatalog, LauncherUI launcherUi) {
-        URL[] urls = Arrays.stream(Objects.requireNonNull(worderHomeCatalog.resolve("artifacts").toFile().listFiles()))
-                .map(file -> {
-                    try {
-                        return file.toURI().toURL();
-                    } catch (MalformedURLException e) {
-                        e.printStackTrace();
-                    }
-                    return null;
-                })
-                .toArray(URL[]::new);
 
-        ClassLoader loader = URLClassLoader.newInstance(urls, App.class.getClassLoader());
-        try {
-            Thread.currentThread().setContextClassLoader(loader);
-            Class<?> mainClass = Class.forName("worder.gui.AppEntry", false, loader);
-            var method = mainClass.getMethod("launch", Class.class, String[].class);
-            SwingUtilities.invokeLater(() -> {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                launcherUi.dispose();
-            });
-            method.invoke(null, mainClass, new String[0]);
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
+    private static void initDefaults() throws MalformedURLException {
+        remoteWorderDistribution = new URL("https://dl.bintray.com/evgen8/generic");
+        worderHome = Path.of(detectWorderHome());
+    }
+
+    private static void processArguments(String[] args) throws MalformedURLException {
+        for (String argument : args) {
+            var index = argument.indexOf("=");
+            var argumentName = argument.substring(0, index);
+            var launcherArgument = Arrays.stream(LauncherArgument.values())
+                    .filter(it -> it.name.equals(argumentName))
+                    .findFirst()
+                    .orElseThrow();
+
+            launcherArgument.value = argument.substring(index + 1);
+            launcherArgument.action.execute();
         }
     }
 
-    private static void processArguments(String[] args) {
-        Arrays.stream(args)
-                .map(passedArgument -> {
-                    var index = passedArgument.indexOf("=");
-                    var launcherArgument = Arrays.stream(LauncherArgument.values())
-                            .filter(it -> it.name.equals(passedArgument.substring(0, index)))
-                            .findFirst()
-                            .orElseThrow();
-                    launcherArgument.value = passedArgument.substring(index + 1);
-                    return launcherArgument;
-                })
-                .forEach(it -> it.action.execute());
+    private static void setCustomWorderHome() {
+        worderHome = Path.of(LauncherArgument.WORDER_DISTRIBUTION.value);
     }
 
-    private static void setCustomWorderHome() {
-        DescriptorsHandler.setCustomWorderHome(LauncherArgument.WORDER_HOME.value);
+    private static void setCustomWorderDistribution() {
+        localWorderDistribution = Path.of(LauncherArgument.WORDER_DISTRIBUTION.value);
+        useLocalDistribution = true;
+    }
+
+    private static String detectWorderHome() {
+        var currentOs = System.getProperty("os.name");
+        var userHomeCatalog = System.getProperty("user.home");
+
+        if (currentOs.equals("Linux"))
+            return userHomeCatalog + "/.worder-gui/";
+
+        throw new IllegalStateException("There's no support of Worder-Launcher for your OS: " + currentOs);
     }
 
 
     enum LauncherArgument {
         WORDER_HOME(
                 "--worder-home",
-                "Uses specified catalog as a Worder Home Catalog.",
+                "Sets specified path as a Worder Home Catalog.",
                 App::setCustomWorderHome
+        ),
+        WORDER_DISTRIBUTION(
+                "--worder-distribution",
+                "Sets specified path as a Worder Distribution",
+                App::setCustomWorderDistribution
         );
 
 
