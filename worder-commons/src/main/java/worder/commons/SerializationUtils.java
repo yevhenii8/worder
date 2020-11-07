@@ -2,7 +2,7 @@ package worder.commons;
 
 import java.io.*;
 
-public class SerializationUtil<T> {
+public class SerializationUtils<T> {
     @SuppressWarnings("unchecked")
     public T deserialize(byte[] byteArray) throws IOException, ClassNotFoundException {
         ByteArrayInputStream input = new ByteArrayInputStream(byteArray);

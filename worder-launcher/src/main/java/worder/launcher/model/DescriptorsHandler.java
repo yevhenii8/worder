@@ -4,8 +4,8 @@
  *
  * Name: <DescriptorsHandler.java>
  * Created: <28/10/2020, 10:50:39 PM>
- * Modified: <05/11/2020, 10:28:14 PM>
- * Version: <118>
+ * Modified: <07/11/2020, 02:24:33 PM>
+ * Version: <121>
  */
 
 package worder.launcher.model;
@@ -42,7 +42,7 @@ public class DescriptorsHandler {
     public void prepareWorderHome() {
         uiHandler.status("Obtaining local & remote descriptors ...");
 
-        String requiredDescriptorName = AppDescriptor.getCalculatedName();
+        String requiredDescriptorName = AppDescriptor.obtainNameForCurrentOS();
         AppDescriptor localDescriptor = obtainLocalDescriptor(requiredDescriptorName);
         AppDescriptor remoteDescriptor = obtainRemoteDescriptor(requiredDescriptorName);
 

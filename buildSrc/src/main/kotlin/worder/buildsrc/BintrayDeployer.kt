@@ -72,7 +72,7 @@ class BintrayDeployer(
             throw IOException("BintrayAPI response code - ${response.statusCode()}: \n${response.body()}")
     }
 
-    override fun removeFile(path: String) {
+    override fun deleteFile(path: String) {
         require(!path.startsWith("/")) {
             "You can't use absolute path here, passed value: $path"
         }

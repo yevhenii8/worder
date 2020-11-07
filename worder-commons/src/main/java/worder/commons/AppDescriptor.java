@@ -10,20 +10,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class AppDescriptor implements Serializable {
-    private static final SerializationUtil<AppDescriptor> serializator = new SerializationUtil<>();
-    transient private List<Artifact> allArtifacts;
-    private final String name = "WorderAppDescriptor-" + System.getProperty("os.name");
+    private static final SerializationUtils<AppDescriptor> serializator = new SerializationUtils<>();
     private final String generated = LocalDateTime.now().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM));
-
+    private final String name = obtainNameForCurrentOS();
     private final String appVersion;
     private final String appMainClass;
     private final String usedModules;
     private final List<String> envArguments;
-    private final List<Artifact> modulePath;
-    private final List<Artifact> classPath;
-    private final long version;
+    private final List<Artifact> artifacts;
 
 
     private AppDescriptor(
@@ -31,35 +28,57 @@ public class AppDescriptor implements Serializable {
             String appMainClass,
             String usedModules,
             List<String> envArguments,
-            List<Path> modulePath,
-            List<Path> classPath,
-            long version
+            List<Artifact> artifacts
     ) {
         this.appVersion = appVersion;
         this.appMainClass = appMainClass;
         this.usedModules = usedModules;
         this.envArguments = envArguments;
-        this.modulePath = modulePath.stream().map(Artifact::new).collect(Collectors.toList());
-        this.classPath = classPath.stream().map(Artifact::new).collect(Collectors.toList());
-        this.version = version;
+        this.artifacts = artifacts;
     }
 
 
-    public List<Artifact> getModulePath() {
-        return modulePath;
-    }
-
-    public List<Artifact> getClassPath() {
-        return classPath;
-    }
-
-    public List<Artifact> getAllArtifacts() {
-        if (allArtifacts == null) {
-            allArtifacts = new ArrayList<>(classPath);
-            allArtifacts.addAll(modulePath);
+    public static AppDescriptor fromByteArray(byte[] bytes) {
+        try {
+            return serializator.deserialize(bytes);
+        } catch (IOException | ClassNotFoundException exception) {
+            exception.printStackTrace();
         }
 
-        return allArtifacts;
+        return null;
+    }
+
+    public static String obtainNameForCurrentOS() {
+        return "WorderAppDescriptor-" + System.getProperty("os.name");
+    }
+
+
+    public String getGenerated() {
+        return generated;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getAppVersion() {
+        return appVersion;
+    }
+
+    public String getAppMainClass() {
+        return appMainClass;
+    }
+
+    public String getUsedModules() {
+        return usedModules;
+    }
+
+    public List<String> getEnvArguments() {
+        return envArguments;
+    }
+
+    public List<Artifact> getArtifacts() {
+        return artifacts;
     }
 
     public byte[] toByteArray() {
@@ -72,23 +91,46 @@ public class AppDescriptor implements Serializable {
         return null;
     }
 
-    public String getName() {
-        return name;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        AppDescriptor that = (AppDescriptor) o;
+
+        if (!generated.equals(that.generated)) return false;
+        if (!name.equals(that.name)) return false;
+        if (!appVersion.equals(that.appVersion)) return false;
+        if (!appMainClass.equals(that.appMainClass)) return false;
+        if (!usedModules.equals(that.usedModules)) return false;
+        if (!envArguments.equals(that.envArguments)) return false;
+        return artifacts.equals(that.artifacts);
     }
 
-    public long getVersion() {
-        return version;
+    @Override
+    public int hashCode() {
+        int result = generated.hashCode();
+        result = 31 * result + name.hashCode();
+        result = 31 * result + appVersion.hashCode();
+        result = 31 * result + appMainClass.hashCode();
+        result = 31 * result + usedModules.hashCode();
+        result = 31 * result + envArguments.hashCode();
+        result = 31 * result + artifacts.hashCode();
+        return result;
     }
 
 
     public static class Artifact implements Serializable {
         transient private final Path pathToFile;
         private final String name;
+        private final Type type;
 
 
-        Artifact(Path pathToFile) {
+        private Artifact(Path pathToFile, Type type) {
             this.pathToFile = pathToFile;
             this.name = pathToFile.getFileName().toString();
+            this.type = type;
         }
 
 
@@ -100,6 +142,10 @@ public class AppDescriptor implements Serializable {
             return name;
         }
 
+        public Type getType() {
+            return type;
+        }
+
 
         @Override
         public boolean equals(Object o) {
@@ -108,12 +154,20 @@ public class AppDescriptor implements Serializable {
 
             Artifact artifact = (Artifact) o;
 
-            return name.equals(artifact.name);
+            if (!name.equals(artifact.name)) return false;
+            return type == artifact.type;
         }
 
         @Override
         public int hashCode() {
-            return name.hashCode();
+            int result = name.hashCode();
+            result = 31 * result + type.hashCode();
+            return result;
+        }
+
+
+        public enum Type {
+            CLASSPATH, MODULEPATH
         }
     }
 
@@ -122,9 +176,8 @@ public class AppDescriptor implements Serializable {
         private String appMainClass;
         private String usedModules;
         private List<String> envArguments;
-        private List<Path> modulePath;
         private List<Path> classPath;
-        private Long version;
+        private List<Path> modulePath;
 
 
         public AppDescriptor build() {
@@ -132,18 +185,21 @@ public class AppDescriptor implements Serializable {
             Objects.requireNonNull(appMainClass, "'appMainClass' should be specified!");
             Objects.requireNonNull(usedModules, "'usedModules' should be specified!");
             Objects.requireNonNull(envArguments, "'envArguments' should be specified!");
-            Objects.requireNonNull(modulePath, "'modulePath' should be specified!");
             Objects.requireNonNull(classPath, "'classPath' should be specified!");
-            Objects.requireNonNull(version, "'version' should be specified!");
+            Objects.requireNonNull(modulePath, "'modulePath' should be specified!");
+
+            var artifacts = Stream.concat(
+                    classPath.stream().map(it -> new Artifact(it, Artifact.Type.CLASSPATH)),
+                    modulePath.stream().map(it -> new Artifact(it, Artifact.Type.MODULEPATH))
+            ).collect(Collectors.toList());
+
 
             return new AppDescriptor(
                     appVersion,
                     appMainClass,
                     usedModules,
                     envArguments,
-                    modulePath,
-                    classPath,
-                    version
+                    artifacts
             );
         }
 
@@ -177,25 +233,5 @@ public class AppDescriptor implements Serializable {
             this.classPath = classPath;
             return this;
         }
-
-        public Builder version(Long version) {
-            this.version = version;
-            return this;
-        }
-    }
-
-
-    public static AppDescriptor fromByteArray(byte[] bytes) {
-        try {
-            return serializator.deserialize(bytes);
-        } catch (IOException | ClassNotFoundException exception) {
-            exception.printStackTrace();
-        }
-
-        return null;
-    }
-
-    public static String getCalculatedName() {
-        return "WorderAppDescriptor-" + System.getProperty("os.name");
     }
 }

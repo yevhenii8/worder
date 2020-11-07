@@ -17,8 +17,32 @@ open class DeployAppTask : DefaultTask() {
     @Suppress("MemberVisibilityCanBePrivate")
     lateinit var deployer: AppDeployer
 
-    @Option(description = "Run the task in the Transit mode. Use when updating a descriptor structure.")
-    var onlyDescriptor = false
+    @Option(description = "Use this option when AppDescriptor structure changes.")
+    var removeAllDescriptors = false
+
+
+    val gradleLogger = logger
+    val loggingDeployer = object : AppDeployer {
+        override fun listCatalog(path: String): List<String> {
+            gradleLogger.info("Requesting '$path' ...")
+            return deployer.listCatalog(path)
+        }
+
+        override fun downloadFile(path: String): ByteArray {
+            gradleLogger.info("Downloading '$path' ...")
+            return deployer.downloadFile(path)
+        }
+
+        override fun uploadFile(path: String, byteArray: ByteArray, override: Boolean) {
+            gradleLogger.info("Uploading ${if (override) "updated " else ""}'$path' ...")
+            deployer.uploadFile(path, byteArray, override)
+        }
+
+        override fun deleteFile(path: String) {
+            gradleLogger.info("Deleting '$path' ...")
+            deployer.deleteFile(path)
+        }
+    }
 
 
     init {
@@ -36,60 +60,64 @@ open class DeployAppTask : DefaultTask() {
             "Please make sure you have specified deployer object!"
         }
 
-        val gradleLogger = logger
-        val execTask = project.tasks.findByName(ApplicationPlugin.TASK_RUN_NAME) as JavaExec
-        val appArtifacts = (project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as Jar).outputs.files.files.map { it.toPath() }
         val projectPath = project.projectDir.absolutePath
+        val execTask = project.tasks.findByName(ApplicationPlugin.TASK_RUN_NAME) as JavaExec
         val allJvmArgs = execTask.allJvmArgs
 
-        val modulePath = findOption(allJvmArgs, "--module-path")
+        val worderFiles = (project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as Jar).outputs.files.files
+                .map { it.toPath() }
+        val modulePathFiles = findOption(allJvmArgs, "--module-path")
                 .split(":")
                 .filterNot { it.startsWith(projectPath) }
                 .map { Path.of(it) }
-        val classPath = execTask.classpath
+        val classPathFiles = execTask.classpath
                 .map { it.toPath() }
-                .filterNot { it.startsWith(projectPath) || modulePath.contains(it) }
+                .filterNot { it.toString().startsWith(projectPath) || modulePathFiles.contains(it) }
 
-        with(deployer) {
-            gradleLogger.info("Deploying to $this has been started!")
 
-            val remoteDescriptors = listCatalog()
+        with(if (gradleLogger.isInfoEnabled) loggingDeployer else deployer) {
+            val remoteDescriptorNames = listCatalog()
                     .filter { it.startsWith("WorderAppDescriptor-") }
-                    .map { AppDescriptor.fromByteArray(downloadFile(it)) }
-            val previousDescriptor = remoteDescriptors.find { it.name == AppDescriptor.getCalculatedName() }
-            val remoteArtifacts = remoteDescriptors
-                    .flatMap { it.allArtifacts }
-                    .groupBy({ it.name }, { 1 })
-                    .mapValues { it.value.size }
-                    .toMutableMap()
+                    .toMutableSet()
+
+            if (removeAllDescriptors) {
+                remoteDescriptorNames.removeAll {
+                    deleteFile(it)
+                    true
+                }
+            }
+
             val newDescriptor = AppDescriptor.Builder()
                     .appVersion(project.version.toString())
                     .appMainClass(execTask.mainClass.get())
                     .usedModules(findOption(execTask.allJvmArgs, "--add-modules"))
                     .envArguments(allJvmArgs.filter { it.startsWith("-D") })
-                    .modulePath(modulePath)
-                    .classPath(classPath + appArtifacts)
-                    .version(previousDescriptor?.version?.plus(1) ?: 1)
+                    .modulePath(modulePathFiles)
+                    .classPath(classPathFiles + worderFiles)
                     .build()
 
-            newDescriptor.allArtifacts.forEach {
-                if (!remoteArtifacts.contains(it.name)) {
-                    gradleLogger.info("Uploading ${it.name}")
-                    uploadFile("artifacts/${it.name}", Files.readAllBytes(it.pathToFile))
-                }
-            }
-
-            previousDescriptor?.let { previous: AppDescriptor ->
-                (previous.allArtifacts subtract newDescriptor.allArtifacts).forEach {
-                    if (remoteArtifacts[it.name]!! - 1 == 0) {
-                        gradleLogger.info("Removing ${it.name}")
-                        removeFile("artifacts/${it.name}")
-                    }
-                }
-            }
-
-            gradleLogger.info("Uploading${previousDescriptor?.let { " updated " } ?: " "}${newDescriptor.name}")
             uploadFile(newDescriptor.name, newDescriptor.toByteArray(), override = true)
+            remoteDescriptorNames.remove(newDescriptor.name)
+
+            val actualRemoteDescriptors = remoteDescriptorNames.map { AppDescriptor.fromByteArray(downloadFile(it)) } + newDescriptor
+            val actualArtifacts = listCatalog("artifacts").associateTo(mutableMapOf()) { it to 0 }
+
+            actualRemoteDescriptors
+                    .flatMap { it.artifacts }
+                    .forEach {
+                        actualArtifacts.compute(it.name) { _, v ->
+                            if (v == null) {
+                                uploadFile("artifacts/${it.name}", Files.readAllBytes(it.pathToFile))
+                                1
+                            } else {
+                                v + 1
+                            }
+                        }
+                    }
+
+            actualArtifacts
+                    .filter { it.value == 0 }
+                    .forEach { deleteFile("artifacts/${it.key}") }
         }
     }
 
