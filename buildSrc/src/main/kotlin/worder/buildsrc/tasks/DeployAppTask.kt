@@ -8,40 +8,40 @@ import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
 import org.gradle.jvm.tasks.Jar
-import worder.buildsrc.AppDeployer
 import worder.commons.AppDescriptor
+import worder.commons.IOExchanger
 import java.nio.file.Files
 import java.nio.file.Path
 
 @Suppress("LeakingThis")
 open class DeployAppTask : DefaultTask() {
     @Suppress("MemberVisibilityCanBePrivate")
-    lateinit var deployer: AppDeployer
+    lateinit var deployExchanger: IOExchanger
 
     @Option(description = "Use this option when AppDescriptor structure changes.")
     var removeAllDescriptors = false
 
 
     private val gradleLogger: Logger = logger
-    private val loggingDeployer: AppDeployer = object : AppDeployer {
+    private val loggingDeployExchanger: IOExchanger = object : IOExchanger {
         override fun listCatalog(path: String): List<String> {
             gradleLogger.info("Requesting '$path' ...")
-            return deployer.listCatalog(path)
+            return deployExchanger.listCatalog(path)
         }
 
         override fun downloadFile(path: String): ByteArray {
             gradleLogger.info("Downloading '$path' ...")
-            return deployer.downloadFile(path)
+            return deployExchanger.downloadFile(path)
         }
 
         override fun uploadFile(path: String, byteArray: ByteArray, override: Boolean) {
             gradleLogger.info("Uploading ${if (override) "updated " else ""}'$path' ...")
-            deployer.uploadFile(path, byteArray, override)
+            deployExchanger.uploadFile(path, byteArray, override)
         }
 
         override fun deleteFile(path: String) {
             gradleLogger.info("Deleting '$path' ...")
-            deployer.deleteFile(path)
+            deployExchanger.deleteFile(path)
         }
     }
 
@@ -57,7 +57,7 @@ open class DeployAppTask : DefaultTask() {
 
     @TaskAction
     fun execute() {
-        require(this::deployer.isInitialized) {
+        require(this::deployExchanger.isInitialized) {
             "Please make sure you have specified deployer object!"
         }
 
@@ -76,8 +76,8 @@ open class DeployAppTask : DefaultTask() {
                 .filterNot { it.toString().startsWith(projectPath) || modulePathFiles.contains(it) }
 
 
-        with(if (gradleLogger.isInfoEnabled) loggingDeployer else deployer) {
-            val remoteDescriptorNames = listCatalog()
+        with(if (gradleLogger.isInfoEnabled) loggingDeployExchanger else deployExchanger) {
+            val remoteDescriptorNames = listCatalog("") ?: emptyList<String>()
                     .filter { it.startsWith("WorderAppDescriptor-") }
                     .toMutableSet()
 
@@ -97,7 +97,7 @@ open class DeployAppTask : DefaultTask() {
                     .classPath(classPathFiles + worderFiles)
                     .build()
 
-            uploadFile(newDescriptor.name, newDescriptor.toByteArray(), override = true)
+            uploadFile(newDescriptor.name, newDescriptor.toByteArray(), true)
             remoteDescriptorNames.remove(newDescriptor.name)
 
             val actualRemoteDescriptors = remoteDescriptorNames.map { AppDescriptor.fromByteArray(downloadFile(it)) } + newDescriptor
@@ -108,7 +108,7 @@ open class DeployAppTask : DefaultTask() {
                     .forEach {
                         actualArtifacts.compute(it.name) { _, v ->
                             if (v == null) {
-                                uploadFile("artifacts/${it.name}", Files.readAllBytes(it.pathToFile))
+                                uploadFile("artifacts/${it.name}", Files.readAllBytes(it.pathToFile), false)
                                 1
                             } else {
                                 v + 1

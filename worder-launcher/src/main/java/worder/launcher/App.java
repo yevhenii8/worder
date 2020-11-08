@@ -4,23 +4,20 @@
  *
  * Name: <App.java>
  * Created: <04/08/2020, 07:03:59 PM>
- * Modified: <08/11/2020, 06:24:23 PM>
- * Version: <330>
+ * Modified: <08/11/2020, 06:45:47 PM>
+ * Version: <334>
  */
 
 package worder.launcher;
 
-import worder.launcher.model.Action;
+import worder.commons.IOExchanger;
+import worder.commons.impl.BintrayExchanger;
+import worder.commons.impl.LocalExchanger;
 import worder.launcher.model.DescriptorsHandler;
-import worder.launcher.model.IOExchanger;
-import worder.launcher.model.impl.LocalIOExchanger;
-import worder.launcher.model.impl.RemoteIOExchanger;
 import worder.launcher.ui.UiHandler;
 import worder.launcher.ui.impl.swing.SwingUI;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.file.Path;
 import java.util.Arrays;
 
@@ -29,7 +26,7 @@ public class App {
     private static IOExchanger worderHome;
 
 
-    public static void main(String[] args) throws IOException, ClassNotFoundException {
+    public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
         processArguments(args);
         initDefaults();
 
@@ -46,33 +43,45 @@ public class App {
     }
 
 
-    private static void initDefaults() throws MalformedURLException {
+    private static void initDefaults() {
         if (worderDistribution == null)
-            worderDistribution = new RemoteIOExchanger(new URL("https://dl.bintray.com/evgen8/generic"));
+            worderDistribution = new BintrayExchanger("evgen8", "generic");
         if (worderHome == null)
-            worderHome = new LocalIOExchanger(Path.of(detectWorderHome()));
+            worderHome = new LocalExchanger(Path.of(detectWorderHome()));
     }
 
     private static void processArguments(String[] args) {
         for (String argument : args) {
             var index = argument.indexOf("=");
-            var argumentName = argument.substring(0, index);
+            var argumentName = index > 0 ? argument.substring(0, index) : argument;
             var launcherArgument = Arrays.stream(LauncherArgument.values())
                     .filter(it -> it.name.equals(argumentName))
                     .findFirst()
                     .orElseThrow();
 
             launcherArgument.value = argument.substring(index + 1);
-            launcherArgument.action.execute();
+            launcherArgument.action.run();
         }
     }
 
     private static void setCustomWorderHome() {
-        worderHome = new LocalIOExchanger(Path.of(LauncherArgument.WORDER_HOME.value));
+        worderHome = new LocalExchanger(Path.of(LauncherArgument.WORDER_HOME.value));
     }
 
     private static void setCustomWorderDistribution() {
-        worderDistribution = new LocalIOExchanger(Path.of(LauncherArgument.WORDER_DISTRIBUTION.value));
+        worderDistribution = new LocalExchanger(Path.of(LauncherArgument.WORDER_DISTRIBUTION.value));
+    }
+
+    private static void printHelpAndExit() {
+        var maxLength = Arrays.stream(LauncherArgument.values())
+                .mapToInt(argument -> argument.name.length())
+                .max()
+                .orElseThrow();
+
+        for (LauncherArgument argument : LauncherArgument.values())
+            System.out.println(argument.name + " ".repeat(maxLength - argument.name.length() + 3) + argument.description);
+
+        System.exit(0);
     }
 
     private static String detectWorderHome() {
@@ -87,6 +96,11 @@ public class App {
 
 
     enum LauncherArgument {
+        HELP(
+                "--help",
+                "Prints all possible arguments and exits.",
+                App::printHelpAndExit
+        ),
         WORDER_HOME(
                 "--worder-home",
                 "Sets specified path as a Worder Home Catalog.",
@@ -101,11 +115,11 @@ public class App {
 
         private final String name;
         private final String description;
-        private final Action action;
+        private final Runnable action;
         private String value;
 
 
-        LauncherArgument(String name, String description, Action action) {
+        LauncherArgument(String name, String description, Runnable action) {
             this.name = name;
             this.description = description;
             this.action = action;

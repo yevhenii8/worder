@@ -1,7 +1,6 @@
 package worder.commons;
 
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -12,7 +11,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class AppDescriptor implements Serializable {
-    private static final SerializationUtils<AppDescriptor> serializator = new SerializationUtils<>();
     private final String generated = LocalDateTime.now().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM));
     private final String name = obtainNameForCurrentOS();
     private final String appVersion;
@@ -41,7 +39,12 @@ public class AppDescriptor implements Serializable {
         if (bytes == null)
             return null;
 
-        return serializator.deserialize(bytes);
+        ByteArrayInputStream input = new ByteArrayInputStream(bytes);
+        ObjectInputStream ois = new ObjectInputStream(input);
+        AppDescriptor obj = (AppDescriptor) ois.readObject();
+        ois.close();
+
+        return obj;
     }
 
     public static String obtainNameForCurrentOS() {
@@ -77,14 +80,13 @@ public class AppDescriptor implements Serializable {
         return artifacts;
     }
 
-    public byte[] toByteArray() {
-        try {
-            return serializator.serialize(this);
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
-        }
+    public byte[] toByteArray() throws IOException {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(output);
+        oos.writeObject(this);
+        output.close();
 
-        return null;
+        return output.toByteArray();
     }
 
 

@@ -1,10 +1,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import worder.buildsrc.tasks.DeployAppTask
 import worder.buildsrc.tasks.UpdateFileStampsTask
 import worder.buildsrc.tasks.UpdateVersionTask
-import worder.buildsrc.tasks.DeployAppTask
-import worder.buildsrc.FileSystemDeployer
-import worder.buildsrc.BintrayDeployer
-import java.nio.file.Path
+import worder.commons.impl.BintrayExchanger
+import worder.commons.impl.LocalExchanger
 
 version = "1.0.115-SNAPSHOT"
 
@@ -64,16 +63,16 @@ tasks {
         }
     }
     deployBintrayTask.apply {
-        deployer = BintrayDeployer(
-                bintrayUser = project.properties["bintrayUser"] as String,
-                bintrayKey = project.properties["bintrayKey"] as String,
-                repository = "generic",
-                `package` = "worder-gui",
-                version = "Latest"
+        deployExchanger = BintrayExchanger(
+                project.properties["bintrayUser"] as String,
+                project.properties["bintrayKey"] as String,
+                "generic",
+                "worder-gui",
+                "Latest"
         )
     }
     deployLocalTask.apply {
-        deployer = FileSystemDeployer(projectDir.toPath().resolve("WorderLocalDistribution"))
+        deployExchanger = LocalExchanger(projectDir.toPath().resolve("WorderLocalDistribution"))
     }
 
 
@@ -90,11 +89,17 @@ tasks {
 
 
     register("devTest") {
-        println(project.projectDir)
-        println(project.rootDir)
-        println(projectDir)
-        println(rootDir)
-//
+        doFirst {
+            val bintrayExchanger = BintrayExchanger("evgen8", "generic")
+            val rootListing = bintrayExchanger.listCatalog("")
+
+            if (rootListing != null)
+                rootListing.forEach { println(it) }
+            else
+                println(null)
+        }
+
+
 //        dependsOn(project.tasks.getByName("configJavafxRun"))
 //        dependsOn(project.tasks.getByName(JavaPlugin.JAR_TASK_NAME))
 //

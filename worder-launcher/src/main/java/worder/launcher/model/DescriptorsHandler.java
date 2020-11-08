@@ -4,13 +4,14 @@
  *
  * Name: <DescriptorsHandler.java>
  * Created: <28/10/2020, 10:50:39 PM>
- * Modified: <08/11/2020, 06:24:23 PM>
- * Version: <160>
+ * Modified: <08/11/2020, 06:45:47 PM>
+ * Version: <164>
  */
 
 package worder.launcher.model;
 
 import worder.commons.AppDescriptor;
+import worder.commons.IOExchanger;
 import worder.launcher.ui.UiHandler;
 
 import java.io.IOException;
@@ -34,7 +35,7 @@ public class DescriptorsHandler {
     }
 
 
-    public void prepareWorderHome() throws IOException, ClassNotFoundException {
+    public void prepareWorderHome() throws IOException, ClassNotFoundException, InterruptedException {
         uiHandler.status("Obtaining local & remote descriptors ...");
 
         String requiredDescriptorName = AppDescriptor.obtainNameForCurrentOS();
@@ -49,7 +50,7 @@ public class DescriptorsHandler {
     }
 
 
-    private void syncWorderHome(AppDescriptor distributionDescriptor, byte[] distributionDescriptorRaw) throws IOException {
+    private void syncWorderHome(AppDescriptor distributionDescriptor, byte[] distributionDescriptorRaw) throws IOException, InterruptedException {
         List<String> actualArtifactNames = worderHome.listCatalog("artifacts");
         Map<String, Integer> actualArtifacts = Objects.requireNonNullElse(actualArtifactNames, Collections.<String>emptyList())
                 .stream()

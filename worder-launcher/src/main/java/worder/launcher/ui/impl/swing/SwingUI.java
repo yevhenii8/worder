@@ -4,8 +4,8 @@
  *
  * Name: <SwingUI.java>
  * Created: <28/10/2020, 05:53:10 PM>
- * Modified: <08/11/2020, 06:24:23 PM>
- * Version: <190>
+ * Modified: <08/11/2020, 06:45:47 PM>
+ * Version: <194>
  */
 
 package worder.launcher.ui.impl.swing;
@@ -27,16 +27,6 @@ public class SwingUI implements UiHandler {
 
 
     public SwingUI() {
-        Thread.setDefaultUncaughtExceptionHandler(
-                (t, e) -> {
-                    var bytes = new ByteArrayOutputStream();
-                    e.printStackTrace(new PrintStream(bytes));
-                    e.printStackTrace();
-                    error(bytes.toString());
-                    System.exit(1);
-                }
-        );
-
         BufferedImage worderIcon = null;
         BufferedImage closeIcon = null;
         BufferedImage githubIcon = null;
@@ -78,10 +68,21 @@ public class SwingUI implements UiHandler {
     }
 
     public void show() {
+        Thread.setDefaultUncaughtExceptionHandler(
+                (t, e) -> {
+                    var bytes = new ByteArrayOutputStream();
+                    e.printStackTrace(new PrintStream(bytes));
+                    e.printStackTrace();
+                    error(bytes.toString());
+                    System.exit(1);
+                }
+        );
+
         frame.setVisible(true);
     }
 
     public void dispose() {
+        Thread.setDefaultUncaughtExceptionHandler(null);
         frame.dispose();
     }
 
