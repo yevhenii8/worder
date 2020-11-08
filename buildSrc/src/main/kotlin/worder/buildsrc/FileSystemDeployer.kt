@@ -1,12 +1,13 @@
 package worder.buildsrc
 
-import java.io.File
 import java.io.IOException
+import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.streams.toList
 
 class FileSystemDeployer(rootPath: Path) : AppDeployer {
-    private val rootAsFile: File = rootPath.toFile().also {
-        it.mkdirs()
+    private val root: Path by lazy {
+        Files.createDirectories(rootPath)
     }
 
 
@@ -15,7 +16,7 @@ class FileSystemDeployer(rootPath: Path) : AppDeployer {
             "You can't use absolute path here, passed value: $path"
         }
 
-        return rootAsFile.resolve(path).list()?.toList() ?: emptyList()
+        return Files.list(root.resolve(path)).map { it.toString() }.toList()
     }
 
     override fun downloadFile(path: String): ByteArray {
@@ -23,7 +24,7 @@ class FileSystemDeployer(rootPath: Path) : AppDeployer {
             "You can't use absolute path here, passed value: $path"
         }
 
-        return rootAsFile.resolve(path).readBytes()
+        return Files.readAllBytes(root.resolve(path))
     }
 
     override fun uploadFile(path: String, byteArray: ByteArray, override: Boolean) {
@@ -31,12 +32,12 @@ class FileSystemDeployer(rootPath: Path) : AppDeployer {
             "You can't use absolute path here, passed value: $path"
         }
 
-        val pathToUpload = rootAsFile.resolve(path)
-        if (!override && pathToUpload.exists())
+        val pathToUpload = root.resolve(path)
+        if (!override && Files.exists(pathToUpload))
             throw IOException("File already exists!")
 
-        rootAsFile.resolve(path.substringBeforeLast("/", "")).mkdirs()
-        pathToUpload.writeBytes(byteArray)
+        Files.createDirectories(root.resolve(path.substringBeforeLast("/", "")))
+        Files.write(pathToUpload, byteArray)
     }
 
     override fun deleteFile(path: String) {
@@ -44,8 +45,8 @@ class FileSystemDeployer(rootPath: Path) : AppDeployer {
             "You can't use absolute path here, passed value: $path"
         }
 
-        rootAsFile.resolve(path).deleteRecursively()
+        Files.delete(root.resolve(path))
     }
 
-    override fun toString(): String = "${javaClass.simpleName}($rootAsFile)"
+    override fun toString(): String = "${javaClass.simpleName}($root)"
 }

@@ -4,15 +4,13 @@
  *
  * Name: <Action.java>
  * Created: <05/11/2020, 08:36:34 PM>
- * Modified: <07/11/2020, 07:54:00 PM>
- * Version: <35>
+ * Modified: <08/11/2020, 06:24:23 PM>
+ * Version: <66>
  */
 
 package worder.launcher.model;
 
-import java.net.MalformedURLException;
-
 @FunctionalInterface
 public interface Action {
-    void execute() throws MalformedURLException;
+    void execute();
 }

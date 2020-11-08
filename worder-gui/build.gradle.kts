@@ -73,7 +73,7 @@ tasks {
         )
     }
     deployLocalTask.apply {
-        deployer = FileSystemDeployer(rootDir.toPath().resolve("WorderLocalDistribution"))
+        deployer = FileSystemDeployer(projectDir.toPath().resolve("WorderLocalDistribution"))
     }
 
 

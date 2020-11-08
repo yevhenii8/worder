@@ -4,51 +4,56 @@
  *
  * Name: <App.java>
  * Created: <04/08/2020, 07:03:59 PM>
- * Modified: <07/11/2020, 07:54:00 PM>
- * Version: <299>
+ * Modified: <08/11/2020, 06:24:23 PM>
+ * Version: <330>
  */
 
 package worder.launcher;
 
 import worder.launcher.model.Action;
 import worder.launcher.model.DescriptorsHandler;
-import worder.launcher.model.WorderRunner;
-import worder.launcher.ui.SwingUI;
+import worder.launcher.model.IOExchanger;
+import worder.launcher.model.impl.LocalIOExchanger;
+import worder.launcher.model.impl.RemoteIOExchanger;
 import worder.launcher.ui.UiHandler;
+import worder.launcher.ui.impl.swing.SwingUI;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.Arrays;
 
 public class App {
-    private static boolean useLocalDistribution;
-    private static URL remoteWorderDistribution;
-    private static Path localWorderDistribution;
-    private static Path worderHome;
+    private static IOExchanger worderDistribution;
+    private static IOExchanger worderHome;
 
 
-    public static void main(String[] args) throws MalformedURLException {
-        initDefaults();
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
         processArguments(args);
+        initDefaults();
 
         UiHandler uiHandler = new SwingUI();
         uiHandler.show();
 
-//        DescriptorsHandler descriptorsHandler = new DescriptorsHandler(uiHandler);
-//        descriptorsHandler.prepareWorderHome();
+        DescriptorsHandler descriptorsHandler = new DescriptorsHandler(uiHandler, worderDistribution, worderHome);
+        descriptorsHandler.prepareWorderHome();
 //
 //        WorderRunner worderRunner = new WorderRunner(uiHandler, descriptorsHandler.getWorderHomePath());
 //        worderRunner.runWorder();
+
+        uiHandler.dispose();
     }
 
 
     private static void initDefaults() throws MalformedURLException {
-        remoteWorderDistribution = new URL("https://dl.bintray.com/evgen8/generic");
-        worderHome = Path.of(detectWorderHome());
+        if (worderDistribution == null)
+            worderDistribution = new RemoteIOExchanger(new URL("https://dl.bintray.com/evgen8/generic"));
+        if (worderHome == null)
+            worderHome = new LocalIOExchanger(Path.of(detectWorderHome()));
     }
 
-    private static void processArguments(String[] args) throws MalformedURLException {
+    private static void processArguments(String[] args) {
         for (String argument : args) {
             var index = argument.indexOf("=");
             var argumentName = argument.substring(0, index);
@@ -63,12 +68,11 @@ public class App {
     }
 
     private static void setCustomWorderHome() {
-        worderHome = Path.of(LauncherArgument.WORDER_DISTRIBUTION.value);
+        worderHome = new LocalIOExchanger(Path.of(LauncherArgument.WORDER_HOME.value));
     }
 
     private static void setCustomWorderDistribution() {
-        localWorderDistribution = Path.of(LauncherArgument.WORDER_DISTRIBUTION.value);
-        useLocalDistribution = true;
+        worderDistribution = new LocalIOExchanger(Path.of(LauncherArgument.WORDER_DISTRIBUTION.value));
     }
 
     private static String detectWorderHome() {

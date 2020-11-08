@@ -4,25 +4,39 @@
  *
  * Name: <SwingUI.java>
  * Created: <28/10/2020, 05:53:10 PM>
- * Modified: <07/11/2020, 07:54:00 PM>
- * Version: <159>
+ * Modified: <08/11/2020, 06:24:23 PM>
+ * Version: <190>
  */
 
-package worder.launcher.ui;
+package worder.launcher.ui.impl.swing;
+
+import worder.launcher.ui.UiHandler;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 
 public class SwingUI implements UiHandler {
+    private final JFrame frame;
     private JLabel progress;
-    private JFrame frame;
     private long lastProgressUpdate = 0L;
 
 
     public SwingUI() {
+        Thread.setDefaultUncaughtExceptionHandler(
+                (t, e) -> {
+                    var bytes = new ByteArrayOutputStream();
+                    e.printStackTrace(new PrintStream(bytes));
+                    e.printStackTrace();
+                    error(bytes.toString());
+                    System.exit(1);
+                }
+        );
+
         BufferedImage worderIcon = null;
         BufferedImage closeIcon = null;
         BufferedImage githubIcon = null;
@@ -59,9 +73,8 @@ public class SwingUI implements UiHandler {
     }
 
     @Override
-    public void criticalError(String message) {
-        JOptionPane.showMessageDialog(new JFrame(), message, "Critical error", JOptionPane.ERROR_MESSAGE);
-        System.exit(1);
+    public void error(String message) {
+        JOptionPane.showMessageDialog(new JFrame(), message, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
     public void show() {

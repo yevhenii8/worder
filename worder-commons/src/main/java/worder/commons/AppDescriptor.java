@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -38,14 +37,11 @@ public class AppDescriptor implements Serializable {
     }
 
 
-    public static AppDescriptor fromByteArray(byte[] bytes) {
-        try {
-            return serializator.deserialize(bytes);
-        } catch (IOException | ClassNotFoundException exception) {
-            exception.printStackTrace();
-        }
+    public static AppDescriptor fromByteArray(byte[] bytes) throws IOException, ClassNotFoundException {
+        if (bytes == null)
+            return null;
 
-        return null;
+        return serializator.deserialize(bytes);
     }
 
     public static String obtainNameForCurrentOS() {
