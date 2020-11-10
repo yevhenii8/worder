@@ -1,10 +1,13 @@
 package worder.commons;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 
 public interface IOExchanger {
-    List<String> listCatalog(String path) throws IOException;
+    List<String> listAsStrings(String path) throws IOException;
+
+    List<URL> listAsUrls(String path) throws IOException;
 
     byte[] downloadFile(String path) throws IOException;
 

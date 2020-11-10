@@ -5,7 +5,7 @@ import worder.buildsrc.tasks.UpdateVersionTask
 import worder.commons.impl.BintrayExchanger
 import worder.commons.impl.LocalExchanger
 
-version = "1.0.115-SNAPSHOT"
+version = "1.0.117-SNAPSHOT"
 
 plugins {
     application
@@ -89,29 +89,18 @@ tasks {
 
 
     register("devTest") {
-        doFirst {
-            val bintrayExchanger = BintrayExchanger("evgen8", "generic")
-            val rootListing = bintrayExchanger.listCatalog("")
+        dependsOn(project.tasks.getByName("configJavafxRun"))
+        dependsOn(project.tasks.getByName(JavaPlugin.JAR_TASK_NAME))
 
-            if (rootListing != null)
-                rootListing.forEach { println(it) }
-            else
-                println(null)
+        doLast {
+            val execTask = project.tasks.findByName(ApplicationPlugin.TASK_RUN_NAME) as JavaExec
+            val jarTask = project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as org.gradle.jvm.tasks.Jar
+
+            println(execTask.allJvmArgs)
+            println()
+            println(execTask.classpath.files)
+            println()
+            println(execTask.jvmArgs)
         }
-
-
-//        dependsOn(project.tasks.getByName("configJavafxRun"))
-//        dependsOn(project.tasks.getByName(JavaPlugin.JAR_TASK_NAME))
-//
-//        doLast {
-//            val execTask = project.tasks.findByName(ApplicationPlugin.TASK_RUN_NAME) as JavaExec
-//            val jarTask = project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as org.gradle.jvm.tasks.Jar
-//
-//            println(execTask.allJvmArgs)
-//            println()
-//            println(execTask.classpath.files)
-//            println()
-//            println(execTask.jvmArgs)
-//        }
     }
 }

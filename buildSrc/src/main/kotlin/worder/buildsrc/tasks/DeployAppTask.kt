@@ -10,6 +10,7 @@ import org.gradle.api.tasks.options.Option
 import org.gradle.jvm.tasks.Jar
 import worder.commons.AppDescriptor
 import worder.commons.IOExchanger
+import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -24,9 +25,14 @@ open class DeployAppTask : DefaultTask() {
 
     private val gradleLogger: Logger = logger
     private val loggingDeployExchanger: IOExchanger = object : IOExchanger {
-        override fun listCatalog(path: String): List<String> {
+        override fun listAsStrings(path: String): List<String> {
             gradleLogger.info("Requesting '$path' ...")
-            return deployExchanger.listCatalog(path)
+            return deployExchanger.listAsStrings(path)
+        }
+
+        override fun listAsUrls(path: String): List<URL> {
+            gradleLogger.info("Requesting '$path' ...")
+            return deployExchanger.listAsUrls(path)
         }
 
         override fun downloadFile(path: String): ByteArray {
@@ -77,7 +83,7 @@ open class DeployAppTask : DefaultTask() {
 
 
         with(if (gradleLogger.isInfoEnabled) loggingDeployExchanger else deployExchanger) {
-            val remoteDescriptorNames = listCatalog("") ?: emptyList<String>()
+            val remoteDescriptorNames = (listAsStrings("") ?: emptyList<String>())
                     .filter { it.startsWith("WorderAppDescriptor-") }
                     .toMutableSet()
 
@@ -101,7 +107,7 @@ open class DeployAppTask : DefaultTask() {
             remoteDescriptorNames.remove(newDescriptor.name)
 
             val actualRemoteDescriptors = remoteDescriptorNames.map { AppDescriptor.fromByteArray(downloadFile(it)) } + newDescriptor
-            val actualArtifacts = listCatalog("artifacts").associateWithTo(mutableMapOf()) { 0 }
+            val actualArtifacts = listAsStrings("artifacts").associateWithTo(mutableMapOf()) { 0 }
 
             actualRemoteDescriptors
                     .flatMap { it.artifacts }

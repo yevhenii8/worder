@@ -4,8 +4,8 @@
  *
  * Name: <SwingUI.java>
  * Created: <28/10/2020, 05:53:10 PM>
- * Modified: <08/11/2020, 06:45:47 PM>
- * Version: <194>
+ * Modified: <10/11/2020, 11:38:33 PM>
+ * Version: <278>
  */
 
 package worder.launcher.ui.impl.swing;
@@ -81,9 +81,16 @@ public class SwingUI implements UiHandler {
         frame.setVisible(true);
     }
 
-    public void dispose() {
-        Thread.setDefaultUncaughtExceptionHandler(null);
-        frame.dispose();
+    public void dispose(long delay) {
+        SwingUtilities.invokeLater(() -> {
+            try {
+                Thread.sleep(delay);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            Thread.setDefaultUncaughtExceptionHandler(null);
+            frame.dispose();
+        });
     }
 
 

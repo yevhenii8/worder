@@ -3,8 +3,10 @@ package worder.commons.impl;
 import worder.commons.IOExchanger;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,18 +20,35 @@ public class LocalExchanger implements IOExchanger {
 
 
     @Override
-    public List<String> listCatalog(String path) throws IOException {
+    public List<String> listAsStrings(String path) throws IOException {
         if (path.startsWith("/"))
             throw new IllegalArgumentException("You can't use absolute path here, passed value: " + path);
 
         var requiredPath = root.resolve(path);
-
         if (Files.notExists(requiredPath))
             return null;
 
         return Files.list(requiredPath)
                 .map(it -> it.getFileName().toString())
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<URL> listAsUrls(String path) throws IOException {
+        if (path.startsWith("/"))
+            throw new IllegalArgumentException("You can't use absolute path here, passed value: " + path);
+
+        var requiredPath = root.resolve(path);
+        if (Files.notExists(requiredPath))
+            return null;
+
+        var files = Files.list(requiredPath).toArray(Path[]::new);
+        var res = new ArrayList<URL>(files.length);
+
+        for (Path file : files)
+            res.add(file.toUri().toURL());
+
+        return res;
     }
 
     @Override
@@ -65,5 +84,12 @@ public class LocalExchanger implements IOExchanger {
             throw new IllegalArgumentException("You can't use absolute path here, passed value: " + path);
 
         Files.delete(root.resolve(path));
+    }
+
+    @Override
+    public String toString() {
+        return "LocalExchanger{" +
+                "root=" + root +
+                '}';
     }
 }

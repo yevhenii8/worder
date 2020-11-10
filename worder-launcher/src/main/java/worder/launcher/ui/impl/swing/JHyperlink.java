@@ -4,8 +4,8 @@
  *
  * Name: <JHyperlink.java>
  * Created: <27/10/2020, 05:20:42 PM>
- * Modified: <08/11/2020, 06:45:47 PM>
- * Version: <295>
+ * Modified: <10/11/2020, 11:38:33 PM>
+ * Version: <379>
  */
 
 package worder.launcher.ui.impl.swing;

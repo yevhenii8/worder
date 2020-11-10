@@ -4,8 +4,8 @@
  *
  * Name: <AppEntry.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <05/11/2020, 10:16:27 PM>
- * Version: <121>
+ * Modified: <10/11/2020, 10:24:05 PM>
+ * Version: <123>
  */
 
 package worder.gui

@@ -4,8 +4,8 @@
  *
  * Name: <DescriptorsHandler.java>
  * Created: <28/10/2020, 10:50:39 PM>
- * Modified: <08/11/2020, 06:45:47 PM>
- * Version: <164>
+ * Modified: <10/11/2020, 11:38:33 PM>
+ * Version: <248>
  */
 
 package worder.launcher.model;
@@ -26,6 +26,7 @@ public class DescriptorsHandler {
     private final IOExchanger worderDistribution;
     private final IOExchanger worderHome;
     private final UiHandler uiHandler;
+    private AppDescriptor homeDescriptor;
 
 
     public DescriptorsHandler(UiHandler uiHandler, IOExchanger worderDistribution, IOExchanger worderHome) {
@@ -45,13 +46,19 @@ public class DescriptorsHandler {
 
         if (localDescriptor == null && distributionDescriptor == null)
             throw new IllegalStateException("Neither local nor distribution descriptor is accessible!");
-        if (localDescriptor == null || !localDescriptor.equals(distributionDescriptor))
+        if (distributionDescriptor != null && (localDescriptor == null || !localDescriptor.equals(distributionDescriptor)))
             syncWorderHome(distributionDescriptor, distributionDescriptorRaw);
+
+        homeDescriptor = localDescriptor;
+    }
+
+    public AppDescriptor getHomeDescriptor() {
+        return homeDescriptor;
     }
 
 
     private void syncWorderHome(AppDescriptor distributionDescriptor, byte[] distributionDescriptorRaw) throws IOException, InterruptedException {
-        List<String> actualArtifactNames = worderHome.listCatalog("artifacts");
+        List<String> actualArtifactNames = worderHome.listAsStrings("artifacts");
         Map<String, Integer> actualArtifacts = Objects.requireNonNullElse(actualArtifactNames, Collections.<String>emptyList())
                 .stream()
                 .collect(Collectors.toMap(Function.identity(), __ -> -1));

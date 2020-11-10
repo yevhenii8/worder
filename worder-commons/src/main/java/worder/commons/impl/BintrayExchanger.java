@@ -47,18 +47,11 @@ public class BintrayExchanger implements IOExchanger {
 
 
     @Override
-    public List<String> listCatalog(String path) throws IOException {
-        if (path.startsWith("/"))
-            throw new IllegalArgumentException("You can't use absolute path here, passed value: " + path);
+    public List<String> listAsStrings(String path) throws IOException {
+        byte[] bytes = downloadBytes(path);
 
-        byte[] bytes;
-        try {
-            var inputStream = new URL(downstream + path).openStream();
-            bytes = inputStream.readAllBytes();
-            inputStream.close();
-        } catch (FileNotFoundException exception) {
+        if (bytes == null)
             return null;
-        }
 
         return new String(bytes)
                 .lines()
@@ -68,15 +61,13 @@ public class BintrayExchanger implements IOExchanger {
     }
 
     @Override
+    public List<URL> listAsUrls(String path) {
+        throw new IllegalStateException("Not implemented for BintrayExchanger.Class");
+    }
+
+    @Override
     public byte[] downloadFile(String path) throws IOException {
-        if (path.startsWith("/"))
-            throw new IllegalArgumentException("You can't use absolute path here, passed value: " + path);
-
-        var inputStream = new URL(downstream + path).openStream();
-        var res = inputStream.readAllBytes();
-        inputStream.close();
-
-        return res;
+        return downloadBytes(path);
     }
 
     @Override
@@ -109,5 +100,29 @@ public class BintrayExchanger implements IOExchanger {
 
         if (response.statusCode() != 200)
             throw new IOException("BintrayAPI response code - " + response.statusCode() + ": \n" + response.body());
+    }
+
+    @Override
+    public String toString() {
+        return "BintrayExchanger{" +
+                "downstream='" + downstream + '\'' +
+                ", upstream='" + upstream + '\'' +
+                ", api='" + api + '\'' +
+                '}';
+    }
+
+
+    private byte[] downloadBytes(String path) throws IOException {
+        if (path.startsWith("/"))
+            throw new IllegalArgumentException("You can't use absolute path here, passed value: " + path);
+
+        try {
+            var inputStream = new URL(downstream + path).openStream();
+            byte[] bytes = inputStream.readAllBytes();
+            inputStream.close();
+            return bytes;
+        } catch (FileNotFoundException exception) {
+            return null;
+        }
     }
 }

@@ -4,87 +4,100 @@
  *
  * Name: <WorderRunner.java>
  * Created: <05/11/2020, 08:36:34 PM>
- * Modified: <08/11/2020, 06:45:47 PM>
- * Version: <70>
+ * Modified: <10/11/2020, 11:38:33 PM>
+ * Version: <154>
  */
 
 package worder.launcher.model;
 
+import worder.commons.AppDescriptor;
+import worder.commons.IOExchanger;
 import worder.launcher.App;
 import worder.launcher.ui.UiHandler;
 
-import javax.swing.*;
-import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Path;
-import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class WorderRunner {
-    public static RunningType defaultRunningType = RunningType.IN_PLACE;
+    private static final long UI_DISPOSE_DELAY = 1500;
+    private final RunningType runningType;
     private final UiHandler uiHandler;
-    private final Path worderHomeCatalog;
+    private final AppDescriptor descriptor;
+    private final List<URL> artifactUrls;
 
 
-    public WorderRunner(UiHandler uiHandler, Path worderHomeCatalog) {
+    public WorderRunner(UiHandler uiHandler, IOExchanger worderHome, AppDescriptor descriptor, RunningType runningType) throws Exception {
         this.uiHandler = uiHandler;
-        this.worderHomeCatalog = worderHomeCatalog;
+        this.runningType = runningType;
+        this.descriptor = descriptor;
+        this.artifactUrls = worderHome.listAsUrls("artifacts");
     }
 
 
-    public static void setDefaultRunningType(RunningType defaultRunningType) {
-        WorderRunner.defaultRunningType = defaultRunningType;
-    }
+    public void runWorder() throws Exception {
+        uiHandler.status("Running Worder " + runningType + " ...");
 
-    public void runWorder() {
-        uiHandler.status("Running worder ...");
-
-        switch (defaultRunningType) {
+        switch (runningType) {
             case IN_PLACE -> runInPlace();
-            case SEPARATE_PID -> runSeparated();
+            case SEPARATED -> runSeparated();
         }
     }
 
 
-    private void runInPlace() {
-        URL[] urls = Arrays.stream(Objects.requireNonNull(worderHomeCatalog.resolve("artifacts").toFile().listFiles()))
-                .map(file -> {
-                    try {
-                        return file.toURI().toURL();
-                    } catch (MalformedURLException e) {
-                        e.printStackTrace();
-                    }
+    private void runInPlace() throws Exception {
+        var loader = URLClassLoader.newInstance(artifactUrls.toArray(URL[]::new), App.class.getClassLoader());
+        var mainClass = Class.forName("worder.gui.AppEntry", false, loader);
+        var mainMethod = mainClass.getMethod("launch", Class.class, String[].class);
+
+        uiHandler.dispose(UI_DISPOSE_DELAY);
+
+        Thread.currentThread().setContextClassLoader(loader);
+        mainMethod.invoke(null, mainClass, new String[0]);
+    }
+
+    private void runSeparated() throws Exception {
+        var artifactPaths = artifactUrls.stream().map(URL::toString).collect(Collectors.toList());
+        var modulePath = findArtifactsOfType(artifactPaths, AppDescriptor.Artifact.Type.MODULEPATH);
+        var classPath = findArtifactsOfType(artifactPaths, AppDescriptor.Artifact.Type.CLASSPATH);
+
+        var worderCommand = new LinkedList<String>();
+        worderCommand.add("java");
+        worderCommand.add("--add-modules");
+        worderCommand.add(descriptor.getUsedModules());
+        worderCommand.add("--module-path");
+        worderCommand.add(String.join(":", modulePath));
+        worderCommand.addAll(descriptor.getEnvArguments());
+        worderCommand.add("--class-path");
+        worderCommand.add(String.join(":", classPath));
+        worderCommand.add(descriptor.getAppMainClass());
+
+        uiHandler.dispose(UI_DISPOSE_DELAY);
+
+        new ProcessBuilder()
+                .command(worderCommand)
+                .start();
+    }
+
+    private List<String> findArtifactsOfType(List<String> artifactPaths, AppDescriptor.Artifact.Type type) {
+        return descriptor.getArtifacts().stream()
+                .filter(it -> it.getType() == type)
+                .map(it -> {
+                    for (String path : artifactPaths)
+                        if (path.endsWith(it.getName()))
+                            return path;
+
                     return null;
                 })
-                .toArray(URL[]::new);
-
-        ClassLoader loader = URLClassLoader.newInstance(urls, App.class.getClassLoader());
-        try {
-            Thread.currentThread().setContextClassLoader(loader);
-            Class<?> mainClass = Class.forName("worder.gui.AppEntry", false, loader);
-            var method = mainClass.getMethod("launch", Class.class, String[].class);
-            SwingUtilities.invokeLater(() -> {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                uiHandler.dispose();
-            });
-            method.invoke(null, mainClass, new String[0]);
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void runSeparated() {
-
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
 
     public enum RunningType {
-        IN_PLACE, SEPARATE_PID
+        IN_PLACE, SEPARATED
     }
 }
