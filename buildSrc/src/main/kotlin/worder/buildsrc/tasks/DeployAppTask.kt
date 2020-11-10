@@ -107,7 +107,7 @@ open class DeployAppTask : DefaultTask() {
             remoteDescriptorNames.remove(newDescriptor.name)
 
             val actualRemoteDescriptors = remoteDescriptorNames.map { AppDescriptor.fromByteArray(downloadFile(it)) } + newDescriptor
-            val actualArtifacts = listAsStrings("artifacts").associateWithTo(mutableMapOf()) { 0 }
+            val actualArtifacts = (listAsStrings("artifacts") ?: emptyList()).associateWithTo(mutableMapOf()) { 0 }
 
             actualRemoteDescriptors
                     .flatMap { it.artifacts }

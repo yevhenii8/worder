@@ -4,8 +4,8 @@
  *
  * Name: <DescriptorsHandler.java>
  * Created: <28/10/2020, 10:50:39 PM>
- * Modified: <10/11/2020, 11:38:33 PM>
- * Version: <248>
+ * Modified: <11/11/2020, 12:53:29 AM>
+ * Version: <253>
  */
 
 package worder.launcher.model;
@@ -15,6 +15,7 @@ import worder.commons.IOExchanger;
 import worder.launcher.ui.UiHandler;
 
 import java.io.IOException;
+import java.io.InvalidClassException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -42,14 +43,23 @@ public class DescriptorsHandler {
         String requiredDescriptorName = AppDescriptor.obtainNameForCurrentOS();
         byte[] distributionDescriptorRaw = worderDistribution.downloadFile(requiredDescriptorName);
         AppDescriptor distributionDescriptor = AppDescriptor.fromByteArray(distributionDescriptorRaw);
-        AppDescriptor localDescriptor = AppDescriptor.fromByteArray(worderHome.downloadFile(requiredDescriptorName));
+        AppDescriptor localDescriptor;
+
+        try {
+            localDescriptor = AppDescriptor.fromByteArray(worderHome.downloadFile(requiredDescriptorName));
+        } catch (InvalidClassException exception) {
+            localDescriptor = null;
+        }
 
         if (localDescriptor == null && distributionDescriptor == null)
             throw new IllegalStateException("Neither local nor distribution descriptor is accessible!");
-        if (distributionDescriptor != null && (localDescriptor == null || !localDescriptor.equals(distributionDescriptor)))
-            syncWorderHome(distributionDescriptor, distributionDescriptorRaw);
 
-        homeDescriptor = localDescriptor;
+        if (distributionDescriptor != null && (localDescriptor == null || !localDescriptor.equals(distributionDescriptor))) {
+            syncWorderHome(distributionDescriptor, distributionDescriptorRaw);
+            homeDescriptor = distributionDescriptor;
+        } else {
+            homeDescriptor = localDescriptor;
+        }
     }
 
     public AppDescriptor getHomeDescriptor() {
