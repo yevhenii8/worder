@@ -4,8 +4,8 @@
  *
  * Name: <WorderRunner.java>
  * Created: <05/11/2020, 08:36:34 PM>
- * Modified: <11/11/2020, 12:53:29 AM>
- * Version: <159>
+ * Modified: <11/11/2020, 07:30:24 PM>
+ * Version: <169>
  */
 
 package worder.launcher.model;
@@ -17,6 +17,7 @@ import worder.launcher.ui.UiHandler;
 
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -28,13 +29,21 @@ public class WorderRunner {
     private final UiHandler uiHandler;
     private final AppDescriptor descriptor;
     private final List<URL> artifactUrls;
+    private final String worderArgs;
 
 
-    public WorderRunner(UiHandler uiHandler, IOExchanger worderHome, AppDescriptor descriptor, RunningType runningType) throws Exception {
+    public WorderRunner(
+            UiHandler uiHandler,
+            IOExchanger worderHome,
+            AppDescriptor descriptor,
+            RunningType runningType,
+            String worderArgs
+    ) throws Exception {
         this.uiHandler = uiHandler;
         this.runningType = runningType;
         this.descriptor = descriptor;
         this.artifactUrls = worderHome.listAsUrls("artifacts");
+        this.worderArgs = worderArgs;
     }
 
 
@@ -56,7 +65,7 @@ public class WorderRunner {
         uiHandler.dispose(UI_DISPOSE_DELAY);
 
         Thread.currentThread().setContextClassLoader(loader);
-        mainMethod.invoke(null, mainClass, new String[0]);
+        mainMethod.invoke(null, mainClass, worderArgs == null ? new String[0] : worderArgs.split(" "));
     }
 
     private void runSeparated() throws Exception {
@@ -75,10 +84,14 @@ public class WorderRunner {
         worderCommand.add(String.join(":", classPath));
         worderCommand.add(descriptor.getAppMainClass());
 
+        if (worderArgs != null)
+            worderCommand.addAll(Arrays.asList(worderArgs.split(" ")));
+
         uiHandler.dispose(UI_DISPOSE_DELAY);
 
         new ProcessBuilder()
                 .command(worderCommand)
+                .inheritIO()
                 .start();
     }
 

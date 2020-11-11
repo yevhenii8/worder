@@ -122,7 +122,7 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomSt
                 .associateWith { str -> WorderArgument.values().find { it.value == str } }
 
         require(mappedArgs.all { it.value != null }) {
-            "Unexpected argument(s) has been passed! ${mappedArgs.filterValues { it == null }.keys}"
+            "Unexpected argument(s): ${mappedArgs.filterValues { it == null }.keys}"
         }
 
         mappedArgs.apply {

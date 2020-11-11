@@ -4,8 +4,8 @@
  *
  * Name: <App.java>
  * Created: <04/08/2020, 07:03:59 PM>
- * Modified: <11/11/2020, 12:53:29 AM>
- * Version: <423>
+ * Modified: <11/11/2020, 07:30:24 PM>
+ * Version: <433>
  */
 
 package worder.launcher;
@@ -29,6 +29,7 @@ public class App {
     private static IOExchanger worderDistribution = new BintrayExchanger("evgen8", "generic");
     private static IOExchanger worderHome = new LocalExchanger(Path.of(detectWorderHome()));
     private static WorderRunner.RunningType runningType = WorderRunner.RunningType.IN_PLACE;
+    private static String worderArgs = null;
 
 
     public static void main(String[] args) throws Exception {
@@ -40,7 +41,7 @@ public class App {
         DescriptorsHandler descriptorsHandler = new DescriptorsHandler(uiHandler, worderDistribution, worderHome);
         descriptorsHandler.prepareWorderHome();
 
-        WorderRunner worderRunner = new WorderRunner(uiHandler, worderHome, descriptorsHandler.getHomeDescriptor(), runningType);
+        WorderRunner worderRunner = new WorderRunner(uiHandler, worderHome, descriptorsHandler.getHomeDescriptor(), runningType, worderArgs);
         worderRunner.runWorder();
     }
 
@@ -69,6 +70,10 @@ public class App {
 
     private static void setSeparatedRunning() {
         runningType = WorderRunner.RunningType.SEPARATED;
+    }
+
+    private static void setWorderArgs() {
+        worderArgs = LauncherArgument.ARGS.value;
     }
 
     private static void printHelp() {
@@ -145,7 +150,7 @@ public class App {
         System.out.println(descriptor.getName());
         System.out.println();
         values.forEach((k, v) -> System.out.println("    " + k + ":  " + " ".repeat(maxLength - k.length()) + v));
-        
+
         System.out.println();
         System.out.println("    Module Path Artifacts:");
         for (int i = 0; i < modulePath.length; i++)
@@ -175,6 +180,11 @@ public class App {
                 "--help",
                 "Prints all possible arguments and exits.",
                 App::printHelp
+        ),
+        ARGS(
+                "--args",
+                "Passes its value to Worder as arguments.",
+                App::setWorderArgs
         ),
         PRINT_DISTRIBUTION_DESCRIPTORS(
                 "--print-distribution-descriptors",
