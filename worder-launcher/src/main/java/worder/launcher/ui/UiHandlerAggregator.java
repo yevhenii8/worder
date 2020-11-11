@@ -4,8 +4,8 @@
  *
  * Name: <UiHandlerAggregator.java>
  * Created: <11/11/2020, 08:24:43 PM>
- * Modified: <11/11/2020, 08:25:17 PM>
- * Version: <2>
+ * Modified: <11/11/2020, 08:35:25 PM>
+ * Version: <3>
  */
 
 package worder.launcher.ui;
