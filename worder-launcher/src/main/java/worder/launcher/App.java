@@ -4,8 +4,8 @@
  *
  * Name: <App.java>
  * Created: <04/08/2020, 07:03:59 PM>
- * Modified: <11/11/2020, 09:46:07 PM>
- * Version: <437>
+ * Modified: <11/11/2020, 10:02:10 PM>
+ * Version: <441>
  */
 
 package worder.launcher;
@@ -21,15 +21,18 @@ import worder.launcher.ui.UiHandlerAggregator;
 import worder.launcher.ui.impl.console.ConsoleUI;
 import worder.launcher.ui.impl.swing.SwingUI;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class App {
+    private static final String worderHomeString = DescriptorsHandler.detectWorderHome();
     private static IOExchanger worderDistribution = new BintrayExchanger("evgen8", "generic");
-    private static IOExchanger worderHome = new LocalExchanger(Path.of(DescriptorsHandler.detectWorderHome()));
+    private static IOExchanger worderHome = new LocalExchanger(Path.of(worderHomeString));
     private static WorderRunner.RunningType runningType = WorderRunner.RunningType.IN_PLACE;
     private static String worderArgs = null;
 
@@ -37,7 +40,10 @@ public class App {
     public static void main(String[] args) throws Exception {
         processArguments(args);
 
-        UiHandler uiHandler = new UiHandlerAggregator(new SwingUI(), new ConsoleUI());
+        UiHandler uiHandler = new UiHandlerAggregator(
+                new SwingUI(),
+                new ConsoleUI(new PrintStream(worderHomeString + "worder-launcher.log"))
+        );
         uiHandler.show();
 
         DescriptorsHandler descriptorsHandler = new DescriptorsHandler(uiHandler, worderDistribution, worderHome);
