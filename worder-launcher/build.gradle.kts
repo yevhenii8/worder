@@ -1,6 +1,10 @@
 import org.gradle.jvm.tasks.Jar
 import worder.buildsrc.tasks.UpdateFileStampsTask
 
+
+version = "1.0"
+
+
 plugins {
     application
     java
@@ -33,24 +37,30 @@ tasks {
     }
 
 
-    register("package") {
-        doFirst {
-            val jarFile = jar.get().outputs.files.singleFile
-            val executableType = when (val currentOs = System.getProperty("os.name")) {
-                "Linux" -> "deb"
-                else -> throw IllegalStateException("There's no support of Worder-Launcher for your OS: $currentOs")
-            }
+    register<Exec>("package") {
+        dependsOn(jar)
 
-            ProcessBuilder()
-                    .command(
-                            "jpackage",
-                            "--input", jarFile.absolutePath,
-                            "--name", "WorderLauncher",
-                            "--main-jar", jarFile.name,
-                            "--type", executableType
-                    )
-                    .inheritIO()
-                    .start()
+        val jarFile = jar.get().outputs.files.singleFile
+
+        when (val currentOs = System.getProperty("os.name")) {
+            "Linux" -> {
+                commandLine(
+                        "bash", "-c",
+                        "jpackage" +
+                                " --input '${jarFile.parent}'" +
+                                " --name WorderLauncher" +
+                                " --main-jar ${jarFile.name}" +
+                                " --type deb" +
+                                " --app-version '${project.version}'" +
+                                " --copyright '© 2019-2020 Yevhenii Nadtochii No Rights Reserved'" +
+                                " --description 'Launcher with auto-update for Worder GUI'" +
+                                " --dest 'build/executables'" +
+                                " --icon 'build/resources/main/icons/worder-icon_512x512.png'" +
+                                " --linux-deb-maintainer yevhenii.nadtochii@gmail.com" +
+                                " --linux-shortcut"
+                )
+            }
+            else -> throw IllegalStateException("There's no support for native build of WorderLauncher for your OS: $currentOs")
         }
     }
 }
