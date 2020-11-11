@@ -4,8 +4,8 @@
  *
  * Name: <App.java>
  * Created: <04/08/2020, 07:03:59 PM>
- * Modified: <11/11/2020, 07:30:24 PM>
- * Version: <433>
+ * Modified: <11/11/2020, 08:25:17 PM>
+ * Version: <435>
  */
 
 package worder.launcher;
@@ -17,6 +17,8 @@ import worder.commons.impl.LocalExchanger;
 import worder.launcher.model.DescriptorsHandler;
 import worder.launcher.model.WorderRunner;
 import worder.launcher.ui.UiHandler;
+import worder.launcher.ui.UiHandlerAggregator;
+import worder.launcher.ui.impl.console.ConsoleUI;
 import worder.launcher.ui.impl.swing.SwingUI;
 
 import java.io.IOException;
@@ -27,7 +29,7 @@ import java.util.Map;
 
 public class App {
     private static IOExchanger worderDistribution = new BintrayExchanger("evgen8", "generic");
-    private static IOExchanger worderHome = new LocalExchanger(Path.of(detectWorderHome()));
+    private static IOExchanger worderHome = new LocalExchanger(Path.of(DescriptorsHandler.detectWorderHome()));
     private static WorderRunner.RunningType runningType = WorderRunner.RunningType.IN_PLACE;
     private static String worderArgs = null;
 
@@ -35,7 +37,7 @@ public class App {
     public static void main(String[] args) throws Exception {
         processArguments(args);
 
-        UiHandler uiHandler = new SwingUI();
+        UiHandler uiHandler = new UiHandlerAggregator(new SwingUI(), new ConsoleUI());
         uiHandler.show();
 
         DescriptorsHandler descriptorsHandler = new DescriptorsHandler(uiHandler, worderDistribution, worderHome);
@@ -162,16 +164,6 @@ public class App {
             System.out.println("        " + (i + 1) + ") " + classPath[i].getName());
 
         System.exit(0);
-    }
-
-    private static String detectWorderHome() {
-        var currentOs = System.getProperty("os.name");
-        var userHomeCatalog = System.getProperty("user.home");
-
-        if (currentOs.equals("Linux"))
-            return userHomeCatalog + "/.worder-gui/";
-
-        throw new IllegalStateException("There's no support of Worder-Launcher for your OS: " + currentOs);
     }
 
 

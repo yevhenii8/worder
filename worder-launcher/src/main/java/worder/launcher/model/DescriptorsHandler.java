@@ -4,8 +4,8 @@
  *
  * Name: <DescriptorsHandler.java>
  * Created: <28/10/2020, 10:50:39 PM>
- * Modified: <11/11/2020, 07:30:24 PM>
- * Version: <263>
+ * Modified: <11/11/2020, 08:25:17 PM>
+ * Version: <265>
  */
 
 package worder.launcher.model;
@@ -34,6 +34,17 @@ public class DescriptorsHandler {
         this.worderDistribution = worderDistribution;
         this.worderHome = worderHome;
         this.uiHandler = uiHandler;
+    }
+
+
+    public static String detectWorderHome() {
+        var currentOs = System.getProperty("os.name");
+        var userHomeCatalog = System.getProperty("user.home");
+
+        if (currentOs.equals("Linux"))
+            return userHomeCatalog + "/.worder-gui/";
+
+        throw new IllegalStateException("There's no support of Worder-Launcher for your OS: " + currentOs);
     }
 
 

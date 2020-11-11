@@ -4,8 +4,8 @@
  *
  * Name: <SwingUI.java>
  * Created: <28/10/2020, 05:53:10 PM>
- * Modified: <11/11/2020, 07:30:24 PM>
- * Version: <293>
+ * Modified: <11/11/2020, 08:25:17 PM>
+ * Version: <295>
  */
 
 package worder.launcher.ui.impl.swing;
