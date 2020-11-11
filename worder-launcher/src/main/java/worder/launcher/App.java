@@ -78,7 +78,7 @@ public class App {
                 .orElseThrow();
 
         for (LauncherArgument argument : LauncherArgument.values())
-            System.out.println(argument.name + " ".repeat(maxLength - argument.name.length() + 3) + argument.description);
+            System.out.println(argument.name + "   ".repeat(maxLength - argument.name.length()) + argument.description);
 
         System.exit(0);
     }

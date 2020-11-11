@@ -4,8 +4,8 @@
  *
  * Name: <AppEntry.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <10/11/2020, 10:24:05 PM>
- * Version: <123>
+ * Modified: <11/11/2020, 07:12:15 PM>
+ * Version: <129>
  */
 
 package worder.gui
@@ -21,6 +21,7 @@ import worder.gui.database.DatabaseController
 import worder.gui.insert.InsertTabView
 import java.io.File
 import java.nio.file.Path
+import kotlin.system.exitProcess
 
 class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomStyles::class) {
     companion object {
@@ -58,8 +59,6 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomSt
         }
 
 
-        fun runDevSample() = withSampleDB { }
-
         fun runDevInsert() = withSampleDB {
             mainView.switchToInsertTab()
             find<InsertTabView>().generateInsertBatch(devInsertFiles)
@@ -83,6 +82,17 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomSt
         fun runDevDebug() {
             println("Used JRE: ${Runtime.version()}")
             println("Used KotlinC: ${KotlinVersion.CURRENT}")
+        }
+
+        fun printHelpAndExit() {
+            val arguments = WorderArgument.values()
+            val maxLen = arguments.map { it.value.length }.max()!!
+
+            arguments.forEach {
+                println("${it.value}   " + " ".repeat(maxLen - it.value.length) + it.description)
+            }
+
+            exitProcess(0)
         }
     }
 
@@ -109,7 +119,7 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomSt
 
     private fun processArguments() {
         val mappedArgs = FX.application.parameters.raw
-                .associateWith { WorderArgument.fromString(it) }
+                .associateWith { str -> WorderArgument.values().find { it.value == str } }
 
         require(mappedArgs.all { it.value != null }) {
             "Unexpected argument(s) has been passed! ${mappedArgs.filterValues { it == null }.keys}"
@@ -123,24 +133,13 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomSt
     }
 
 
-    @Suppress("unused")
     enum class WorderArgument(val value: String, val description: String, val action: () -> Unit) {
-        DEV_DEBUG("--dev-debug", "Prints some debug info to connected terminal.", AppEntry.Companion::runDevDebug),
-        DEV_DATABASE("--dev-sample", "Automatically connects to the sampleDB.", AppEntry.Companion::runDevSample),
+        HELP("--help", "Prints all possible worder arguments and exits.", AppEntry.Companion::printHelpAndExit),
+        DEV_DEBUG("--dev-debug", "Prints additional info (JRE, KotlinC) when app starts.", AppEntry.Companion::runDevDebug),
+        DEV_DATABASE("--dev-sample", "Automatically connects to the sampleDB.", { withSampleDB { } }),
         DEV_DATABASE_KEEP("--dev-sample-keep", "Automatically connects to the sampleDB and does NOT remove it on exit.", { withSampleDB { keepSample = true } }),
         DEV_INSERT("--dev-insert", "Development stage for the Insert Tab.", AppEntry.Companion::runDevInsert),
         DEV_INSERT_HARD("--dev-insert-hard", "Development stage for the Insert Tab with hard load.", AppEntry.Companion::runDevInsertHard),
         DEV_UPDATE("--dev-update", "Development stage for the Update Tab.", AppEntry.Companion::runDevUpdate);
-
-
-        companion object {
-            fun fromString(value: String): WorderArgument? {
-                for (worderArgument in values())
-                    if (worderArgument.value == value)
-                        return worderArgument
-
-                return null
-            }
-        }
     }
 }
