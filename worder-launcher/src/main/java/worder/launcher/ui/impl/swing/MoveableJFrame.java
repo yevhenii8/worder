@@ -4,8 +4,8 @@
  *
  * Name: <MoveableJFrame.java>
  * Created: <27/10/2020, 08:51:08 PM>
- * Modified: <11/11/2020, 10:02:10 PM>
- * Version: <315>
+ * Modified: <12/11/2020, 10:48:52 PM>
+ * Version: <484>
  */
 
 package worder.launcher.ui.impl.swing;

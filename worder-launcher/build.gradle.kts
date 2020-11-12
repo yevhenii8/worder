@@ -1,8 +1,9 @@
 import org.gradle.jvm.tasks.Jar
 import worder.buildsrc.tasks.UpdateFileStampsTask
+import worder.buildsrc.tasks.UpdateVersionTask
 
 
-version = "1.0"
+version = "1.0.147-SNAPSHOT"
 
 
 plugins {
@@ -20,10 +21,13 @@ application {
 
 tasks {
     val updateFileStampsTask by register<UpdateFileStampsTask>("updateFileStamps")
+    val updateVersionTask by register<UpdateVersionTask>("updateVersion")
+    val makeExecutableTask by register<Exec>("makeExecutable")
 
 
     with(compileJava.get()) {
         dependsOn(updateFileStampsTask)
+        dependsOn(updateVersionTask)
     }
     withType<UpdateFileStampsTask> {
         sourcesDir = projectDir.resolve("src")
@@ -36,8 +40,13 @@ tasks {
         from(configurations.compileClasspath.get().files.map { if (it.isDirectory) it else zipTree(it) })
     }
 
-
-    register<Exec>("package") {
+    gradle.taskGraph.whenReady {
+        if (hasTask(makeExecutableTask)) {
+            updateVersionTask.enabled = false
+            updateFileStampsTask.enabled = false
+        }
+    }
+    makeExecutableTask.apply {
         dependsOn(jar)
 
         val jarFile = jar.get().outputs.files.singleFile
@@ -50,14 +59,19 @@ tasks {
                                 " --input '${jarFile.parent}'" +
                                 " --name WorderLauncher" +
                                 " --main-jar ${jarFile.name}" +
-                                " --type deb" +
                                 " --app-version '${project.version}'" +
                                 " --copyright '© 2019-2020 Yevhenii Nadtochii No Rights Reserved'" +
                                 " --description 'Launcher with auto-update for Worder GUI'" +
                                 " --dest 'build/executables'" +
+                                " --vendor 'Yevhenii Nadtochii'" +
                                 " --icon 'build/resources/main/icons/worder-icon_512x512.png'" +
+
                                 " --linux-deb-maintainer yevhenii.nadtochii@gmail.com" +
-                                " --linux-shortcut"
+                                " --linux-package-name worder-launcher" +
+                                " --linux-shortcut" +
+
+                                " --verbose" +
+                                " --temp 'build/executables/linux-scripts'"
                 )
             }
             else -> throw IllegalStateException("There's no support for native build of WorderLauncher for your OS: $currentOs")

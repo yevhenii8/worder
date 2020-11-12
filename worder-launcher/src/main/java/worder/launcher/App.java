@@ -4,8 +4,8 @@
  *
  * Name: <App.java>
  * Created: <04/08/2020, 07:03:59 PM>
- * Modified: <11/11/2020, 10:02:10 PM>
- * Version: <441>
+ * Modified: <12/11/2020, 10:48:52 PM>
+ * Version: <610>
  */
 
 package worder.launcher;
@@ -14,35 +14,46 @@ import worder.commons.AppDescriptor;
 import worder.commons.IOExchanger;
 import worder.commons.impl.BintrayExchanger;
 import worder.commons.impl.LocalExchanger;
+import worder.launcher.logging.SimpleLogger;
 import worder.launcher.model.DescriptorsHandler;
 import worder.launcher.model.WorderRunner;
 import worder.launcher.ui.UiHandler;
-import worder.launcher.ui.UiHandlerAggregator;
-import worder.launcher.ui.impl.console.ConsoleUI;
+import worder.launcher.ui.UiHandlerLoggingDecorator;
 import worder.launcher.ui.impl.swing.SwingUI;
 
-import java.io.FileNotFoundException;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class App {
-    private static final String worderHomeString = DescriptorsHandler.detectWorderHome();
-    private static IOExchanger worderDistribution = new BintrayExchanger("evgen8", "generic");
-    private static IOExchanger worderHome = new LocalExchanger(Path.of(worderHomeString));
     private static WorderRunner.RunningType runningType = WorderRunner.RunningType.IN_PLACE;
+    private static IOExchanger worderDistribution = new BintrayExchanger("evgen8", "generic");
+    private static IOExchanger worderHome = new LocalExchanger(Path.of(DescriptorsHandler.detectWorderHome()));
+    private static String launcherVersion = null;
     private static String worderArgs = null;
 
 
     public static void main(String[] args) throws Exception {
+        setLauncherVersion();
         processArguments(args);
 
-        UiHandler uiHandler = new UiHandlerAggregator(
-                new SwingUI(),
-                new ConsoleUI(new PrintStream(worderHomeString + "worder-launcher.log"))
+        SimpleLogger simpleLogger = new SimpleLogger(worderDistribution, worderHome, launcherVersion, args, runningType);
+        simpleLogger.initLogging();
+
+        UiHandler uiHandler = new UiHandlerLoggingDecorator(new SwingUI(launcherVersion), simpleLogger);
+        Thread.setDefaultUncaughtExceptionHandler(
+                (t, e) -> {
+                    var bytes = new ByteArrayOutputStream();
+                    e.printStackTrace(new PrintStream(bytes));
+                    e.printStackTrace();
+                    uiHandler.error(bytes.toString());
+                    System.exit(1);
+                }
         );
         uiHandler.show();
 
@@ -61,11 +72,15 @@ public class App {
             var launcherArgument = Arrays.stream(LauncherArgument.values())
                     .filter(it -> it.name.equals(argumentName))
                     .findFirst()
-                    .orElseThrow();
+                    .orElseThrow(() -> new IllegalArgumentException("Wrong argument has been passed: " + argument));
 
             launcherArgument.value = argument.substring(index + 1);
             launcherArgument.action.run();
         }
+    }
+
+    private static void setLauncherVersion() throws IOException {
+        launcherVersion = Files.readString(Path.of(App.class.getResource("/version").getPath()));
     }
 
     private static void setCustomWorderHome() {
@@ -91,7 +106,7 @@ public class App {
                 .orElseThrow();
 
         for (LauncherArgument argument : LauncherArgument.values())
-            System.out.println(argument.name + "   ".repeat(maxLength - argument.name.length()) + argument.description);
+            System.out.println(argument.name + " ".repeat(maxLength - argument.name.length() + 3) + argument.description);
 
         System.exit(0);
     }
@@ -100,7 +115,7 @@ public class App {
         try {
             for (String name : worderDistribution.listAsStrings("")) {
                 if (name.startsWith("WorderAppDescriptor")) {
-                    AppDescriptor appDescriptor = AppDescriptor.fromByteArray(worderHome.downloadFile(name));
+                    AppDescriptor appDescriptor = AppDescriptor.fromByteArray(worderDistribution.downloadFile(name));
                     printDescriptor(appDescriptor);
                     System.out.println();
                     System.out.println();

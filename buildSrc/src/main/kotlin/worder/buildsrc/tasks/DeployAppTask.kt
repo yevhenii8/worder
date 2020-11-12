@@ -10,6 +10,7 @@ import org.gradle.api.tasks.options.Option
 import org.gradle.jvm.tasks.Jar
 import worder.commons.AppDescriptor
 import worder.commons.IOExchanger
+import java.net.URI
 import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Path
@@ -48,6 +49,11 @@ open class DeployAppTask : DefaultTask() {
         override fun deleteFile(path: String) {
             gradleLogger.info("Deleting '$path' ...")
             deployExchanger.deleteFile(path)
+        }
+
+        override fun getRootURI(): URI {
+            gradleLogger.info("Requesting root URI ...")
+            return deployExchanger.rootURI
         }
     }
 

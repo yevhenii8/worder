@@ -3,9 +3,12 @@ package worder.commons.impl;
 import worder.commons.IOExchanger;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -74,7 +77,7 @@ public class LocalExchanger implements IOExchanger {
         if (Files.exists(pathToUpload) && !override)
             throw new IllegalArgumentException("File " + path + " already exists!");
 
-        Files.createDirectories(pathToUpload.subpath(0, pathToUpload.getNameCount() - 1));
+        Files.createDirectories(pathToUpload.getParent());
         Files.write(pathToUpload, bytes);
     }
 
@@ -84,6 +87,11 @@ public class LocalExchanger implements IOExchanger {
             throw new IllegalArgumentException("You can't use absolute path here, passed value: " + path);
 
         Files.delete(root.resolve(path));
+    }
+
+    @Override
+    public URI getRootURI() {
+        return root.toUri();
     }
 
     @Override

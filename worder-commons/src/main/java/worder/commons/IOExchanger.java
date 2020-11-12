@@ -1,6 +1,8 @@
 package worder.commons;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.List;
 
@@ -14,4 +16,6 @@ public interface IOExchanger {
     void uploadFile(String path, byte[] bytes, boolean override) throws IOException, InterruptedException;
 
     void deleteFile(String path) throws IOException, InterruptedException;
+
+    URI getRootURI();
 }

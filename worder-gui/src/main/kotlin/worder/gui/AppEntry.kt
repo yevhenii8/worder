@@ -4,8 +4,8 @@
  *
  * Name: <AppEntry.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <11/11/2020, 07:12:15 PM>
- * Version: <129>
+ * Modified: <12/11/2020, 10:32:15 PM>
+ * Version: <140>
  */
 
 package worder.gui
@@ -37,7 +37,7 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomSt
                 File("$samplePath/inserting/words5.txt")
         )
 
-        val worderVersion: String by lazy { Companion::class.java.getResource("/version").readText() }
+        val worderVersion: String = Companion::class.java.getResource("/version").readText()
         val mainView: MainView = find()
         val sampleDB: File = samplePath.resolve("sample-db_TMP.bck").toFile()
         val isConnectedToSample: Boolean
@@ -82,6 +82,11 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomSt
         fun runDevDebug() {
             println("Used JRE: ${Runtime.version()}")
             println("Used KotlinC: ${KotlinVersion.CURRENT}")
+
+            println("worder classloader: ${this::class.java.classLoader}")
+            println("worder classloader name: ${this::class.java.classLoader.name}")
+            println("worder classloader parent: ${this::class.java.classLoader.parent}")
+            println("worder classloader parent name: ${this::class.java.classLoader.parent.name}")
         }
 
         fun printHelpAndExit() {

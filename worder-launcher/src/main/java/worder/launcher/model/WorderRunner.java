@@ -4,15 +4,14 @@
  *
  * Name: <WorderRunner.java>
  * Created: <05/11/2020, 08:36:34 PM>
- * Modified: <11/11/2020, 10:02:10 PM>
- * Version: <177>
+ * Modified: <12/11/2020, 10:48:52 PM>
+ * Version: <346>
  */
 
 package worder.launcher.model;
 
 import worder.commons.AppDescriptor;
 import worder.commons.IOExchanger;
-import worder.launcher.App;
 import worder.launcher.ui.UiHandler;
 
 import java.net.URL;
@@ -58,7 +57,7 @@ public class WorderRunner {
 
 
     private void runInPlace() throws Exception {
-        var loader = URLClassLoader.newInstance(artifactUrls.toArray(URL[]::new), App.class.getClassLoader());
+        var loader = new URLClassLoader(artifactUrls.toArray(URL[]::new), this.getClass().getClassLoader().getParent());
         var mainClass = Class.forName("worder.gui.AppEntry", false, loader);
         var mainMethod = mainClass.getMethod("launch", Class.class, String[].class);
 

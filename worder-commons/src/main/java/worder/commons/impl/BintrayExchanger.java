@@ -103,6 +103,11 @@ public class BintrayExchanger implements IOExchanger {
     }
 
     @Override
+    public URI getRootURI() {
+        return URI.create(downstream);
+    }
+
+    @Override
     public String toString() {
         return "BintrayExchanger{" +
                 "downstream='" + downstream + '\'' +

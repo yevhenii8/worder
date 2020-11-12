@@ -4,8 +4,8 @@
  *
  * Name: <SwingUI.java>
  * Created: <28/10/2020, 05:53:10 PM>
- * Modified: <11/11/2020, 10:02:10 PM>
- * Version: <301>
+ * Modified: <12/11/2020, 10:48:52 PM>
+ * Version: <470>
  */
 
 package worder.launcher.ui.impl.swing;
@@ -16,28 +16,21 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 
 public class SwingUI implements UiHandler {
     private final JFrame frame;
-    private JLabel progress;
+    private final String launcherVersion;
     private long lastProgressUpdate = 0L;
+    private JLabel progress;
 
 
-    public SwingUI() {
-        BufferedImage worderIcon = null;
-        BufferedImage closeIcon = null;
-        BufferedImage githubIcon = null;
+    public SwingUI(String launcherVersion) throws IOException {
+        this.launcherVersion = launcherVersion;
 
-        try {
-            worderIcon = ImageIO.read(ClassLoader.getSystemResource("icons/worder-icon_512x512.png"));
-            closeIcon = ImageIO.read(ClassLoader.getSystemResource("icons/close-icon_24x24.png"));
-            githubIcon = ImageIO.read(ClassLoader.getSystemResource("icons/github-icon_24x24.png"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        BufferedImage worderIcon = ImageIO.read(ClassLoader.getSystemResource("icons/worder-icon_512x512.png"));
+        BufferedImage closeIcon = ImageIO.read(ClassLoader.getSystemResource("icons/close-icon_24x24.png"));
+        BufferedImage githubIcon = ImageIO.read(ClassLoader.getSystemResource("icons/github-icon_24x24.png"));
 
         frame = composeFrame(worderIcon);
         frame.add(composeCloseButtonPanel(closeIcon), BorderLayout.NORTH);
@@ -68,16 +61,6 @@ public class SwingUI implements UiHandler {
     }
 
     public void show() {
-        Thread.setDefaultUncaughtExceptionHandler(
-                (t, e) -> {
-                    var bytes = new ByteArrayOutputStream();
-                    e.printStackTrace(new PrintStream(bytes));
-                    e.printStackTrace();
-                    error(bytes.toString());
-                    System.exit(1);
-                }
-        );
-
         frame.setVisible(true);
     }
 
@@ -103,11 +86,12 @@ public class SwingUI implements UiHandler {
         frame.setUndecorated(true);
         frame.setLocationRelativeTo(null);
         frame.getRootPane().setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        frame.setTitle("Worder Launcher");
 
         return frame;
     }
 
-    private JPanel composeCloseButtonPanel(Image icon) {
+    private JComponent composeCloseButtonPanel(Image icon) {
         JButton button = new JButton(new ImageIcon(icon));
         button.setBorder(BorderFactory.createEmptyBorder());
         button.setContentAreaFilled(false);
@@ -121,9 +105,9 @@ public class SwingUI implements UiHandler {
         return panel;
     }
 
-    private JPanel composeLogoAndProgressPanel() {
+    private JComponent composeLogoAndProgressPanel() {
         JLabel logo = new JLabel("Worder GUI Launcher");
-        logo.setFont(logo.getFont().deriveFont(30.0f));
+        logo.setFont(logo.getFont().deriveFont(35.0f));
 
         progress = new JLabel();
         progress.setBorder(BorderFactory.createEmptyBorder(9, 3, 40, 0));
@@ -140,12 +124,14 @@ public class SwingUI implements UiHandler {
 
     private JComponent composeCopyrightPanel(Image icon) {
         JHyperlink hyperlink = new JHyperlink(
-                "© 2019-2020 Yevhenii Nadtochii No Rights Reserved",
+                "© 2019-2020 Yevhenii Nadtochii No Rights Reserved / " + launcherVersion,
                 "https://github.com/yevhenii8/worder",
                 new ImageIcon(icon),
                 SwingConstants.CENTER
         );
         hyperlink.setFont(hyperlink.getFont().deriveFont(10.0f));
+        hyperlink.setAlignmentX(Component.CENTER_ALIGNMENT);
+
         return hyperlink;
     }
 }
