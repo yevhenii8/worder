@@ -1,7 +1,9 @@
 package worder.buildsrc
 
 import java.io.File
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -18,7 +20,7 @@ class StampedFile(
                 .replace("*", "\\*")
                 .replace("<[^<]*?_TIME>".toRegex(), "<\\\\d{2}/\\\\d{2}/\\\\d{4}, \\\\d{2}:\\\\d{2}:\\\\d{2} (AM|PM)>")
                 .replace("<[A-Z_]*?>".toRegex(), "<.*?>")
-                .toRegex()
+                .toRegex(RegexOption.UNIX_LINES)
 
         private const val pathToStampPatternTransit = "/sourceFileStampPatternTransit.txt"
         private val stampPatternTransit: String = String(this::class.java.getResourceAsStream(pathToStampPatternTransit).readBytes())
@@ -26,7 +28,7 @@ class StampedFile(
                 .replace("*", "\\*")
                 .replace("<[^<]*?_TIME>".toRegex(), "<\\\\d{2}/\\\\d{2}/\\\\d{4}, \\\\d{2}:\\\\d{2}:\\\\d{2} (AM|PM)>")
                 .replace("<[A-Z_]*?>".toRegex(), "<.*?>")
-                .toRegex()
+                .toRegex(RegexOption.UNIX_LINES)
 
         private val regexProperty = "(?<=<).*?(?=>)".toRegex()
 
@@ -73,11 +75,9 @@ class StampedFile(
             transitAction(properties)
         }
 
-        val lastFileModificationTime = LocalDateTime
-                .ofEpochSecond(sourceFile.lastModified() / 1000, 0, ZoneOffset.ofHours(3))
-                .toStampDateTime()
-        val isItNewStamp = presentStamp == null
+        val lastFileModificationTime = Instant.ofEpochMilli(sourceFile.lastModified()).atZone(ZoneId.systemDefault()).toLocalDateTime().toStampDateTime()
         val wasFileModified = lastFileModificationTime != properties[StampProperty.FILE_MODIFICATION_TIME]
+        val isItNewStamp = presentStamp == null
 
         if (isItNewStamp || wasFileModified || useTransit) {
             val who = "${javaClass.simpleName}.kt"
@@ -137,9 +137,16 @@ class StampedFile(
             false
         }
         !rawStamp.matches(regexStampPattern) -> {
-            validationResult = "Invalid stamp format occurred (doesn't correspond to the pattern)!\n" +
+            validationResult = "Invalid stamp format occurred! (doesn't correspond to the pattern)\n" +
                     "File name: $sourceFile\n" +
-                    "Pattern: $regexStampPattern"
+                    "Raw stamp:\n" +
+                    "----------------------------------------------------------------\n" +
+                    rawStamp + "\n" +
+                    "----------------------------------------------------------------\n" +
+                    "Used pattern:\n" +
+                    "----------------------------------------------------------------\n" +
+                    "$regexStampPattern" +
+                    "----------------------------------------------------------------"
             false
         }
         properties[StampProperty.FILE_NAME] != sourceFile.name -> {

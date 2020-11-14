@@ -4,8 +4,8 @@
  *
  * Name: <App.java>
  * Created: <04/08/2020, 07:03:59 PM>
- * Modified: <14/11/2020, 10:58:35 PM>
- * Version: <627>
+ * Modified: <15/11/2020, 12:04:20 AM>
+ * Version: <630>
  */
 
 package worder.launcher;
@@ -34,7 +34,7 @@ public class App {
 
 
     public static void main(String[] args) throws Exception {
-        var bytes = App.class.getResourceAsStream("/version").readAllBytes();
+        var bytes = App.class.getResourceAsStream("/version").readAllBytes();;
         String launcherVersion = new String(bytes);
 
         ArgumentsHandler argumentsHandler = new ArgumentsHandler(args);
