@@ -4,8 +4,8 @@
  *
  * Name: <SwingUI.java>
  * Created: <28/10/2020, 05:53:10 PM>
- * Modified: <12/11/2020, 10:48:52 PM>
- * Version: <470>
+ * Modified: <14/11/2020, 09:25:42 PM>
+ * Version: <475>
  */
 
 package worder.launcher.ui.impl.swing;
@@ -16,7 +16,9 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 
 public class SwingUI implements UiHandler {
     private final JFrame frame;
@@ -36,6 +38,14 @@ public class SwingUI implements UiHandler {
         frame.add(composeCloseButtonPanel(closeIcon), BorderLayout.NORTH);
         frame.add(composeLogoAndProgressPanel(), BorderLayout.CENTER);
         frame.add(composeCopyrightPanel(githubIcon), BorderLayout.SOUTH);
+
+        Thread.setDefaultUncaughtExceptionHandler((thread, exception) -> {
+                    var bytes = new ByteArrayOutputStream();
+                    exception.printStackTrace(new PrintStream(bytes));
+                    error(bytes.toString());
+                    System.exit(1);
+                }
+        );
     }
 
 
