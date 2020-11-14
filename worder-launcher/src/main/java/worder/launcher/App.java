@@ -4,8 +4,8 @@
  *
  * Name: <App.java>
  * Created: <04/08/2020, 07:03:59 PM>
- * Modified: <14/11/2020, 09:32:54 PM>
- * Version: <618>
+ * Modified: <14/11/2020, 10:13:32 PM>
+ * Version: <625>
  */
 
 package worder.launcher;
@@ -22,7 +22,6 @@ import worder.launcher.ui.UiHandlerLoggingDecorator;
 import worder.launcher.ui.impl.swing.SwingUI;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.IntStream;
@@ -35,7 +34,8 @@ public class App {
 
 
     public static void main(String[] args) throws Exception {
-        String launcherVersion = Files.readString(Path.of(App.class.getResource("/version").getPath()));
+        var bytes = App.class.getResourceAsStream("/version").readAllBytes();
+        String launcherVersion = new String(bytes);
 
         ArgumentsHandler argumentsHandler = new ArgumentsHandler(args);
         argumentsHandler.applyExecutionArguments();

@@ -3,7 +3,7 @@ import worder.buildsrc.tasks.UpdateFileStampsTask
 import worder.buildsrc.tasks.UpdateVersionTask
 
 
-version = "1.0.155-SNAPSHOT"
+version = "1.0.162-SNAPSHOT"
 
 
 plugins {
@@ -47,6 +47,7 @@ tasks {
         }
     }
     makeExecutableTask.apply {
+        dependsOn(clean)
         dependsOn(jar)
 
         val jarFile = jar.get().outputs.files.singleFile
@@ -57,10 +58,10 @@ tasks {
                         "bash", "-c",
                         "jpackage" +
                                 " --input '${jarFile.parent}'" +
-                                " --name WorderLauncher" +
+                                " --name 'Worder Launcher'" +
                                 " --main-jar ${jarFile.name}" +
                                 " --app-version '${project.version}'" +
-                                " --copyright '© 2019-2020 Yevhenii Nadtochii No Rights Reserved'" +
+                                " --copyright '© 2020 Yevhenii Nadtochii No Rights Reserved'" +
                                 " --description 'Launcher with auto-update for Worder GUI'" +
                                 " --dest 'build/executables'" +
                                 " --vendor 'Yevhenii Nadtochii'" +
@@ -68,10 +69,7 @@ tasks {
 
                                 " --linux-deb-maintainer yevhenii.nadtochii@gmail.com" +
                                 " --linux-package-name worder-launcher" +
-                                " --linux-shortcut" +
-
-                                " --verbose" +
-                                " --temp 'build/executables/linux-scripts'"
+                                " --linux-shortcut"
                 )
             }
             else -> throw IllegalStateException("There's no support for native build of WorderLauncher for your OS: $currentOs")

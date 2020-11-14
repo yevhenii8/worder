@@ -4,8 +4,8 @@
  *
  * Name: <SimpleLogger.java>
  * Created: <12/11/2020, 05:06:22 PM>
- * Modified: <14/11/2020, 09:32:54 PM>
- * Version: <152>
+ * Modified: <14/11/2020, 10:13:32 PM>
+ * Version: <159>
  */
 
 package worder.launcher.logging;

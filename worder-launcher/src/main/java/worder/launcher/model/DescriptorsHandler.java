@@ -4,8 +4,8 @@
  *
  * Name: <DescriptorsHandler.java>
  * Created: <28/10/2020, 10:50:39 PM>
- * Modified: <14/11/2020, 09:32:54 PM>
- * Version: <448>
+ * Modified: <14/11/2020, 10:13:32 PM>
+ * Version: <455>
  */
 
 package worder.launcher.model;
