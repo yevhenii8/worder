@@ -4,8 +4,8 @@
  *
  * Name: <SwingUI.java>
  * Created: <28/10/2020, 05:53:10 PM>
- * Modified: <14/11/2020, 09:25:42 PM>
- * Version: <475>
+ * Modified: <14/11/2020, 09:32:54 PM>
+ * Version: <478>
  */
 
 package worder.launcher.ui.impl.swing;
@@ -22,14 +22,11 @@ import java.io.PrintStream;
 
 public class SwingUI implements UiHandler {
     private final JFrame frame;
-    private final String launcherVersion;
     private long lastProgressUpdate = 0L;
     private JLabel progress;
 
 
-    public SwingUI(String launcherVersion) throws IOException {
-        this.launcherVersion = launcherVersion;
-
+    public SwingUI() throws IOException {
         BufferedImage worderIcon = ImageIO.read(ClassLoader.getSystemResource("icons/worder-icon_512x512.png"));
         BufferedImage closeIcon = ImageIO.read(ClassLoader.getSystemResource("icons/close-icon_24x24.png"));
         BufferedImage githubIcon = ImageIO.read(ClassLoader.getSystemResource("icons/github-icon_24x24.png"));
@@ -134,7 +131,7 @@ public class SwingUI implements UiHandler {
 
     private JComponent composeCopyrightPanel(Image icon) {
         JHyperlink hyperlink = new JHyperlink(
-                "© 2019-2020 Yevhenii Nadtochii No Rights Reserved / " + launcherVersion,
+                "© 2020 Yevhenii Nadtochii No Rights Reserved",
                 "https://github.com/yevhenii8/worder",
                 new ImageIcon(icon),
                 SwingConstants.CENTER

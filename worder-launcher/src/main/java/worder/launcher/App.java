@@ -4,8 +4,8 @@
  *
  * Name: <App.java>
  * Created: <04/08/2020, 07:03:59 PM>
- * Modified: <14/11/2020, 09:25:42 PM>
- * Version: <615>
+ * Modified: <14/11/2020, 09:32:54 PM>
+ * Version: <618>
  */
 
 package worder.launcher;
@@ -21,15 +21,11 @@ import worder.launcher.ui.UiHandler;
 import worder.launcher.ui.UiHandlerLoggingDecorator;
 import worder.launcher.ui.impl.swing.SwingUI;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class App {
     private static WorderRunner.RunningType runningType = WorderRunner.RunningType.IN_PLACE;
@@ -39,7 +35,7 @@ public class App {
 
 
     public static void main(String[] args) throws Exception {
-        String launcherVersion = Files.readString(Path.of(App.class.getResource("/version").getPath()));;
+        String launcherVersion = Files.readString(Path.of(App.class.getResource("/version").getPath()));
 
         ArgumentsHandler argumentsHandler = new ArgumentsHandler(args);
         argumentsHandler.applyExecutionArguments();
@@ -52,7 +48,7 @@ public class App {
             System.exit(0);
         }
 
-        UiHandler uiHandler = new UiHandlerLoggingDecorator(new SwingUI(launcherVersion), simpleLogger);
+        UiHandler uiHandler = new UiHandlerLoggingDecorator(new SwingUI(), simpleLogger);
         uiHandler.show();
 
         DescriptorsHandler descriptorsHandler = new DescriptorsHandler(uiHandler, worderDistribution, worderHome);
