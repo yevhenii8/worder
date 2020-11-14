@@ -39,7 +39,7 @@ open class UpdateFileStampsTask : DefaultTask() {
             invalid.forEach {
                 logger.error(it.second.validationResult)
             }
-            error("Invalid source file stamp(s) occurred! Source files' stamps updating has been cancelled!")
+            error("Invalid source file stamp(s) occurred! Source file stamps updating has been cancelled!")
         }
 
         valid.forEach {

@@ -137,7 +137,9 @@ class StampedFile(
             false
         }
         !rawStamp.matches(regexStampPattern) -> {
-            validationResult = "Invalid stamp format occurred: $sourceFile"
+            validationResult = "Invalid stamp format occurred (doesn't correspond to the pattern)!\n" +
+                    "File name: $sourceFile\n" +
+                    "Pattern: $regexStampPattern"
             false
         }
         properties[StampProperty.FILE_NAME] != sourceFile.name -> {
