@@ -4,8 +4,10 @@ import worder.buildsrc.tasks.UpdateFileStampsTask
 import worder.buildsrc.tasks.UpdateVersionTask
 import worder.commons.impl.BintrayExchanger
 import worder.commons.impl.LocalExchanger
+import java.nio.file.Files
+import java.nio.file.Path
 
-version = "1.0.135-SNAPSHOT"
+version = "1.0.136-SNAPSHOT"
 
 plugins {
     application
@@ -63,6 +65,7 @@ tasks {
         }
     }
     deployBintrayTask.apply {
+        if (Files.exists(Path.of("gradle.properties")))
         deployExchanger = BintrayExchanger(
                 project.properties["bintrayUser"] as String,
                 project.properties["bintrayKey"] as String,
