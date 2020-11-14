@@ -72,7 +72,14 @@ tasks {
                                 " --linux-shortcut"
                 )
             }
-            else -> throw IllegalStateException("There's no support for native build of WorderLauncher for your OS: $currentOs")
+        }
+
+        doFirst {
+            if (commandLine.isEmpty())
+                throw IllegalStateException(
+                        "There's no support for building native executable of Worder Launcher for your OS: " +
+                                System.getProperty("os.name")
+                )
         }
     }
 }
