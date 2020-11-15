@@ -3,7 +3,7 @@ import worder.buildsrc.tasks.UpdateFileStampsTask
 import worder.buildsrc.tasks.UpdateVersionTask
 
 
-version = "1.0.169-SNAPSHOT"
+version = "1.0.175-SNAPSHOT"
 
 
 plugins {

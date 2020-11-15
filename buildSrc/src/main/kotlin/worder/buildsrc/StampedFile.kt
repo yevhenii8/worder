@@ -16,19 +16,22 @@ class StampedFile(
     companion object {
         private const val pathToStampPattern = "/sourceFileStampPattern.txt"
         private val stampPattern: String = String(this::class.java.getResourceAsStream(pathToStampPattern).readBytes())
-        private val regexStampPattern: Regex = "^$stampPattern"
+        private val regexStampPattern: Regex = "^$stampPattern$"
                 .replace("*", "\\*")
                 .replace("<[^<]*?_TIME>".toRegex(), "<\\\\d{2}/\\\\d{2}/\\\\d{4}, \\\\d{2}:\\\\d{2}:\\\\d{2} (AM|PM)>")
                 .replace("<[A-Z_]*?>".toRegex(), "<.*?>")
-                .toRegex(RegexOption.UNIX_LINES)
+                .replace("\\R".toRegex(), "\\\\R")
+                .toRegex()
 
         private const val pathToStampPatternTransit = "/sourceFileStampPatternTransit.txt"
         private val stampPatternTransit: String = String(this::class.java.getResourceAsStream(pathToStampPatternTransit).readBytes())
         private val regexStampPatternTransit: Regex = "^$stampPatternTransit"
+                .replace("\n", "\\R")
                 .replace("*", "\\*")
                 .replace("<[^<]*?_TIME>".toRegex(), "<\\\\d{2}/\\\\d{2}/\\\\d{4}, \\\\d{2}:\\\\d{2}:\\\\d{2} (AM|PM)>")
                 .replace("<[A-Z_]*?>".toRegex(), "<.*?>")
-                .toRegex(RegexOption.UNIX_LINES)
+                .replace("\\R".toRegex(), "\\\\R")
+                .toRegex()
 
         private val regexProperty = "(?<=<).*?(?=>)".toRegex()
 
@@ -145,8 +148,8 @@ class StampedFile(
                     "----------------------------------------------------------------\n" +
                     "Used pattern:\n" +
                     "----------------------------------------------------------------\n" +
-                    "$regexStampPattern" +
-                    "----------------------------------------------------------------"
+                    "$regexStampPattern" + "\n" +
+                    "----------------------------------------------------------------\n"
             false
         }
         properties[StampProperty.FILE_NAME] != sourceFile.name -> {
