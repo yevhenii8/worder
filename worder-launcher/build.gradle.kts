@@ -6,7 +6,7 @@ import worder.commons.OS.LINUX
 import worder.commons.OS.WINDOWS_10
 
 
-version = "1.0.194"
+version = "1.0.195"
 
 
 plugins {
@@ -82,7 +82,8 @@ tasks {
                 commandLine("bash", "-c", jpackageCommand.joinToString(" "))
             }
             WINDOWS_10 -> {
-                jpackageCommand.add("--icon \"${iconsCatalog.resolve("worder-icon_256x256.ico")}\"")
+                jpackageCommand.add("--icon")
+                jpackageCommand.add("\"${iconsCatalog.resolve("worder-icon_256x256.ico")}\"")
                 jpackageCommand.add("--win-menu")
                 jpackageCommand.add("--win-shortcut")
 
