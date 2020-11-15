@@ -1,9 +1,12 @@
 import org.gradle.jvm.tasks.Jar
 import worder.buildsrc.tasks.UpdateFileStampsTask
 import worder.buildsrc.tasks.UpdateVersionTask
+import worder.commons.OS
+import worder.commons.OS.LINUX
+import worder.commons.OS.WINDOWS_10
 
 
-version = "1.0.185-SNAPSHOT"
+version = "1.0.186-SNAPSHOT"
 
 
 plugins {
@@ -51,34 +54,36 @@ tasks {
         dependsOn(jar)
 
         val jarFile = jar.get().outputs.files.singleFile
+        val jpackageCommandCommon = "jpackage" +
+                " --input '${jarFile.parent}'" +
+                " --name 'Worder Launcher'" +
+                " --main-jar ${jarFile.name}" +
+                " --app-version '${project.version}'" +
+                " --copyright '© 2020 Yevhenii Nadtochii No Rights Reserved'" +
+                " --description 'Launcher with auto-update for Worder GUI'" +
+                " --dest 'build/executables'" +
+                " --vendor 'Yevhenii Nadtochii'" +
+                " --icon 'build/resources/main/icons/worder-icon_512x512.png'"
 
-        when (val currentOs = System.getProperty("os.name")) {
-            "Linux" -> {
-                commandLine(
-                        "bash", "-c",
-                        "jpackage" +
-                                " --input '${jarFile.parent}'" +
-                                " --name 'Worder Launcher'" +
-                                " --main-jar ${jarFile.name}" +
-                                " --app-version '${project.version}'" +
-                                " --copyright '© 2020 Yevhenii Nadtochii No Rights Reserved'" +
-                                " --description 'Launcher with auto-update for Worder GUI'" +
-                                " --dest 'build/executables'" +
-                                " --vendor 'Yevhenii Nadtochii'" +
-                                " --icon 'build/resources/main/icons/worder-icon_512x512.png'" +
-
-                                " --linux-deb-maintainer yevhenii.nadtochii@gmail.com" +
-                                " --linux-package-name worder-launcher" +
-                                " --linux-shortcut"
-                )
-            }
+        when (OS.getCurrentOS()) {
+            LINUX -> commandLine(
+                    "bash", "-c", jpackageCommandCommon +
+                    " --linux-deb-maintainer yevhenii.nadtochii@gmail.com" +
+                    " --linux-package-name worder-launcher" +
+                    " --linux-shortcut"
+            )
+            WINDOWS_10 -> commandLine(
+                    jpackageCommandCommon +
+                            " --win-menu" +
+                            " --win-shortcut"
+            )
         }
 
         doFirst {
             if (commandLine.isEmpty())
                 throw IllegalStateException(
                         "There's no support for building native executable of Worder Launcher for your OS: " +
-                                System.getProperty("os.name")
+                                OS.getCurrentOS()
                 )
         }
     }

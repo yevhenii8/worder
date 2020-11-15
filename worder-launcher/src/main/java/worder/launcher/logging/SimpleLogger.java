@@ -11,6 +11,7 @@
 package worder.launcher.logging;
 
 import worder.commons.IOExchanger;
+import worder.commons.OS;
 import worder.launcher.model.WorderRunner;
 
 import java.io.File;
@@ -73,7 +74,7 @@ public class SimpleLogger {
         Map<String, String> properties = new LinkedHashMap<>();
         properties.put("Launch DateTime", LocalDateTime.now().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)));
         properties.put("Launcher Version", launcherVersion);
-        properties.put("Used OS", System.getProperty("os.name"));
+        properties.put("Used OS", OS.getCurrentOS().toString());
         properties.put("Used JRE", Runtime.version().toString());
         properties.put("Used Worder Home", worderHome.toString());
         properties.put("Used Worder Distribution", worderDistribution.toString());

@@ -10,6 +10,7 @@ import org.gradle.api.tasks.options.Option
 import org.gradle.jvm.tasks.Jar
 import worder.commons.AppDescriptor
 import worder.commons.IOExchanger
+import worder.commons.OS
 import java.net.URI
 import java.net.URL
 import java.nio.file.Files
@@ -80,7 +81,12 @@ open class DeployAppTask : DefaultTask() {
         val worderFiles = (project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as Jar).outputs.files.files
                 .map { it.toPath() }
         val modulePathFiles = findOption(allJvmArgs, "--module-path")
-                .split(":")
+                .split(
+                        when (OS.getCurrentOS()!!) {
+                            OS.LINUX -> ":"
+                            OS.WINDOWS_10 -> ";"
+                        }
+                )
                 .filterNot { it.startsWith(projectPath) }
                 .map { Path.of(it) }
         val classPathFiles = execTask.classpath
@@ -134,10 +140,7 @@ open class DeployAppTask : DefaultTask() {
                     .forEach { deleteFile("artifacts/${it.key}") }
 
             artifactsToUpload
-                    .forEach {
-                        println(it)
-                        uploadFile("artifacts/${it.name}", Files.readAllBytes(it.pathToFile), false)
-                    }
+                    .forEach { uploadFile("artifacts/${it.name}", Files.readAllBytes(it.pathToFile), false) }
         }
     }
 

@@ -48,7 +48,7 @@ public class AppDescriptor implements Serializable {
     }
 
     public static String obtainNameForCurrentOS() {
-        return "WorderAppDescriptor-" + System.getProperty("os.name").replace(' ', '_');
+        return "WorderAppDescriptor-" + OS.getCurrentOS();
     }
 
 

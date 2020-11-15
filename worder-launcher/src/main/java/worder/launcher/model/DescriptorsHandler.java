@@ -12,6 +12,7 @@ package worder.launcher.model;
 
 import worder.commons.AppDescriptor;
 import worder.commons.IOExchanger;
+import worder.commons.OS;
 import worder.launcher.ui.UiHandler;
 
 import java.io.IOException;
@@ -39,21 +40,14 @@ public class DescriptorsHandler {
 
 
     public static Path detectWorderHome() {
-        var currentOs = System.getProperty("os.name");
-        var userHomeCatalog = System.getProperty("user.home");
-
-        switch (currentOs) {
-            case "Linux":
-                return Path.of(userHomeCatalog)
-                        .resolve(".worder-gui");
-            case "Windows 10":
-                return Path.of(userHomeCatalog)
-                        .resolve("AppData")
-                        .resolve("Local")
-                        .resolve("Worder Gui");
-        }
-
-        throw new IllegalStateException("There's no support of Worder-Launcher for your OS: " + currentOs);
+        return switch (OS.getCurrentOS()) {
+            case LINUX -> Path.of(System.getProperty("user.home"))
+                    .resolve(".worder-gui");
+            case WINDOWS_10 -> Path.of(System.getProperty("user.home"))
+                    .resolve("AppData")
+                    .resolve("Local")
+                    .resolve("Worder Gui");
+        };
     }
 
 
