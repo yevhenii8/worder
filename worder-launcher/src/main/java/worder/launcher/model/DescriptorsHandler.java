@@ -4,8 +4,8 @@
  *
  * Name: <DescriptorsHandler.java>
  * Created: <28/10/2020, 10:50:39 PM>
- * Modified: <15/11/2020, 10:56:13 AM>
- * Version: <460>
+ * Modified: <15/11/2020, 11:48:27 AM>
+ * Version: <461>
  */
 
 package worder.launcher.model;
@@ -50,7 +50,7 @@ public class DescriptorsHandler {
                 return Path.of(userHomeCatalog)
                         .resolve("AppData")
                         .resolve("Local")
-                        .resolve("Worder gui");
+                        .resolve("Worder Gui");
         }
 
         throw new IllegalStateException("There's no support of Worder-Launcher for your OS: " + currentOs);

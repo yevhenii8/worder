@@ -4,8 +4,8 @@
  *
  * Name: <SwingUI.java>
  * Created: <28/10/2020, 05:53:10 PM>
- * Modified: <14/11/2020, 11:36:27 PM>
- * Version: <489>
+ * Modified: <15/11/2020, 11:49:32 AM>
+ * Version: <492>
  */
 
 package worder.launcher.ui.impl.swing;
@@ -131,7 +131,7 @@ public class SwingUI implements UiHandler {
 
     private JComponent composeCopyrightPanel(Image icon) {
         JHyperlink hyperlink = new JHyperlink(
-                "© 2020 Yevhenii Nadtochii No Rights Reserved",
+                "\u00a9 2020 Yevhenii Nadtochii No Rights Reserved",
                 "https://github.com/yevhenii8/worder",
                 new ImageIcon(icon),
                 SwingConstants.CENTER
