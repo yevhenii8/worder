@@ -4,8 +4,8 @@
  *
  * Name: <App.java>
  * Created: <04/08/2020, 07:03:59 PM>
- * Modified: <15/11/2020, 10:56:13 AM>
- * Version: <632>
+ * Modified: <15/11/2020, 01:06:31 PM>
+ * Version: <633>
  */
 
 package worder.launcher;
@@ -173,24 +173,28 @@ public class App {
         }
 
         private static void printHelp() {
-            var maxLen = IntStream.concat(
+            var descMaxLen = IntStream.concat(
+                    Arrays.stream(LauncherArgument.values()).mapToInt(argument -> argument.description.length()),
+                    Arrays.stream(LauncherCommand.values()).mapToInt(command -> command.description.length())
+            ).max().orElseThrow();
+            var nameMaxLen = IntStream.concat(
                     Arrays.stream(LauncherArgument.values()).mapToInt(argument -> argument.name.length()),
                     Arrays.stream(LauncherCommand.values()).mapToInt(command -> command.name.length())
             ).max().orElseThrow();
 
             System.out.println("You can use one or more arguments at once, but only ONE command.");
-            System.out.println("------------------------------------------------------------------------");
+            System.out.println("-".repeat(5 + nameMaxLen + descMaxLen));
             System.out.println();
 
             System.out.println("Possible execution arguments: ");
             for (LauncherArgument argument : LauncherArgument.values())
-                System.out.println("    " + argument.name + " ".repeat(maxLen - argument.name.length() + 3) + argument.description);
+                System.out.println("    " + argument.name + " ".repeat(nameMaxLen - argument.name.length() + 3) + argument.description);
 
             System.out.println();
 
             System.out.println("Possible commands: ");
             for (LauncherCommand command : LauncherCommand.values())
-                System.out.println("    " + command.name + " ".repeat(maxLen - command.name.length() + 3) + command.description);
+                System.out.println("    " + command.name + " ".repeat(nameMaxLen - command.name.length() + 3) + command.description);
         }
 
         private static void printDistributionDescriptors() {

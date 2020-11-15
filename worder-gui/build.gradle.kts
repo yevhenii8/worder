@@ -7,7 +7,7 @@ import worder.commons.impl.LocalExchanger
 import java.nio.file.Files
 import java.nio.file.Path
 
-version = "1.0.137-SNAPSHOT"
+version = "1.0.139-SNAPSHOT"
 
 plugins {
     application

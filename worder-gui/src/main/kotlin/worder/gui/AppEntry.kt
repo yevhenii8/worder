@@ -21,7 +21,6 @@ import worder.gui.database.DatabaseController
 import worder.gui.insert.InsertTabView
 import java.io.File
 import java.nio.file.Path
-import kotlin.system.exitProcess
 
 class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomStyles::class) {
     companion object {
@@ -88,17 +87,6 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomSt
             println("worder classloader parent: ${this::class.java.classLoader.parent}")
             println("worder classloader parent name: ${this::class.java.classLoader.parent.name}")
         }
-
-        fun printHelpAndExit() {
-            val arguments = WorderArgument.values()
-            val maxLen = arguments.map { it.value.length }.max()!!
-
-            arguments.forEach {
-                println("${it.value}   " + " ".repeat(maxLen - it.value.length) + it.description)
-            }
-
-            exitProcess(0)
-        }
     }
 
 
@@ -138,8 +126,7 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomSt
     }
 
 
-    enum class WorderArgument(val value: String, val description: String, val action: () -> Unit) {
-        HELP("--help", "Prints all possible worder arguments and exits.", AppEntry.Companion::printHelpAndExit),
+    enum class WorderArgument(val value: String, @Suppress("unused") val description: String, val action: () -> Unit) {
         DEV_DEBUG("--dev-debug", "Prints additional info (JRE, KotlinC) when app starts.", AppEntry.Companion::runDevDebug),
         DEV_DATABASE("--dev-sample", "Automatically connects to the sampleDB.", { withSampleDB { } }),
         DEV_DATABASE_KEEP("--dev-sample-keep", "Automatically connects to the sampleDB and does NOT remove it on exit.", { withSampleDB { keepSample = true } }),
