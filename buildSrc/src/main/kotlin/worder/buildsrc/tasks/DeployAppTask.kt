@@ -113,14 +113,15 @@ open class DeployAppTask : DefaultTask() {
             remoteDescriptorNames.remove(newDescriptor.name)
 
             val actualRemoteDescriptors = remoteDescriptorNames.map { AppDescriptor.fromByteArray(downloadFile(it)) } + newDescriptor
-            val actualArtifacts = (listAsStrings("artifacts") ?: emptyList()).associateWithTo(mutableMapOf()) { 0 }
+            val actualRemoteArtifacts = (listAsStrings("artifacts") ?: emptyList()).associateWithTo(mutableMapOf()) { 0 }
+            val artifactsToUpload = mutableListOf<AppDescriptor.Artifact>()
 
             actualRemoteDescriptors
                     .flatMap { it.artifacts }
                     .forEach {
-                        actualArtifacts.compute(it.name) { _, v ->
+                        actualRemoteArtifacts.compute(it.name) { _, v ->
                             if (v == null) {
-                                uploadFile("artifacts/${it.name}", Files.readAllBytes(it.pathToFile), false)
+                                artifactsToUpload.add(it)
                                 1
                             } else {
                                 v + 1
@@ -128,9 +129,12 @@ open class DeployAppTask : DefaultTask() {
                         }
                     }
 
-            actualArtifacts
+            actualRemoteArtifacts
                     .filter { it.value == 0 }
                     .forEach { deleteFile("artifacts/${it.key}") }
+
+            artifactsToUpload
+                    .forEach { uploadFile("artifacts/${it.name}", Files.readAllBytes(it.pathToFile), false) }
         }
     }
 

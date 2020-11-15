@@ -7,7 +7,7 @@ import worder.commons.impl.LocalExchanger
 import java.nio.file.Files
 import java.nio.file.Path
 
-version = "1.0.136-SNAPSHOT"
+version = "1.0.137-SNAPSHOT"
 
 plugins {
     application
@@ -65,10 +65,13 @@ tasks {
         }
     }
     deployBintrayTask.apply {
-        if (Files.exists(Path.of("gradle.properties")))
+        val bintrayUser = project.properties["bintrayUser"]
+        val bintrayKey = project.properties["bintrayKey"]
+
+        if (bintrayUser != null && bintrayKey != null)
         deployExchanger = BintrayExchanger(
-                project.properties["bintrayUser"] as String,
-                project.properties["bintrayKey"] as String,
+                bintrayUser as String,
+                bintrayKey as String,
                 "generic",
                 "worder-gui",
                 "Latest"
