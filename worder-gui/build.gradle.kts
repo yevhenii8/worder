@@ -65,8 +65,8 @@ tasks {
         }
     }
     deployBintrayTask.apply {
-        val bintrayUser = project.properties["bintrayUser"]
-        val bintrayKey = project.properties["bintrayKey"]
+        val bintrayUser: String? by project
+        val bintrayKey: String? by project
 
         if (bintrayUser != null && bintrayKey != null)
         deployExchanger = BintrayExchanger(
