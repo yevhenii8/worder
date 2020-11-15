@@ -54,33 +54,39 @@ tasks {
         dependsOn(jar)
 
         val jarFile = jar.get().outputs.files.singleFile
+        val iconsCatalog = rootDir
+                .resolve("worder-commons")
+                .resolve("src")
+                .resolve("main")
+                .resolve("resources")
+                .resolve("icons")
         val jpackageCommand = mutableListOf(
                 "jpackage",
-                "--input '${jarFile.parent}'",
-                "--name 'Worder Launcher'",
-                "--main-jar ${jarFile.name}",
-                "--app-version '${project.version}'",
-                "--copyright '© 2020 Yevhenii Nadtochii No Rights Reserved'",
-                "--description 'Launcher with auto-update for Worder GUI'",
-                "--dest 'build/executables'",
-                "--vendor 'Yevhenii Nadtochii'"
+                "--input", "\"${jarFile.parent}\"",
+                "--name", "\"Worder Launcher\"",
+                "--main-jar", "\"${jarFile.name}\"",
+                "--app-version", "\"${project.version}\"",
+                "--copyright", "\"© 2020 Yevhenii Nadtochii No Rights Reserved\"",
+                "--description", "\"Launcher with auto-update for Worder GUI\"",
+                "--dest", "\"build/executables\"",
+                "--vendor", "\"Yevhenii Nadtochii\""
         )
 
         when (OS.getCurrentOS()!!) {
             LINUX -> {
-                jpackageCommand.add("--icon '../worder-commons/src/main/resources/icons/worder-icon_512x512.png'")
+                jpackageCommand.add("--icon \"${iconsCatalog.resolve("worder-icon_256x256.png")}\"")
                 jpackageCommand.add("--linux-deb-maintainer yevhenii.nadtochii@gmail.com")
                 jpackageCommand.add("--linux-package-name worder-launcher")
                 jpackageCommand.add("--linux-shortcut")
-                
+
                 commandLine("bash", "-c", jpackageCommand.joinToString(" "))
             }
             WINDOWS_10 -> {
-                jpackageCommand.add("--icon '../worder-commons/src/main/resources/icons/worder-icon_256x256.ico'")
+                jpackageCommand.add("--icon \"${iconsCatalog.resolve("worder-icon_256x256.ico")}\"")
                 jpackageCommand.add("--win-menu")
                 jpackageCommand.add("--win-shortcut")
 
-                commandLine(jpackageCommand.joinToString(" "))
+                commandLine(jpackageCommand)
             }
         }
 

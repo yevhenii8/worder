@@ -92,7 +92,7 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomSt
 
     override fun start(stage: Stage) {
         stage.apply {
-            icons += resources.image("/icons/worder-icon_512x512.png")
+            icons += resources.image("/icons/worder-icon_256x256.png")
             isMaximized = true
         }
 

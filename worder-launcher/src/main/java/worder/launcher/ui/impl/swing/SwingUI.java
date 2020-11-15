@@ -27,7 +27,7 @@ public class SwingUI implements UiHandler {
 
 
     public SwingUI() throws IOException {
-        BufferedImage worderIcon = ImageIO.read(ClassLoader.getSystemResource("icons/worder-icon_512x512.png"));
+        BufferedImage worderIcon = ImageIO.read(ClassLoader.getSystemResource("icons/worder-icon_256x256.png"));
         BufferedImage closeIcon = ImageIO.read(ClassLoader.getSystemResource("icons/close-icon_24x24.png"));
         BufferedImage githubIcon = ImageIO.read(ClassLoader.getSystemResource("icons/github-icon_24x24.png"));
 
