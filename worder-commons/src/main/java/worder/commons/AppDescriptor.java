@@ -118,6 +118,18 @@ public class AppDescriptor implements Serializable {
         return result;
     }
 
+    @Override
+    public String toString() {
+        return "AppDescriptor{" +
+                "generated='" + generated + '\'' +
+                ", name='" + name + '\'' +
+                ", appVersion='" + appVersion + '\'' +
+                ", appMainClass='" + appMainClass + '\'' +
+                ", usedModules='" + usedModules + '\'' +
+                ", envArguments=" + envArguments +
+                ", artifacts=" + artifacts +
+                '}';
+    }
 
     public static class Artifact implements Serializable {
         transient private final Path pathToFile;
@@ -163,6 +175,14 @@ public class AppDescriptor implements Serializable {
             return result;
         }
 
+        @Override
+        public String toString() {
+            return "Artifact{" +
+                    "pathToFile=" + pathToFile +
+                    ", name='" + name + '\'' +
+                    ", type=" + type +
+                    '}';
+        }
 
         public enum Type {
             CLASSPATH, MODULEPATH

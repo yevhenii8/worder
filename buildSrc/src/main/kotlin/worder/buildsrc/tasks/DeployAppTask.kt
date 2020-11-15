@@ -134,7 +134,10 @@ open class DeployAppTask : DefaultTask() {
                     .forEach { deleteFile("artifacts/${it.key}") }
 
             artifactsToUpload
-                    .forEach { uploadFile("artifacts/${it.name}", Files.readAllBytes(it.pathToFile), false) }
+                    .forEach {
+                        println(it)
+                        uploadFile("artifacts/${it.name}", Files.readAllBytes(it.pathToFile), false)
+                    }
         }
     }
 
