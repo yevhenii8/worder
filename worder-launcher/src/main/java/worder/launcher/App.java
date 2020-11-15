@@ -4,8 +4,8 @@
  *
  * Name: <App.java>
  * Created: <04/08/2020, 07:03:59 PM>
- * Modified: <15/11/2020, 12:18:20 AM>
- * Version: <631>
+ * Modified: <15/11/2020, 10:56:13 AM>
+ * Version: <632>
  */
 
 package worder.launcher;
@@ -29,12 +29,12 @@ import java.util.stream.IntStream;
 public class App {
     private static WorderRunner.RunningType runningType = WorderRunner.RunningType.IN_PLACE;
     private static IOExchanger worderDistribution = new BintrayExchanger("evgen8", "generic");
-    private static IOExchanger worderHome = new LocalExchanger(Path.of(DescriptorsHandler.detectWorderHome()));
+    private static IOExchanger worderHome = new LocalExchanger(DescriptorsHandler.detectWorderHome());
     private static String worderArgs = null;
 
 
     public static void main(String[] args) throws Exception {
-        var bytes = App.class.getResourceAsStream("/version").readAllBytes();;
+        var bytes = App.class.getResourceAsStream("/version").readAllBytes();
         String launcherVersion = new String(bytes);
 
         ArgumentsHandler argumentsHandler = new ArgumentsHandler(args);
