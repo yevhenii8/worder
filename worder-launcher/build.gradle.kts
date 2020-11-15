@@ -6,7 +6,7 @@ import worder.commons.OS.LINUX
 import worder.commons.OS.WINDOWS_10
 
 
-version = "1.0.186-SNAPSHOT"
+version = "1.0.194"
 
 
 plugins {
@@ -54,29 +54,34 @@ tasks {
         dependsOn(jar)
 
         val jarFile = jar.get().outputs.files.singleFile
-        val jpackageCommandCommon = "jpackage" +
-                " --input '${jarFile.parent}'" +
-                " --name 'Worder Launcher'" +
-                " --main-jar ${jarFile.name}" +
-                " --app-version '${project.version}'" +
-                " --copyright '© 2020 Yevhenii Nadtochii No Rights Reserved'" +
-                " --description 'Launcher with auto-update for Worder GUI'" +
-                " --dest 'build/executables'" +
-                " --vendor 'Yevhenii Nadtochii'" +
-                " --icon 'build/resources/main/icons/worder-icon_512x512.png'"
+        val jpackageCommand = mutableListOf(
+                "jpackage",
+                "--input '${jarFile.parent}'",
+                "--name 'Worder Launcher'",
+                "--main-jar ${jarFile.name}",
+                "--app-version '${project.version}'",
+                "--copyright '© 2020 Yevhenii Nadtochii No Rights Reserved'",
+                "--description 'Launcher with auto-update for Worder GUI'",
+                "--dest 'build/executables'",
+                "--vendor 'Yevhenii Nadtochii'"
+        )
 
-        when (OS.getCurrentOS()) {
-            LINUX -> commandLine(
-                    "bash", "-c", jpackageCommandCommon +
-                    " --linux-deb-maintainer yevhenii.nadtochii@gmail.com" +
-                    " --linux-package-name worder-launcher" +
-                    " --linux-shortcut"
-            )
-            WINDOWS_10 -> commandLine(
-                    jpackageCommandCommon +
-                            " --win-menu" +
-                            " --win-shortcut"
-            )
+        when (OS.getCurrentOS()!!) {
+            LINUX -> {
+                jpackageCommand.add("--icon '../worder-commons/src/main/resources/icons/worder-icon_512x512.png'")
+                jpackageCommand.add("--linux-deb-maintainer yevhenii.nadtochii@gmail.com")
+                jpackageCommand.add("--linux-package-name worder-launcher")
+                jpackageCommand.add("--linux-shortcut")
+                
+                commandLine("bash", "-c", jpackageCommand.joinToString(" "))
+            }
+            WINDOWS_10 -> {
+                jpackageCommand.add("--icon '../worder-commons/src/main/resources/icons/worder-icon_256x256.ico'")
+                jpackageCommand.add("--win-menu")
+                jpackageCommand.add("--win-shortcut")
+
+                commandLine(jpackageCommand.joinToString(" "))
+            }
         }
 
         doFirst {
