@@ -6,7 +6,7 @@ import worder.commons.OS.LINUX
 import worder.commons.OS.WINDOWS_10
 
 
-version = "1.0.195"
+version = "1.0.207"
 
 
 plugins {
@@ -40,7 +40,10 @@ tasks {
         manifest {
             attributes["Main-Class"] = "worder.launcher.App"
         }
-        from(configurations.compileClasspath.get().files.map { if (it.isDirectory) it else zipTree(it) })
+        from(
+                configurations.compileClasspath.get().files.map { if (it.isDirectory) it else zipTree(it) },
+                configurations.default.get().files.map { if (it.isDirectory) it else zipTree(it) }
+        )
     }
 
     gradle.taskGraph.whenReady {

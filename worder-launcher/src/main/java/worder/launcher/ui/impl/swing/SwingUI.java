@@ -4,8 +4,8 @@
  *
  * Name: <SwingUI.java>
  * Created: <28/10/2020, 05:53:10 PM>
- * Modified: <15/11/2020, 07:55:05 PM>
- * Version: <496>
+ * Modified: <15/11/2020, 08:19:53 PM>
+ * Version: <498>
  */
 
 package worder.launcher.ui.impl.swing;
@@ -27,9 +27,9 @@ public class SwingUI implements UiHandler {
 
 
     public SwingUI() throws IOException {
-        BufferedImage worderIcon = ImageIO.read(ClassLoader.getSystemResource("icons/worder-icon_256x256.png"));
-        BufferedImage closeIcon = ImageIO.read(ClassLoader.getSystemResource("icons/close-icon_24x24.png"));
-        BufferedImage githubIcon = ImageIO.read(ClassLoader.getSystemResource("icons/github-icon_24x24.png"));
+        BufferedImage worderIcon = ImageIO.read(SwingUI.class.getResource("/icons/worder-icon_256x256.png"));
+        BufferedImage closeIcon = ImageIO.read(SwingUI.class.getResource("/icons/close-icon_24x24.png"));
+        BufferedImage githubIcon = ImageIO.read(SwingUI.class.getResource("/icons/github-icon_24x24.png"));
 
         frame = composeFrame(worderIcon);
         frame.add(composeCloseButtonPanel(closeIcon), BorderLayout.NORTH);
