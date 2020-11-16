@@ -90,13 +90,13 @@ open class DeployAppTask : DefaultTask() {
                 .filterNot { it.startsWith(projectPath) }
                 .map { Path.of(it) }
         val classPathFiles = execTask.classpath
-                .map { it.toPath() }
                 .filterNot {
-                    it.toString().startsWith(projectPath) || it.fileName.startsWith("javafx") &&
-                            (it.fileName.endsWith("linux.jar") || it.fileName.endsWith("win.jar") || it.fileName.endsWith("mac.jar"))
+                    it.name.startsWith("javafx") &&
+                            (it.name.endsWith("linux.jar") || it.name.endsWith("win.jar") || it.name.endsWith("mac.jar"))
                 }
+                .map { it.toPath() }
+                .filterNot { it.toString().startsWith(projectPath) }
         // the temporary patch above is due to https://github.com/openjfx/javafx-gradle-plugin/issues/65
-
 
         with(if (gradleLogger.isInfoEnabled) loggingDeployExchanger else deployExchanger) {
             val remoteDescriptorNames = (listAsStrings("") ?: emptyList<String>())
