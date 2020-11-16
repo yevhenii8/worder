@@ -92,10 +92,8 @@ open class DeployAppTask : DefaultTask() {
         val classPathFiles = execTask.classpath
                 .map { it.toPath() }
                 .filterNot {
-                    it.toString().startsWith(projectPath)
-                            || (it.fileName.endsWith("linux.jar") && it.fileName.startsWith("javafx"))
-                            || (it.fileName.endsWith("win") && it.fileName.startsWith("javafx"))
-                            || (it.fileName.endsWith("mac") && it.fileName.startsWith("javafx"))
+                    it.toString().startsWith(projectPath) || it.fileName.startsWith("javafx") &&
+                            (it.fileName.endsWith("linux.jar") || it.fileName.endsWith("win.jar") || it.fileName.endsWith("mac.jar"))
                 }
         // the temporary patch above is due to https://github.com/openjfx/javafx-gradle-plugin/issues/65
 
