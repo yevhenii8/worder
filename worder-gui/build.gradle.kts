@@ -68,13 +68,13 @@ tasks {
         val bintrayKey: String? by project
 
         if (bintrayUser != null && bintrayKey != null)
-        deployExchanger = BintrayExchanger(
-                bintrayUser as String,
-                bintrayKey as String,
-                "generic",
-                "worder-gui",
-                "Latest"
-        )
+            deployExchanger = BintrayExchanger(
+                    bintrayUser as String,
+                    bintrayKey as String,
+                    "generic",
+                    "worder-gui",
+                    "Latest"
+            )
     }
     deployLocalTask.apply {
         deployExchanger = LocalExchanger(projectDir.toPath().resolve("WorderLocalDistribution"))
@@ -87,5 +87,30 @@ tasks {
     withType<UpdateFileStampsTask> {
         sourcesDir = projectDir.resolve("src")
         sourcesFormats = listOf(".kt")
+    }
+
+    register("devTest") {
+        dependsOn(project.tasks.getByName("configJavafxRun"))
+
+        doFirst {
+            val projectPath = project.projectDir.absolutePath
+            val execTask = project.tasks.findByName(ApplicationPlugin.TASK_RUN_NAME) as JavaExec
+            val allJvmArgs = execTask.allJvmArgs
+
+            execTask.classpath.filter { it.name.contains("-linux") }.forEach {
+                println(it.name)
+                println(it)
+                println()
+            }
+            println()
+            println()
+            allJvmArgs.find { it.contains("-linux") }!!
+                    .split(if (worder.commons.OS.getCurrentOS() == worder.commons.OS.LINUX) ":" else ";")
+                    .forEach {
+                        println(it.substringAfterLast("/"))
+                        println(it)
+                        println()
+                    }
+        }
     }
 }
