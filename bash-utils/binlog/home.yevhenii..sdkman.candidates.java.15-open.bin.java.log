@@ -1,0 +1,44 @@
+java 
+--add-modules javafx.controls,javafx.graphics,javafx.web 
+--module-path C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.openjfx\javafx-web\14\82b34ae8d50728510dd4f329947487babeb632b9\javafx-web-14-linux.jar;
+              C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.openjfx\javafx-controls\14\2bcf5308eb78334efe29ae9fe6ce82e7018fbe42\javafx-controls-14-linux.jar;
+              C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.openjfx\javafx-media\14\8afeeaef935de0b5cfe7359c85f95c1320be46e\javafx-media-14-linux.jar;
+              C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.openjfx\javafx-graphics\14\df3d4a95f42f4e3ed50ad1d102c723eee6e26688\javafx-graphics-14-linux.jar;
+              C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.openjfx\javafx-base\14\22e2d31c4f00da36fe46bebd893349b50a14647f\javafx-base-14-linux.jar 
+-Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant 
+-cp C:\Users\Julia\Projects\worder\worder-gui\build\classes\java\main;
+    C:\Users\Julia\Projects\worder\worder-gui\build\classes\kotlin\main;
+    C:\Users\Julia\Projects\worder\worder-gui\build\resources\main;
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\no.tornado\tornadofx\2.0.0-SNAPSHOT\b105dde250d219fdee7c3a2931bedf9e8e49c573\tornadofx-2.0.0-SNAPSHOT.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.jetbrains.kotlin\kotlin-stdlib-jdk8\1.3.72\916d54b9eb6442b615e6f1488978f551c0674720\kotlin-stdlib-jdk8-1.3.72.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.jetbrains.kotlinx\kotlinx-coroutines-javafx\1.3.7\be726d82a68d63f1b232893aaf2f44431add32da\kotlinx-coroutines-javafx-1.3.7.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.jetbrains.kotlinx\kotlinx-coroutines-jdk8\1.3.7\43d2b0508ddcf4257b978002f9a646d6b78d24eb\kotlinx-coroutines-jdk8-1.3.7.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.jetbrains.exposed\exposed-jdbc\0.26.1\57bc86b5cea43607b46283062a9a6c5dd016b07f\exposed-jdbc-0.26.1.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.jetbrains.exposed\exposed-core\0.26.1\a88231a8f68de705b09ca940d749bee88875f93\exposed-core-0.26.1.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.jetbrains.kotlinx\kotlinx-coroutines-core\1.3.7\8e2eb78158638b33793d204ffef0b65c4a578e1c\kotlinx-coroutines-core-1.3.7.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.xerial\sqlite-jdbc\3.32.3.1\185dbb642c3004dee75d408fa327c8356410ed0\sqlite-jdbc-3.32.3.1.jar:
+    C:\Users\Julia\Projects\worder\worder-commons\build\libs\worder-commons.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.openjfx\javafx-web\14\82b34ae8d50728510dd4f329947487babeb632b9\javafx-web-14-linux.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.openjfx\javafx-web\14\6d37a0c4e73833f097ea2162effc37c8d3297523\javafx-web-14.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.openjfx\javafx-fxml\13\4a5e8cbe8d9093be4598cc735b84b2ceacf5df1f\javafx-fxml-13.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.openjfx\javafx-controls\14\2bcf5308eb78334efe29ae9fe6ce82e7018fbe42\javafx-controls-14-linux.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.openjfx\javafx-controls\14\312b419feb6d5d927c80dafe13f8770bb5ff5b77\javafx-controls-14.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.openjfx\javafx-media\14\8afeeaef935de0b5cfe7359c85f95c1320be46e\javafx-media-14-linux.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.openjfx\javafx-media\14\51ec4899654f6b2496e5c40d96ba58d26ff3888b\javafx-media-14.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.openjfx\javafx-swing\13\e1620232f16a334d610171faa923fee62ac3da1f\javafx-swing-13.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.openjfx\javafx-graphics\14\df3d4a95f42f4e3ed50ad1d102c723eee6e26688\javafx-graphics-14-linux.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.openjfx\javafx-graphics\14\132514c6e75c58dd34592dad8d356f78c3f0a680\javafx-graphics-14.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.openjfx\javafx-base\14\22e2d31c4f00da36fe46bebd893349b50a14647f\javafx-base-14-linux.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.openjfx\javafx-base\14\4eddcdd8713831212ec9b396169959655cf0dc21\javafx-base-14.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.slf4j\slf4j-nop\1.7.30\55d4c73dd343efebd236abfeb367c9ef41d55063\slf4j-nop-1.7.30.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.jetbrains.kotlin\kotlin-stdlib-jdk7\1.3.72\3adfc2f4ea4243e01204be8081fe63bde6b12815\kotlin-stdlib-jdk7-1.3.72.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.jetbrains.kotlin\kotlin-reflect\1.3.72\86613e1a669a701b0c660bfd2af4f82a7ae11fca\kotlin-reflect-1.3.72.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.jetbrains.kotlin\kotlin-stdlib\1.3.72\8032138f12c0180bc4e51fe139d4c52b46db6109\kotlin-stdlib-1.3.72.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.jetbrains.kotlin\kotlin-stdlib-common\1.3.72\6ca8bee3d88957eaaaef077c41c908c9940492d8\kotlin-stdlib-common-1.3.72.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.slf4j\slf4j-api\1.7.30\b5a4b6d16ab13e34a88fae84c35cd5d68cac922c\slf4j-api-1.7.30.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.glassfish\javax.json\1.1.2\a507518970d55e9de24665af06d70aae91b4aaa1\javax.json-1.1.2.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\de.jensd\fontawesomefx-fontawesome\4.7.0-9.1.2\7773ab9426179280438f4a8b1d64b3913b0ead92\fontawesomefx-fontawesome-4.7.0-9.1.2.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\org.jetbrains\annotations\13.0\919f0dfe192fb4e063e7dacadee7f8bb9a2672a9\annotations-13.0.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\javax.json\javax.json-api\1.1.2\b38c52a6e180359108bd5e35dbeec7d1be45c535\javax.json-api-1.1.2.jar:
+    C:\Users\Julia\.gradle\caches\modules-2\files-2.1\de.jensd\fontawesomefx-commons\9.1.2\33eb463c75c8c225eb50c8b30a337c81386c19b2\fontawesomefx-commons-9.1.2.jar 
+worder.gui.AppEntry

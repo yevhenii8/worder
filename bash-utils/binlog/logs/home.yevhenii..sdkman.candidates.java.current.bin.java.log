@@ -1,0 +1,1 @@
+[2020-11-16 21:13:39] java -Xmx64m -Xms64m -Dorg.gradle.appname=gradle -classpath /home/yevhenii/.sdkman/candidates/gradle/6.7/lib/gradle-launcher-6.7.jar org.gradle.launcher.GradleMain run

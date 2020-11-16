@@ -4,8 +4,8 @@
  *
  * Name: <MainView.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <04/08/2020, 08:02:59 PM>
- * Version: <48>
+ * Modified: <16/11/2020, 09:12:58 PM>
+ * Version: <49>
  */
 
 package worder.gui.core
@@ -60,7 +60,7 @@ class MainView : View("Worder GUI") {
                 hgrow = Priority.ALWAYS
             }
             hyperlink {
-                text = "© 2019-2020 Yevhenii Nadtochii No Rights Reserved"
+                text = "© 2020 Yevhenii Nadtochii No Rights Reserved"
                 graphic = imageview("/icons/github-icon_24x24.png")
                 setOnAction {
                     hostServices.showDocument("https://github.com/yevhenii8/worder")
