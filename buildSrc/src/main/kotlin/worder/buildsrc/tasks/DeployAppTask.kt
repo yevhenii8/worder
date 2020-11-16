@@ -91,7 +91,13 @@ open class DeployAppTask : DefaultTask() {
                 .map { Path.of(it) }
         val classPathFiles = execTask.classpath
                 .map { it.toPath() }
-                .filterNot { it.toString().startsWith(projectPath) || modulePathFiles.contains(it) }
+                .filterNot {
+                    it.toString().startsWith(projectPath)
+                            || it.fileName.endsWith("linux")
+                            || it.fileName.endsWith("win")
+                            || it.fileName.endsWith("mac")
+                }
+        // the patch above is due to https://github.com/openjfx/javafx-gradle-plugin/issues/65
 
 
         with(if (gradleLogger.isInfoEnabled) loggingDeployExchanger else deployExchanger) {
