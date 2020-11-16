@@ -58,11 +58,11 @@ function help() {
     echo "binlog - Allows to set up a logger upon an arbitrary binary\command."
     echo "It stores all the logs in $BINLOG_LOGS"
     echo "Use pattern: binlog [command] (path/to/binary | command). Available commands: "
-    echo "      put"
-    echo "      remove"
-    echo "      list"
-    echo "      reset"
-    echo "      help"
+    echo "      put - Puts logger under specifified binary."
+    echo "      remove - Removes logger, doesn't touch associated log file."
+    echo "      list - Display active loggers and their log files."
+    echo "      reset - Removes all loggers and all associated log files."
+    echo "      help - Displays this message."
 }
 
 
