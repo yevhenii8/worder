@@ -12,6 +12,7 @@ package worder.launcher.model;
 
 import worder.commons.AppDescriptor;
 import worder.commons.IOExchanger;
+import worder.commons.OS;
 import worder.launcher.ui.UiHandler;
 
 import java.net.URL;
@@ -68,6 +69,10 @@ public class WorderRunner {
     }
 
     private void runSeparated() throws Exception {
+        var currentOs = OS.getCurrentOS();
+        if (currentOs != OS.LINUX)
+            throw new IllegalStateException("Separate run is not implemented on your OS: " + currentOs);
+
         var artifactPaths = artifactUrls.stream().map(URL::toString).collect(Collectors.toList());
         var modulePath = findArtifactsOfType(artifactPaths, AppDescriptor.Artifact.Type.MODULEPATH);
         var classPath = findArtifactsOfType(artifactPaths, AppDescriptor.Artifact.Type.CLASSPATH);
