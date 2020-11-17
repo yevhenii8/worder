@@ -13,7 +13,7 @@ open class UpdateVersionTask : DefaultTask() {
 
     @TaskAction
     fun execute() {
-        val worderVersion = VersionDescriptor.fromString(project.version.toString()).apply {
+        val version = VersionDescriptor.fromString(project.version.toString()).apply {
             buildNumber++
         }
 
@@ -24,7 +24,7 @@ open class UpdateVersionTask : DefaultTask() {
             buildScript.writeText(
                     buildScriptContent.replace(
                             regex = "^version = .*$".toRegex(RegexOption.MULTILINE),
-                            replacement = "version = \"$worderVersion\""
+                            replacement = "version = \"$version\""
                     )
             )
 
@@ -32,7 +32,7 @@ open class UpdateVersionTask : DefaultTask() {
                     .resolve("main")
                     .resolve("resources")
                     .resolve("version")
-                    .writeText(worderVersion.toString())
+                    .writeText(version.toString())
         }
     }
 }

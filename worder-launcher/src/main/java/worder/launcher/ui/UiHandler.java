@@ -4,8 +4,8 @@
  *
  * Name: <UiHandler.java>
  * Created: <05/11/2020, 08:36:34 PM>
- * Modified: <14/11/2020, 11:36:27 PM>
- * Version: <365>
+ * Modified: <17/11/2020, 10:48:39 PM>
+ * Version: <368>
  */
 
 package worder.launcher.ui;
@@ -15,7 +15,7 @@ public interface UiHandler {
 
     void dispose(long delay);
 
-    void status(String status);
+    void progress(String progress);
 
     void error(String message);
 }

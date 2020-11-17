@@ -4,8 +4,8 @@
  *
  * Name: <DescriptorsHandler.java>
  * Created: <28/10/2020, 10:50:39 PM>
- * Modified: <15/11/2020, 03:10:15 PM>
- * Version: <462>
+ * Modified: <17/11/2020, 10:49:21 PM>
+ * Version: <467>
  */
 
 package worder.launcher.model;
@@ -16,7 +16,6 @@ import worder.commons.OS;
 import worder.launcher.ui.UiHandler;
 
 import java.io.IOException;
-import java.io.InvalidClassException;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
@@ -51,18 +50,23 @@ public class DescriptorsHandler {
     }
 
 
-    public void prepareWorderHome() throws IOException, ClassNotFoundException, InterruptedException {
-        uiHandler.status("Obtaining local & remote descriptors ...");
-
+    public void prepareWorderHome() throws ClassNotFoundException, InterruptedException, IOException {
         String requiredDescriptorName = AppDescriptor.obtainNameForCurrentOS();
-        byte[] distributionDescriptorRaw = worderDistribution.downloadFile(requiredDescriptorName);
-        AppDescriptor distributionDescriptor = AppDescriptor.fromByteArray(distributionDescriptorRaw);
-        AppDescriptor localDescriptor;
 
+        uiHandler.progress("Obtaining distribution descriptor ...");
+        byte[] distributionDescriptorRaw = new byte[0];
+        AppDescriptor distributionDescriptor = null;
+        try {
+            distributionDescriptorRaw = worderDistribution.downloadFile(requiredDescriptorName);
+            distributionDescriptor = AppDescriptor.fromByteArray(distributionDescriptorRaw);
+        } catch (IOException ignored) {
+        }
+
+        uiHandler.progress("Obtaining local descriptor ...");
+        AppDescriptor localDescriptor = null;
         try {
             localDescriptor = AppDescriptor.fromByteArray(worderHome.downloadFile(requiredDescriptorName));
-        } catch (InvalidClassException exception) {
-            localDescriptor = null;
+        } catch (IOException ignored) {
         }
 
         if (localDescriptor == null && distributionDescriptor == null)
@@ -95,11 +99,11 @@ public class DescriptorsHandler {
             var value = entry.getValue();
 
             if (value == -1) {
-                uiHandler.status("Removing '" + name + "' ...");
+                uiHandler.progress("Removing '" + name + "' ...");
                 worderHome.deleteFile("artifacts/" + name);
             }
             if (value == 1) {
-                uiHandler.status("Downloading '" + name + "' ...");
+                uiHandler.progress("Downloading '" + name + "' ...");
                 worderHome.uploadFile(
                         "artifacts/" + name,
                         worderDistribution.downloadFile("artifacts/" + name),
@@ -108,7 +112,7 @@ public class DescriptorsHandler {
             }
         }
 
-        uiHandler.status("Uploading most relevant " + distributionDescriptor.getName() + " ...");
+        uiHandler.progress("Uploading latest " + distributionDescriptor.getName() + " ...");
         worderHome.uploadFile(distributionDescriptor.getName(), distributionDescriptorRaw, true);
     }
 }

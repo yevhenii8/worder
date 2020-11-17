@@ -4,8 +4,8 @@
  *
  * Name: <SwingUI.java>
  * Created: <28/10/2020, 05:53:10 PM>
- * Modified: <15/11/2020, 08:19:53 PM>
- * Version: <498>
+ * Modified: <17/11/2020, 10:48:39 PM>
+ * Version: <507>
  */
 
 package worder.launcher.ui.impl.swing;
@@ -16,9 +16,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 
 public class SwingUI implements UiHandler {
     private final JFrame frame;
@@ -35,19 +33,11 @@ public class SwingUI implements UiHandler {
         frame.add(composeCloseButtonPanel(closeIcon), BorderLayout.NORTH);
         frame.add(composeLogoAndProgressPanel(), BorderLayout.CENTER);
         frame.add(composeCopyrightPanel(githubIcon), BorderLayout.SOUTH);
-
-        Thread.setDefaultUncaughtExceptionHandler((thread, exception) -> {
-                    var bytes = new ByteArrayOutputStream();
-                    exception.printStackTrace(new PrintStream(bytes));
-                    error(bytes.toString());
-                    System.exit(1);
-                }
-        );
     }
 
 
     @Override
-    public void status(String value) {
+    public void progress(String progress) {
         long sinceLastUpdate = System.currentTimeMillis() - lastProgressUpdate;
         long PROGRESS_UPDATE_INTERVAL = 500L;
 
@@ -58,7 +48,7 @@ public class SwingUI implements UiHandler {
                 e.printStackTrace();
             }
 
-        progress.setText(value);
+        this.progress.setText(progress);
         lastProgressUpdate = System.currentTimeMillis();
     }
 
@@ -78,7 +68,6 @@ public class SwingUI implements UiHandler {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            Thread.setDefaultUncaughtExceptionHandler(null);
             frame.dispose();
         });
     }

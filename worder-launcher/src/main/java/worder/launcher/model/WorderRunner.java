@@ -4,8 +4,8 @@
  *
  * Name: <WorderRunner.java>
  * Created: <05/11/2020, 08:36:34 PM>
- * Modified: <17/11/2020, 11:17:59 AM>
- * Version: <366>
+ * Modified: <17/11/2020, 10:30:29 PM>
+ * Version: <367>
  */
 
 package worder.launcher.model;
@@ -48,7 +48,7 @@ public class WorderRunner {
 
 
     public void runWorder() throws Exception {
-        uiHandler.status("Running Worder " + runningType + " ...");
+        uiHandler.progress("Running Worder " + runningType + " ...");
 
         switch (runningType) {
             case IN_PLACE -> runInPlace();

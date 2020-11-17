@@ -4,13 +4,16 @@
  *
  * Name: <UiHandlerLoggingDecorator.java>
  * Created: <11/11/2020, 08:24:43 PM>
- * Modified: <14/11/2020, 11:36:27 PM>
- * Version: <196>
+ * Modified: <17/11/2020, 10:48:39 PM>
+ * Version: <201>
  */
 
 package worder.launcher.ui;
 
 import worder.launcher.logging.SimpleLogger;
+
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 
 public class UiHandlerLoggingDecorator implements UiHandler {
     private final UiHandler uiHandler;
@@ -18,6 +21,14 @@ public class UiHandlerLoggingDecorator implements UiHandler {
 
 
     public UiHandlerLoggingDecorator(UiHandler uiHandler, SimpleLogger simpleLogger) {
+        Thread.setDefaultUncaughtExceptionHandler((thread, exception) -> {
+                    var bytes = new ByteArrayOutputStream();
+                    exception.printStackTrace(new PrintStream(bytes));
+                    error(bytes.toString());
+                    System.exit(1);
+                }
+        );
+
         this.uiHandler = uiHandler;
         this.simpleLogger = simpleLogger;
     }
@@ -33,12 +44,13 @@ public class UiHandlerLoggingDecorator implements UiHandler {
     public void dispose(long delay) {
         simpleLogger.log("DISPOSE", "Call of dispose(" + delay + ") on " + uiHandler);
         uiHandler.dispose(delay);
+        Thread.setDefaultUncaughtExceptionHandler(null);
     }
 
     @Override
-    public void status(String status) {
-        simpleLogger.log("STATUS", status);
-        uiHandler.status(status);
+    public void progress(String progress) {
+        simpleLogger.log("PROGRESS", progress);
+        uiHandler.progress(progress);
     }
 
     @Override
