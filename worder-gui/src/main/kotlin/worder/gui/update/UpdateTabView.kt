@@ -4,8 +4,8 @@
  *
  * Name: <UpdateTabView.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <04/08/2020, 07:11:08 PM>
- * Version: <14>
+ * Modified: <17/11/2020, 11:19:15 AM>
+ * Version: <15>
  */
 
 package worder.gui.update
@@ -22,6 +22,7 @@ import worder.gui.database.model.WorderDB
 import worder.gui.database.model.WorderUpdateDB
 import worder.gui.database.ui.NoConnectionFragment
 import worder.gui.tornadofx.replaceChildren
+import worder.gui.update.model.Requester
 import worder.gui.update.model.WordBlock
 import worder.gui.update.model.WordsPipeline
 import worder.gui.update.model.impl.DefaultWordsPipeline
@@ -44,9 +45,7 @@ class UpdateTabView : View("Update"), DatabaseEventListener {
     override fun onDatabaseConnection(db: WorderDB) {
         wordsPipeline = DefaultWordsPipeline.createInstance(
                 database = db.updater,
-                //usedRequesters = Requester.defaultRequesters,
-                //usedRequesters = listOf(FakeRequester()),
-                usedRequesters = listOf(FakeRequester.instance),
+                usedRequesters = Requester.defaultRequesters,
                 selectOrder = WorderUpdateDB.SelectOrder.RANDOM
         )
 
