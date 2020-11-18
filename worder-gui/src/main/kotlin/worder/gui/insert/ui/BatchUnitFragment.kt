@@ -4,8 +4,8 @@
  *
  * Name: <BatchUnitFragment.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <04/08/2020, 07:11:08 PM>
- * Version: <103>
+ * Modified: <18/11/2020, 06:15:03 PM>
+ * Version: <104>
  */
 
 package worder.gui.insert.ui
@@ -35,6 +35,8 @@ import tornadofx.paddingTop
 import tornadofx.removeWhen
 import tornadofx.squeezebox
 import tornadofx.textfield
+import tornadofx.useMaxWidth
+import tornadofx.usePrefSize
 import tornadofx.vbox
 import worder.gui.core.styles.WorderCustomStyles
 import worder.gui.core.worderStatusLabel
@@ -71,6 +73,7 @@ class BatchUnitFragment : Fragment() {
                 label(unit.invalidWordsProperty.sizeProperty())
             }
             vbox(spacing = 5) {
+                usePrefSize = true
                 button("Commit") {
                     enableWhen {
                         BatchUnit.BatchUnitAction.COMMIT.getListener()

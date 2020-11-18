@@ -4,8 +4,8 @@
  *
  * Name: <FakeRequester.kt>
  * Created: <24/07/2020, 07:45:55 PM>
- * Modified: <04/08/2020, 07:11:08 PM>
- * Version: <21>
+ * Modified: <18/11/2020, 06:12:19 PM>
+ * Version: <23>
  */
 
 package worder.gui.update.model.impl.requesters
@@ -49,6 +49,16 @@ class FakeRequester : DefinitionRequester, ExampleRequester, TranscriptionReques
             "ад",
             "преисподня",
             "притон",
+            "игорный дом0",
+            "игорный дом1",
+            "игорный дом2",
+            "игорный дом3",
+            "игорный дом4",
+            "игорный дом5",
+            "игорный дом6",
+            "игорный дом7",
+            "игорный дом8",
+            "игорный дом9",
             "игорный дом"
     )
     override val transcriptions: List<String> = listOf(

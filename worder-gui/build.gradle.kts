@@ -5,7 +5,7 @@ import worder.buildsrc.tasks.UpdateVersionTask
 import worder.commons.impl.BintrayExchanger
 import worder.commons.impl.LocalExchanger
 
-version = "1.0.152"
+version = "1.0.171"
 
 plugins {
     application

@@ -4,8 +4,8 @@
  *
  * Name: <MacmillanRequester.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <04/08/2020, 07:11:08 PM>
- * Version: <20>
+ * Modified: <18/11/2020, 06:56:11 PM>
+ * Version: <22>
  */
 
 package worder.gui.update.model.impl.requesters
@@ -25,7 +25,7 @@ class MacmillanRequester private constructor() : DefinitionRequester, ExampleReq
         private val TRANSCRIPTION_PATTERN = Regex("(?<=<span class=\"PRON\">).*?(?=</div>)")
         private val TRANSCRIPTION_FILTER = Regex("( /)|(/)")
         private val DEFINITION_PATTERN = Regex("(?<=<span class=\"DEFINITION\">).*?(?=</span></?div)")
-        private val EXAMPLE_PATTERN = Regex("((?<=<p class=\"EXAMPLE\").*?(?=</p>))|((?<=<div class=\"openEx\").*?(?=</div>))")
+        private val EXAMPLE_PATTERN = Regex("((?<=<p class=\"EXAMPLE\").*?(?=</p>))|((?<=<div class=\"openEx\">).*?(?=</div>))")
         private val COMMON_FILTER = Regex("(<.*?>)|(resource=\"dict_british\">)")
 
         val instance: Requester by lazy {

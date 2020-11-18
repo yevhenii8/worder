@@ -4,8 +4,8 @@
  *
  * Name: <SQLiteFile.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <04/08/2020, 07:11:08 PM>
- * Version: <57>
+ * Modified: <18/11/2020, 06:32:12 PM>
+ * Version: <60>
  */
 
 package worder.gui.database.model.impl
@@ -277,7 +277,7 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
     WorderUpdaterDB's Methods Implementation
      */
 
-    private fun selectNextTxn(): Query = WordTable.slice(WordTable.columns.drop(2) + WordTable.name.lowerCase()).select {
+    private fun selectNextTxn(): Query = WordTable.slice(WordTable.columns.drop(2) + WordTable.name).select {
         (WordTable.tags notLike "%$updatedTagId%" or WordTable.tags.isNull()) and
                 (WordTable.rate less 100) and
                 (WordTable.name.notInList(skippedWords + cachedWords)) and
@@ -296,7 +296,7 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
             "Last call of hasNextWord() returned FALSE!"
         }
 
-        val word = resultRow[WordTable.name.lowerCase()]
+        val word = resultRow[WordTable.name]
         cachedWords.add(word)
 
         if (cachedWords.size > 3)

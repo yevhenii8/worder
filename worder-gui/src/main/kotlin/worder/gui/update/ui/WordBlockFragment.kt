@@ -4,8 +4,8 @@
  *
  * Name: <WordBlockFragment.kt>
  * Created: <24/07/2020, 07:45:55 PM>
- * Modified: <04/08/2020, 07:11:08 PM>
- * Version: <379>
+ * Modified: <18/11/2020, 06:13:53 PM>
+ * Version: <381>
  */
 
 package worder.gui.update.ui
@@ -33,6 +33,7 @@ import tornadofx.separator
 import tornadofx.style
 import tornadofx.toObservable
 import tornadofx.tooltip
+import tornadofx.usePrefSize
 import tornadofx.vbox
 import tornadofx.warning
 import tornadofx.webview
@@ -158,6 +159,7 @@ class WordBlockFragment : Fragment() {
 
             hbox(alignment = Pos.CENTER_RIGHT) {
                 hgrow = Priority.ALWAYS
+                usePrefSize = true
                 vbox(spacing = 5, alignment = Pos.CENTER) {
                     worderStatusLabel(block.statusProperty).style { fontSize = 16.px }
                     add(resolutionUI)

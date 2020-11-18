@@ -4,8 +4,8 @@
  *
  * Name: <InsertBatchFragment.kt>
  * Created: <09/07/2020, 10:43:11 PM>
- * Modified: <04/08/2020, 07:11:08 PM>
- * Version: <401>
+ * Modified: <18/11/2020, 06:46:43 PM>
+ * Version: <403>
  */
 
 package worder.gui.insert.ui
@@ -159,7 +159,7 @@ class InsertBatchFragment : Fragment() {
                     button("Commit All Units") {
                         useMaxWidth = true
                         batch.statusProperty.onChange {
-                            isDisable = it == InsertBatch.InsertBatchStatus.COMMITTING
+                            isDisable = (it != InsertBatch.InsertBatchStatus.READY_TO_COMMIT)
                         }
                         setOnAction {
                             CoroutineScope(Dispatchers.Default).launch {

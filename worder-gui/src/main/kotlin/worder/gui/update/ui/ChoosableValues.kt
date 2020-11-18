@@ -4,8 +4,8 @@
  *
  * Name: <ChoosableValues.kt>
  * Created: <31/07/2020, 04:56:09 PM>
- * Modified: <04/08/2020, 07:11:08 PM>
- * Version: <8>
+ * Modified: <18/11/2020, 07:01:10 PM>
+ * Version: <9>
  */
 
 package worder.gui.update.ui
@@ -32,8 +32,10 @@ class ChoosableValues<E>(initValues: Collection<E> = emptyList(), val chooseLimi
 
 
     init {
+        // TODO("Some UI configuration should be added on Update Tab in order to restrict max count of values")
         choosables = initValues.distinct()
                 .map { ChoosableValue(it) }
+                .take(10)
                 .asObservable()
 
         values.bind(choosables) { it.value }
