@@ -42,4 +42,12 @@
 
 ## Screenshots
 
-![Alt text](/screenshots/worder-launcher.png?raw=true "Worder Launcher")
+### Worder Launcher
+![worder-launcher.png](/screenshots/worder-launcher.png?raw=true "Worder Launcher")
+
+### Worder GUI
+![worder-gui-disconnected-db.png](/screenshots/worder-gui-disconnected-db.png?raw=true "Worder GUI - disconnected DB")
+![worder-gui-connected-db.png](/screenshots/worder-gui-connected-db.png?raw=true "Worder GUI - connected DB")
+![worder-gui-update.png](/screenshots/worder-gui-update.png?raw=true "Worder GUI - Update Tab")
+![worder-gui-insert.png](/screenshots/worder-gui-insert.png?raw=true "Worder GUI - Insert Tab")
+![worder-gui-naked.png](/screenshots/worder-gui-naked.png?raw=true "Worder GUI - No Active Tab")
