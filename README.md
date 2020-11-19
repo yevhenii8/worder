@@ -27,9 +27,9 @@
 
 ## How to run Worder ?
 
-- [x] Using JRE 15 and the launcher: `java -jar worder-launcher-1.0.238.jar`
-- [x] Install `worder-launcher-1.0.238.exe` on Windows or `worder-launcher-1.0.238.deb` on Linux. Run via an application icon.
-- [x] Using Gradle 6.7.1+ or Gradle wrapper (gradlew). Wrapper will download gradle by itself otherwise you have to download Gradle by yourself.
+- [x] On Windows or Linux: using JRE 15 and the launcher: `java -jar worder-launcher_v1.0.238.jar`
+- [x] On Windows or Linux: install `worder-launcher_v1.0.238.exe` or `worder-launcher_v1.0.238.deb`. Run via an application icon.
+- [x] Any OS: use Gradle 6.7.1+ or Gradle wrapper (gradlew) to build application from sources. Wrapper will download gradle by itself. Otherwise, you have to download Gradle by yourself.
   ```
   // Bash
   cd worder-gui
@@ -54,7 +54,8 @@
 
 ## Remarks
 
-1. It was primarily developed and full-tested on Ubuntu\Linux for Ubuntu\Linux.
-2. Windows' executable has been assembled just because I could.
-3. Project doesn't contain unit tests for test purposes :)
+1. Again, launcher can be used only on Linux\Windows. On Mac you can run Worder only through [compiling it from sources](#how-to-run-worder-).
+2. It was primarily developed and full-tested on Ubuntu\Linux for Ubuntu\Linux :)
+3. Project doesn't contain unit tests for test purposes :) By default they're disabled for `gradle build` task.
 4. Only smoke tests have been performed on Windows.
+5. You can upload the launcher from [Releases](https://github.com/yevhenii8/worder/releases) section.
