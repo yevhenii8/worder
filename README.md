@@ -18,12 +18,12 @@
    - [Java Serialization](https://www.tutorialspoint.com/java/java_serialization.htm)
 4. **bash-utils** - contains two bash scripts that were used at some time during development. 
    - *generateFileStamps.sh* - was used for initial generation of source stamps. The problem it was solving stems from the fact that Java Standard Lib doesn't contain methods to access file creation time, and it's kind of [difficult](https://unix.stackexchange.com/questions/24441/get-file-created-creation-time) to obtain one in Ubuntu.
-   - *binlog.sh* - was used in order to investigate how exactly looks java-command with which gradle runs *worder-gui*. It allows to log all requests to any arbitrary executable just before passing them to it. You can "listen" to several executable files simultaneously.
-5. **buildSrc** - a special gradle subproject. Contains custom build logic for worder.
-    - *AssembleExecutableTask.kt* - uses `jpackage` from JDK 15 to pack (the launcher + JRE image) into native executable.
-    - *DeployAppTask.kt* - deploys *worder-gui* to the remote [Bintray repository](https://bintray.com/evgen8) or custom local file system directory. The launcher uses Bintray repository as a default source for updates-check.
-    - *UpdateFileStampsTask.kt* - provides auto-stamp for source files that contains creation time, last modification time, count of compilations.
-    - *UpdateVersionTask.kt* - puts a build number in application version.
+   - *binlog.sh* - was used in order to investigate how exactly looks java-command with which gradle runs *worder-gui*. It allows to log all requests to any arbitrary executable just before passing them along. You can "listen" to several executable files simultaneously.
+5. **buildSrc** - a special gradle subproject. Contains some custom build logic for `worder-gui` and `worder-launcher`.
+    - *AssembleExecutableTask.kt* - uses `jpackage` from JDK 15 to pack (the launcher + JRE image) into a native executable.
+    - *DeployAppTask.kt* - deploys *worder-gui* to the remote [Bintray repository](https://bintray.com/evgen8) or to a specified local directory. The launcher uses Bintray repository as a default source for updates-check.
+    - *UpdateFileStampsTask.kt* - provides auto-stamp for source files that contains creation time, last modification time and count of compilations.
+    - *UpdateVersionTask.kt* - puts a build number in an application version.
 
 ## How to run Worder ?
 
