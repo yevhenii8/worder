@@ -1,3 +1,8 @@
+plugins {
+    id("org.jetbrains.kotlin.jvm") version "1.3.72" apply (false)
+    id("org.openjfx.javafxplugin") version "0.0.9" apply (false)
+}
+
 subprojects {
     repositories {
         jcenter()
@@ -11,7 +16,10 @@ subprojects {
         }
         withType<Wrapper> {
             distributionType = Wrapper.DistributionType.ALL
-            gradleVersion = "6.7"
+            gradleVersion = "6.7.1"
+        }
+        withType<Test> {
+            onlyIf { project.hasProperty("devThroughTest") }
         }
     }
 }

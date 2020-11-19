@@ -3,9 +3,7 @@ import worder.buildsrc.tasks.AssembleExecutableTask
 import worder.buildsrc.tasks.UpdateFileStampsTask
 import worder.buildsrc.tasks.UpdateVersionTask
 
-
-version = "1.0.238"
-
+version = "1.0.239"
 
 plugins {
     application
@@ -21,19 +19,13 @@ application {
 }
 
 tasks {
-    val updateFileStampsTask by register<UpdateFileStampsTask>("updateFileStamps")
     val updateVersionTask by register<UpdateVersionTask>("updateVersion")
     val assembleExecutableTask by register<AssembleExecutableTask>("assembleExecutable")
-
-
-    with(compileJava.get()) {
-        dependsOn(updateFileStampsTask)
-        dependsOn(updateVersionTask)
-    }
-    withType<UpdateFileStampsTask> {
+    val updateFileStampsTask by register<UpdateFileStampsTask>("updateFileStamps") {
         sourcesDir = projectDir.resolve("src")
         sourcesFormats = listOf(".java")
     }
+
     withType<Jar> {
         manifest {
             attributes["Main-Class"] = "worder.launcher.App"
@@ -43,7 +35,10 @@ tasks {
                 configurations.default.get().files.map { if (it.isDirectory) it else zipTree(it) }
         )
     }
-
+    with(compileJava.get()) {
+        dependsOn(updateFileStampsTask)
+        dependsOn(updateVersionTask)
+    }
     gradle.taskGraph.whenReady {
         if (hasTask(assembleExecutableTask)) {
             updateVersionTask.enabled = false
