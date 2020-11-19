@@ -11,10 +11,10 @@
    - [SQLite JDBC](https://github.com/xerial/sqlite-jdbc)
    - [Exposed](https://github.com/JetBrains/Exposed)
 2. **worder-launcher** - a lightweight GUI application that has zero dependencies list and provides hassle-free running of *worder-gui*. Can be used as `jar file + local JRE 15` or with installation via native installers (`.exe for Windows and .deb for Linux are available`). The installers contain packed java image and therefore don't need JVM to be installed.
-   - [Java 15](https://jdk.java.net/15/)
+   - [Java](https://jdk.java.net/15/)
    - [Java Swing](https://en.wikipedia.org/wiki/Swing_(Java))
 3. **worder-commons** - common build logic that is used by both *buildSrc* and *worder-launcher*. Has zero dependencies list as well that forces using `Java Serialization` instead of e.g. JSON.
-   - [Java 15](https://jdk.java.net/15/)
+   - [Java](https://jdk.java.net/15/)
    - [Java Serialization](https://www.tutorialspoint.com/java/java_serialization.htm)
 4. **bash-utils** - contains two bash scripts that were used at some time during development. 
    - *generateFileStamps.sh* - was used for initial generation of source stamps. The problem it was solving stems from the fact that Java Standard Lib doesn't contain methods to access file creation time, and it's kind of [difficult](https://unix.stackexchange.com/questions/24441/get-file-created-creation-time) to obtain one in Ubuntu.
@@ -51,3 +51,10 @@
 ![worder-gui-update.png](/screenshots/worder-gui-update.png?raw=true "Worder GUI - Update Tab")
 ![worder-gui-insert.png](/screenshots/worder-gui-insert.png?raw=true "Worder GUI - Insert Tab")
 ![worder-gui-naked.png](/screenshots/worder-gui-naked.png?raw=true "Worder GUI - No Active Tab")
+
+## Remarks
+
+1. It was primarily developed and full-tested on Ubuntu\Linux for Ubuntu\Linux.
+2. Windows' executable has been assembled just because I could.
+3. Project doesn't contain unit tests for test purposes :)
+4. Only smoke tests have been performed on Windows.
