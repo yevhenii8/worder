@@ -4,8 +4,8 @@
  *
  * Name: <WorderRunner.java>
  * Created: <05/11/2020, 08:36:34 PM>
- * Modified: <21/11/2020, 10:24:49 PM>
- * Version: <369>
+ * Modified: <21/11/2020, 11:48:24 PM>
+ * Version: <370>
  */
 
 package worder.launcher.model;
@@ -43,7 +43,7 @@ public class WorderRunner {
         this.runningType = runningType;
         this.descriptor = descriptor;
         this.artifactUrls = worderHome.listAsUrls("artifacts");
-        this.worderArgs = (worderArgs == null) ? null : worderArgs.split(" ");
+        this.worderArgs = (worderArgs == null) ? null : worderArgs.split("(?<!\") (?!\")");
     }
 
 
