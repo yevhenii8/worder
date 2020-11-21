@@ -4,8 +4,8 @@
  *
  * Name: <AppEntry.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <15/11/2020, 07:54:45 PM>
- * Version: <144>
+ * Modified: <21/11/2020, 08:57:30 PM>
+ * Version: <147>
  */
 
 package worder.gui
@@ -20,53 +20,58 @@ import worder.gui.core.styles.WorderDefaultStyles
 import worder.gui.database.DatabaseController
 import worder.gui.insert.InsertTabView
 import java.io.File
+import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardCopyOption
+import kotlin.system.exitProcess
 
 class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomStyles::class) {
     companion object {
         private val databaseController: DatabaseController = find()
-        private val samplePath: Path = Path.of("sample")
-        private val originalSampleDB: File = samplePath.resolve("sample-db.bck").toFile()
-        private val devInsertFiles: List<File> = listOf(
-                File("$samplePath/inserting/words0.txt"),
-                File("$samplePath/inserting/words1.txt"),
-                File("$samplePath/inserting/words2.txt"),
-                File("$samplePath/inserting/words3.txt"),
-                File("$samplePath/inserting/words4.txt"),
-                File("$samplePath/inserting/words5.txt")
-        )
+        private val obtainDemoDB: (Path) -> Path = { it.resolve("demo-db-backup.bck") }
+        private val obtainDemoFiles: (Path) -> Collection<File> = {
+            listOf(
+                    it.resolve("demo-words0.txt").toFile(),
+                    it.resolve("demo-words1.txt").toFile(),
+                    it.resolve("demo-words2.txt").toFile(),
+                    it.resolve("demo-words3.txt").toFile(),
+                    it.resolve("demo-words4.txt").toFile(),
+                    it.resolve("demo-words5.txt").toFile()
+            )
+        }
 
         val worderVersion: String = Companion::class.java.getResource("/version").readText()
+        val obtainDemoTmpDB: (Path) -> Path = { it.resolve("demo-db-backup-tmp.bck") }
+        val isConnectedToDemo: (Path) -> Boolean = { databaseController.db?.toString() == obtainDemoTmpDB(it).toString() }
         val mainView: MainView = find()
-        val sampleDB: File = samplePath.resolve("sample-db_TMP.bck").toFile()
-        val isConnectedToSample: Boolean
-            get() = databaseController.db?.toString()?.substringAfterLast('/') == sampleDB.name
-        var keepSample: Boolean = false
 
 
-        private fun withSampleDB(block: (samplePath: Path) -> Unit) {
-            if (!isConnectedToSample) {
-                require(originalSampleDB.exists()) {
-                    "There's no sample-db provided! Please check: $originalSampleDB"
+        private fun withDemoDB(pathToDemo: Path = Path.of("demo"), block: (demoPath: Path) -> Unit) {
+            val demoDB = obtainDemoDB(pathToDemo)
+            val demoTmpDB = obtainDemoTmpDB(pathToDemo)
+
+            if (!isConnectedToDemo(pathToDemo)) {
+                require(Files.exists(demoDB)) {
+                    "There's no demo files provided! Please check: $pathToDemo"
                 }
 
-                originalSampleDB.copyTo(sampleDB, overwrite = true)
-                databaseController.connectToSqlLiteFile(sampleDB)
+                Files.copy(demoDB, demoTmpDB, StandardCopyOption.REPLACE_EXISTING)
+                databaseController.connectToSqlLiteFile(demoTmpDB.toFile())
             }
 
-            block.invoke(samplePath)
+            block.invoke(pathToDemo)
         }
 
-
-        fun runDevInsert() = withSampleDB {
+        private fun runDevInsert() = withDemoDB {
             mainView.switchToInsertTab()
-            find<InsertTabView>().generateInsertBatch(devInsertFiles)
+            find<InsertTabView>().generateInsertBatch(obtainDemoFiles(it))
         }
 
-        fun runDevInsertHard() = withSampleDB {
+        private fun runDevInsertHard() = withDemoDB {
+            val demoFiles = obtainDemoFiles(it)
             val devInsertFilesMany = mutableListOf<File>().apply {
                 repeat(10) {
-                    addAll(devInsertFiles)
+                    addAll(demoFiles)
                 }
             }
 
@@ -74,11 +79,7 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomSt
             find<InsertTabView>().generateInsertBatch(devInsertFilesMany)
         }
 
-        fun runDevUpdate() = withSampleDB {
-            mainView.switchToUpdateTab()
-        }
-
-        fun runDevDebug() {
+        fun printEnvInfo() {
             println("Used JRE: ${Runtime.version()}")
             println("Used KotlinC: ${KotlinVersion.CURRENT}")
 
@@ -86,6 +87,32 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomSt
             println("worder classloader name: ${this::class.java.classLoader.name}")
             println("worder classloader parent: ${this::class.java.classLoader.parent}")
             println("worder classloader parent name: ${this::class.java.classLoader.parent.name}")
+
+            exitProcess(0)
+        }
+
+        fun printHelp() {
+            val nameMaxLen = WorderArgument.values().map { it.designation.length }.max()!!
+            val descMaxLen = WorderArgument.values().map { it.description.length }.max()!!
+
+            println()
+            println("-".repeat(7 + nameMaxLen + descMaxLen))
+            println("Be aware, all of 'dev_' arguments are for dev purposes. Don't use them.")
+            println("-".repeat(7 + nameMaxLen + descMaxLen))
+            println()
+
+            WorderArgument.values().forEach {
+                println("    " + it.name + " ".repeat(nameMaxLen - it.name.length + 3) + it.description)
+            }
+
+            exitProcess(0)
+        }
+
+        fun runDemo() {
+            val pathToDemo = Path.of(WorderArgument.DEMO.value!!)
+            withDemoDB(pathToDemo) {
+                find<InsertTabView>().generateInsertBatch(obtainDemoFiles(it))
+            }
         }
     }
 
@@ -102,17 +129,23 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomSt
 
     override fun stop() {
         databaseController.disconnect()
-
-        if (isConnectedToSample && !keepSample)
-            sampleDB.delete()
-
         super.stop()
     }
 
 
     private fun processArguments() {
         val mappedArgs = FX.application.parameters.raw
-                .associateWith { str -> WorderArgument.values().find { it.value == str } }
+                .associateWith { str ->
+                    val argName = str.substringBefore('=')
+                    val argValue = str.substringAfter('=')
+                    val worderArgument = WorderArgument.values()
+                            .find { it.designation == argName }
+
+                    if (argValue != str)
+                        worderArgument?.let { it.value = argValue }
+
+                    worderArgument
+                }
 
         require(mappedArgs.all { it.value != null }) {
             "Unexpected argument(s): ${mappedArgs.filterValues { it == null }.keys}"
@@ -121,17 +154,51 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomSt
         mappedArgs.apply {
             if (size > 0)
                 mainView.title += " (${keys.joinToString(" ")})"
-            forEach { it.value!!.action.invoke() }
+            forEach { it.value?.action?.invoke() }
         }
     }
 
 
-    enum class WorderArgument(val value: String, @Suppress("unused") val description: String, val action: () -> Unit) {
-        DEV_DEBUG("--dev-debug", "Prints additional info (JRE, KotlinC) when app starts.", AppEntry.Companion::runDevDebug),
-        DEV_DATABASE("--dev-sample", "Automatically connects to the sampleDB.", { withSampleDB { } }),
-        DEV_DATABASE_KEEP("--dev-sample-keep", "Automatically connects to the sampleDB and does NOT remove it on exit.", { withSampleDB { keepSample = true } }),
-        DEV_INSERT("--dev-insert", "Development stage for the Insert Tab.", AppEntry.Companion::runDevInsert),
-        DEV_INSERT_HARD("--dev-insert-hard", "Development stage for the Insert Tab with hard load.", AppEntry.Companion::runDevInsertHard),
-        DEV_UPDATE("--dev-update", "Development stage for the Update Tab.", AppEntry.Companion::runDevUpdate);
+    enum class WorderArgument(
+            val designation: String,
+            val description: String,
+            val action: () -> Unit,
+            var value: String? = null
+    ) {
+        DEMO(
+                "--demo",
+                "Runs application in a demonstration mode. Requires path to demo directory to be specified.",
+                AppEntry.Companion::runDemo
+        ),
+        HELP(
+                "--help",
+                "Prints all possible arguments and exits.",
+                AppEntry.Companion::printHelp
+        ),
+        PRINT_ENV_INFO(
+                "--print-env-info",
+                "Prints environment info and exits.",
+                AppEntry.Companion::printEnvInfo
+        ),
+        DEV_DEMO(
+                "--dev-demo",
+                "Automatically connects to the demo-db.",
+                { withDemoDB { } }
+        ),
+        DEV_INSERT(
+                "--dev-insert",
+                "Development stage for the Insert Tab.",
+                AppEntry.Companion::runDevInsert
+        ),
+        DEV_INSERT_HARD(
+                "--dev-insert-hard",
+                "Development stage for the Insert Tab with hard load.",
+                AppEntry.Companion::runDevInsertHard
+        ),
+        DEV_UPDATE(
+                "--dev-update",
+                "Development stage for the Update Tab.",
+                { withDemoDB { mainView.switchToUpdateTab() } }
+        );
     }
 }

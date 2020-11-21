@@ -1,11 +1,13 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import worder.buildsrc.tasks.DeployAppTask
+import worder.buildsrc.tasks.DeployDemoTask
 import worder.buildsrc.tasks.UpdateFileStampsTask
 import worder.buildsrc.tasks.UpdateVersionTask
+import worder.commons.IOExchanger
 import worder.commons.impl.BintrayExchanger
 import worder.commons.impl.LocalExchanger
 
-version = "1.0.176"
+version = "1.0.183"
 
 plugins {
     application
@@ -45,39 +47,53 @@ application {
 }
 
 tasks {
+    var bintrayExchanger: IOExchanger? = null
+    val bintrayUser: String? by project
+    val bintrayKey: String? by project
+
+    if (bintrayUser != null && bintrayKey != null)
+        bintrayExchanger = BintrayExchanger(
+                bintrayUser as String,
+                bintrayKey as String,
+                "generic",
+                "worder-gui",
+                "Latest"
+        )
+
     val updateVersionTask by register<UpdateVersionTask>("updateVersion")
     val updateFileStampsTask by register<UpdateFileStampsTask>("updateFileStamps") {
         sourcesDir = projectDir.resolve("src")
         sourcesFormats = listOf(".kt")
     }
-    val deployLocalTask by register<DeployAppTask>("deployLocal") {
+    val deployAppLocalTask by register<DeployAppTask>("deployAppLocal") {
         deployExchanger = LocalExchanger(projectDir.toPath().resolve("WorderLocalDistribution"))
     }
-    val deployBintrayTask by register<DeployAppTask>("deployBintray") {
-        val bintrayUser: String? by project
-        val bintrayKey: String? by project
-
-        if (bintrayUser != null && bintrayKey != null)
-            deployExchanger = BintrayExchanger(
-                    bintrayUser as String,
-                    bintrayKey as String,
-                    "generic",
-                    "worder-gui",
-                    "Latest"
-            )
+    val deployAppBintrayTask by register<DeployAppTask>("deployAppBintray") {
+        if (bintrayExchanger != null) {
+            deployExchanger = bintrayExchanger
+        }
+    }
+    val deployDemoBintrayTask by register<DeployDemoTask>("deployDemoBintray") {
+        if (bintrayExchanger != null) {
+            deployExchanger = bintrayExchanger
+        }
     }
 
-    withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "1.8"
-    }
     with(compileKotlin.get()) {
         dependsOn(updateFileStampsTask)
         dependsOn(updateVersionTask)
     }
     gradle.taskGraph.whenReady {
-        if (hasTask(deployLocalTask) || hasTask(deployBintrayTask)) {
+        if (
+                hasTask(deployAppLocalTask) ||
+                hasTask(deployAppBintrayTask) ||
+                hasTask(deployDemoBintrayTask)
+        ) {
             updateVersionTask.enabled = false
             updateFileStampsTask.enabled = false
         }
+    }
+    withType<KotlinCompile> {
+        kotlinOptions.jvmTarget = "1.8"
     }
 }

@@ -61,7 +61,7 @@ open class DeployAppTask : DefaultTask() {
 
     init {
         group = "Distribution"
-        description = "Publishes Worder's artifacts, dependencies and descriptor to bintray. It's OS-dependent!"
+        description = "Publishes Worder's artifacts, dependencies and descriptor with specified Exchanger. It's OS-dependent!"
 
         dependsOn(project.tasks.getByName("configJavafxRun"))
         dependsOn(project.tasks.getByName(JavaPlugin.JAR_TASK_NAME))

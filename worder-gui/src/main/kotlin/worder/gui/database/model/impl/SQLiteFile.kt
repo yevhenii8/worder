@@ -4,8 +4,8 @@
  *
  * Name: <SQLiteFile.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <18/11/2020, 06:32:12 PM>
- * Version: <60>
+ * Modified: <21/11/2020, 08:54:11 PM>
+ * Version: <61>
  */
 
 package worder.gui.database.model.impl
@@ -33,7 +33,6 @@ import org.jetbrains.exposed.sql.count
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.intParam
-import org.jetbrains.exposed.sql.lowerCase
 import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll

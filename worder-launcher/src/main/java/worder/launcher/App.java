@@ -4,8 +4,8 @@
  *
  * Name: <App.java>
  * Created: <04/08/2020, 07:03:59 PM>
- * Modified: <17/11/2020, 10:48:39 PM>
- * Version: <637>
+ * Modified: <21/11/2020, 08:58:11 PM>
+ * Version: <638>
  */
 
 package worder.launcher;
@@ -138,6 +138,10 @@ public class App {
             worderArgs = LauncherArgument.ARGS.value;
         }
 
+        private static void runDemo() {
+
+        }
+
         private static void printDescriptor(AppDescriptor descriptor) {
             Map<String, String> values = new LinkedHashMap<>();
             values.put("Generated", descriptor.getGenerated());
@@ -182,8 +186,10 @@ public class App {
                     Arrays.stream(LauncherCommand.values()).mapToInt(command -> command.name.length())
             ).max().orElseThrow();
 
+            System.out.println();
+            System.out.println("-".repeat(7 + nameMaxLen + descMaxLen));
             System.out.println("You can use one or more arguments at once, but only ONE command.");
-            System.out.println("-".repeat(5 + nameMaxLen + descMaxLen));
+            System.out.println("-".repeat(7 + nameMaxLen + descMaxLen));
             System.out.println();
 
             System.out.println("Possible execution arguments: ");
@@ -239,6 +245,11 @@ public class App {
                     "Passes its value to Worder as arguments.",
                     ArgumentsHandler::setWorderArgs
             ),
+            DEMO(
+                    "--demo",
+                    "Prepares demo-files if needed and runs Worder in demonstration mode.",
+                    ArgumentsHandler::runDemo
+                    ),
             WORDER_HOME(
                     "--worder-home",
                     "Sets specified path as a Worder Home Catalog.",
@@ -286,17 +297,17 @@ public class App {
             ),
             PRINT_DISTRIBUTION_DESCRIPTORS(
                     "--print-distribution-descriptors",
-                    "Prints all descriptors from distribution and exits.",
+                    "Prints all descriptors from a distribution channel and exits.",
                     ArgumentsHandler::printDistributionDescriptors
             ),
             PRINT_HOME_DESCRIPTOR(
                     "--print-home-descriptor",
-                    "Prints the descriptor from home catalog and exits.",
+                    "Prints a descriptor from a home catalog and exits.",
                     ArgumentsHandler::printHomeDescriptor
             ),
             PRINT_CHANNELS(
                     "--print-channels",
-                    "Prints current Worder Home && Worder Distribution and exits.",
+                    "Prints current Worder Home and Worder Distribution then exits.",
                     ArgumentsHandler::printChannels
             );
 
