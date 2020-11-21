@@ -4,8 +4,8 @@
  *
  * Name: <App.java>
  * Created: <04/08/2020, 07:03:59 PM>
- * Modified: <21/11/2020, 11:15:38 PM>
- * Version: <643>
+ * Modified: <21/11/2020, 11:35:06 PM>
+ * Version: <644>
  */
 
 package worder.launcher;
@@ -61,9 +61,9 @@ public class App {
             demoHandler.prepareDemoFiles();
 
             if (worderArgs == null)
-                worderArgs = "--demo=" + demoHandler.getDemoCatalog();
+                worderArgs = "--demo=\"" + demoHandler.getDemoCatalog() + "\"";
             else
-                worderArgs += " --demo=" + demoHandler.getDemoCatalog();
+                worderArgs += " --demo=\"" + demoHandler.getDemoCatalog() + "\"";
         }
 
         WorderRunner worderRunner = new WorderRunner(uiHandler, worderHome, descriptorsHandler.getHomeDescriptor(), runningType, worderArgs);
@@ -84,10 +84,11 @@ public class App {
                     .forEach(rawArg -> {
                         var index = rawArg.indexOf("=");
                         var rawArgName = index > 0 ? rawArg.substring(0, index) : rawArg;
+                        var rawArgValue = parseArgumentValue(rawArg);
                         var launcherArg = LauncherArgument.fromName(rawArgName);
 
                         if (launcherArg != null) {
-                            launcherArg.value = rawArg.substring(index + 1);
+                            launcherArg.value = rawArgValue;
                             launcherArgs.add(launcherArg);
                         } else {
                             var launcherCmd = LauncherCommand.fromName(rawArgName);
@@ -97,7 +98,7 @@ public class App {
                                 return;
                             }
 
-                            launcherCmd.value = rawArg.substring(index + 1);
+                            launcherCmd.value = rawArgValue;
                             parsedCommands.add(launcherCmd);
                         }
                     });
@@ -249,6 +250,19 @@ public class App {
 
         private boolean hasCommandToExecute() {
             return launcherCmd != null;
+        }
+
+        private String parseArgumentValue(String rawArg) {
+            var index = rawArg.indexOf("=");
+            var value = rawArg.substring(index + 1);
+
+            if (value.endsWith("\""))
+                value = value.substring(0, value.length() - 1);
+
+            if (value.startsWith("\""))
+                value = value.substring(1);
+
+            return value;
         }
 
 

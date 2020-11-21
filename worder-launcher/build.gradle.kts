@@ -3,7 +3,7 @@ import worder.buildsrc.tasks.AssembleExecutableTask
 import worder.buildsrc.tasks.UpdateFileStampsTask
 import worder.buildsrc.tasks.UpdateVersionTask
 
-version = "1.0.253"
+version = "1.0.256"
 
 plugins {
     application

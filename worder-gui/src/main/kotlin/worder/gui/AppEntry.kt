@@ -4,8 +4,8 @@
  *
  * Name: <AppEntry.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <21/11/2020, 11:14:27 PM>
- * Version: <148>
+ * Modified: <21/11/2020, 11:35:36 PM>
+ * Version: <149>
  */
 
 package worder.gui
@@ -137,7 +137,7 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomSt
         val mappedArgs = FX.application.parameters.raw
                 .associateWith { str ->
                     val argName = str.substringBefore('=')
-                    val argValue = str.substringAfter('=')
+                    val argValue = str.substringAfter('=').removePrefix("\"").removeSuffix("\"")
                     val worderArgument = WorderArgument.values()
                             .find { it.designation == argName }
 
