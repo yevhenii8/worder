@@ -65,7 +65,7 @@ public class DemoHandler {
         }
 
         if (!Files.isDirectory(demoCatalog))
-            throw new IllegalStateException("Worder home doesn't contain 'demo' directory! Please check Internet connection and try again!");
+            throw new IllegalStateException("Launcher didn't detect demo-file and could not download them! Please check Internet connection and try again!");
     }
 
     public Path getDemoCatalog() {
