@@ -4,8 +4,8 @@
  *
  * Name: <AppEntry.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <21/11/2020, 11:35:36 PM>
- * Version: <149>
+ * Modified: <22/11/2020, 12:29:18 AM>
+ * Version: <151>
  */
 
 package worder.gui
@@ -92,17 +92,17 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomSt
         }
 
         fun printHelp() {
-            val nameMaxLen = WorderArgument.values().map { it.designation.length }.max()!!
+            val notationMaxLen = WorderArgument.values().map { it.notation.length }.max()!!
             val descMaxLen = WorderArgument.values().map { it.description.length }.max()!!
 
             println()
-            println("-".repeat(7 + nameMaxLen + descMaxLen))
+            println("-".repeat(7 + notationMaxLen + descMaxLen))
             println("Be aware, all of 'dev_' arguments are for dev purposes. Don't use them.")
-            println("-".repeat(7 + nameMaxLen + descMaxLen))
+            println("-".repeat(7 + notationMaxLen + descMaxLen))
             println()
 
             WorderArgument.values().forEach {
-                println("    " + it.name + " ".repeat(nameMaxLen - it.name.length + 3) + it.description)
+                println("    " + it.notation + " ".repeat(notationMaxLen - it.notation.length + 3) + it.description)
             }
 
             exitProcess(0)
@@ -163,12 +163,13 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomSt
             val designation: String,
             val description: String,
             val action: () -> Unit,
-            var value: String? = null
+            notation: String? = null
     ) {
         DEMO(
                 "--demo",
                 "Runs application in a demonstration mode. Requires path to demo directory to be specified.",
-                AppEntry.Companion::runDemo
+                AppEntry.Companion::runDemo,
+                "--demo=\"path\""
         ),
         HELP(
                 "--help",
@@ -200,5 +201,9 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomSt
                 "Development stage for the Update Tab.",
                 { withDemoDB { mainView.switchToUpdateTab() } }
         );
+
+
+        val notation: String = notation ?: designation
+        var value: String? = null
     }
 }

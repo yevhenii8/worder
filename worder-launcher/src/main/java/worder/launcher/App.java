@@ -4,8 +4,8 @@
  *
  * Name: <App.java>
  * Created: <04/08/2020, 07:03:59 PM>
- * Modified: <21/11/2020, 11:35:06 PM>
- * Version: <644>
+ * Modified: <22/11/2020, 12:24:27 AM>
+ * Version: <646>
  */
 
 package worder.launcher;
@@ -182,26 +182,26 @@ public class App {
                     Arrays.stream(LauncherArgument.values()).mapToInt(argument -> argument.description.length()),
                     Arrays.stream(LauncherCommand.values()).mapToInt(command -> command.description.length())
             ).max().orElseThrow();
-            var nameMaxLen = IntStream.concat(
-                    Arrays.stream(LauncherArgument.values()).mapToInt(argument -> argument.name.length()),
-                    Arrays.stream(LauncherCommand.values()).mapToInt(command -> command.name.length())
+            var notationMaxLen = IntStream.concat(
+                    Arrays.stream(LauncherArgument.values()).mapToInt(argument -> argument.notation.length()),
+                    Arrays.stream(LauncherCommand.values()).mapToInt(command -> command.notation.length())
             ).max().orElseThrow();
 
             System.out.println();
-            System.out.println("-".repeat(7 + nameMaxLen + descMaxLen));
+            System.out.println("-".repeat(7 + notationMaxLen + descMaxLen));
             System.out.println("You can use one or more arguments at once, but only ONE command.");
-            System.out.println("-".repeat(7 + nameMaxLen + descMaxLen));
+            System.out.println("-".repeat(7 + notationMaxLen + descMaxLen));
             System.out.println();
 
             System.out.println("Possible execution arguments: ");
             for (LauncherArgument argument : LauncherArgument.values())
-                System.out.println("    " + argument.name + " ".repeat(nameMaxLen - argument.name.length() + 3) + argument.description);
+                System.out.println("    " + argument.notation + " ".repeat(notationMaxLen - argument.notation.length() + 3) + argument.description);
 
             System.out.println();
 
             System.out.println("Possible commands: ");
             for (LauncherCommand command : LauncherCommand.values())
-                System.out.println("    " + command.name + " ".repeat(nameMaxLen - command.name.length() + 3) + command.description);
+                System.out.println("    " + command.notation + " ".repeat(notationMaxLen - command.notation.length() + 3) + command.description);
         }
 
         private static void printDistributionDescriptors() {
@@ -269,39 +269,46 @@ public class App {
         private enum LauncherArgument {
             ARGS(
                     "--args",
+                    "--args=\"--arg0 --arg1\"",
                     "Passes its value to Worder as arguments.",
                     ArgumentsHandler::setWorderArgs
             ),
             DEMO(
                     "--demo",
+                    null,
                     "Prepares demo-files if needed and runs Worder in a demonstration mode.",
                     ArgumentsHandler::setDemoFlag
             ),
             WORDER_HOME(
                     "--worder-home",
+                    "--worder-home=\"path\"",
                     "Sets specified path as a Worder Home Catalog.",
                     ArgumentsHandler::setCustomWorderHome
             ),
             WORDER_DISTRIBUTION(
                     "--worder-distribution",
+                    "--worder-distribution=\"path\"",
                     "Sets specified path as a Worder Distribution",
                     ArgumentsHandler::setCustomWorderDistribution
             ),
             RUN_SEPARATED(
                     "--run-separated",
+                    null,
                     "Launches the application as a separate process.",
                     ArgumentsHandler::setSeparatedRunning
             );
 
 
             private final String name;
+            private final String notation;
             private final String description;
             private final Runnable action;
             private String value;
 
 
-            LauncherArgument(String name, String description, Runnable action) {
+            LauncherArgument(String name, String notation, String description, Runnable action) {
                 this.name = name;
+                this.notation = notation == null ? name : notation;
                 this.description = description;
                 this.action = action;
             }
@@ -319,34 +326,40 @@ public class App {
         private enum LauncherCommand {
             HELP(
                     "--help",
+                    null,
                     "Prints all possible arguments and exits.",
                     ArgumentsHandler::printHelp
             ),
             PRINT_DISTRIBUTION_DESCRIPTORS(
                     "--print-distribution-descriptors",
+                    null,
                     "Prints all descriptors from a distribution channel and exits.",
                     ArgumentsHandler::printDistributionDescriptors
             ),
             PRINT_HOME_DESCRIPTOR(
                     "--print-home-descriptor",
+                    null,
                     "Prints a descriptor from a home catalog and exits.",
                     ArgumentsHandler::printHomeDescriptor
             ),
             PRINT_CHANNELS(
                     "--print-channels",
+                    null,
                     "Prints current Worder Home and Worder Distribution then exits.",
                     ArgumentsHandler::printChannels
             );
 
 
             private final String name;
+            private final String notation;
             private final String description;
             private final Runnable action;
             private String value;
 
 
-            LauncherCommand(String name, String description, Runnable action) {
+            LauncherCommand(String name, String notation, String description, Runnable action) {
                 this.name = name;
+                this.notation = notation == null ? name : notation;
                 this.description = description;
                 this.action = action;
             }

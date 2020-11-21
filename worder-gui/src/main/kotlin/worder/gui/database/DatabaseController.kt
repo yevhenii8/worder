@@ -4,8 +4,8 @@
  *
  * Name: <DatabaseController.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <21/11/2020, 08:54:11 PM>
- * Version: <30>
+ * Modified: <22/11/2020, 12:11:10 AM>
+ * Version: <32>
  */
 
 package worder.gui.database
@@ -32,12 +32,13 @@ class DatabaseController : Controller(), DatabaseEventProducer {
     )
 
     private val listeners = mutableListOf<DatabaseEventListener>()
+    private var dbFileName: String by controllerStats.bindThroughValue(initValue = null, title = "Data source")
     private var timerValue: String by controllerStats.bindThroughValue(initValue = "00:00:00", title = "Session duration")
     private var dbFileSize: String by controllerStats.bindThroughValue(initValue = "0 KiB", title = "Database size")
     private var currentDB: File? = null
     private var secTicker: Job? = null
 
-    var db: WorderDB? by controllerStats.bindThroughValue(initValue = null, title = "Data source")
+    var db: WorderDB? = null
         private set
 
 
@@ -48,6 +49,7 @@ class DatabaseController : Controller(), DatabaseEventProducer {
     fun connectToSqlLiteFile(file: File) {
         currentDB = file
         dbFileSize = "${(currentDB!!.length() / 1024).formatGrouped()} KiB"
+        dbFileName = file.name
         connect(SQLiteFile.createInstance(file))
     }
 
