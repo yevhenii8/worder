@@ -4,8 +4,8 @@
  *
  * Name: <DescriptorsHandler.java>
  * Created: <28/10/2020, 10:50:39 PM>
- * Modified: <17/11/2020, 10:49:21 PM>
- * Version: <467>
+ * Modified: <21/11/2020, 11:05:59 PM>
+ * Version: <468>
  */
 
 package worder.launcher.model;
@@ -99,7 +99,7 @@ public class DescriptorsHandler {
             var value = entry.getValue();
 
             if (value == -1) {
-                uiHandler.progress("Removing '" + name + "' ...");
+                uiHandler.progress("Deleting '" + name + "' ...");
                 worderHome.deleteFile("artifacts/" + name);
             }
             if (value == 1) {

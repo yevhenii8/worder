@@ -4,8 +4,8 @@
  *
  * Name: <App.java>
  * Created: <04/08/2020, 07:03:59 PM>
- * Modified: <21/11/2020, 08:58:11 PM>
- * Version: <638>
+ * Modified: <21/11/2020, 11:15:38 PM>
+ * Version: <643>
  */
 
 package worder.launcher;
@@ -15,6 +15,7 @@ import worder.commons.IOExchanger;
 import worder.commons.impl.BintrayExchanger;
 import worder.commons.impl.LocalExchanger;
 import worder.launcher.logging.SimpleLogger;
+import worder.launcher.model.DemoHandler;
 import worder.launcher.model.DescriptorsHandler;
 import worder.launcher.model.WorderRunner;
 import worder.launcher.ui.UiHandler;
@@ -30,6 +31,7 @@ public class App {
     private static WorderRunner.RunningType runningType = WorderRunner.RunningType.IN_PLACE;
     private static IOExchanger worderDistribution = new BintrayExchanger("evgen8", "generic");
     private static IOExchanger worderHome = new LocalExchanger(DescriptorsHandler.detectWorderHome());
+    private static boolean isDemoActive = false;
     private static String worderArgs = null;
 
 
@@ -53,6 +55,16 @@ public class App {
 
         DescriptorsHandler descriptorsHandler = new DescriptorsHandler(uiHandler, worderDistribution, worderHome);
         descriptorsHandler.prepareWorderHome();
+
+        if (isDemoActive) {
+            DemoHandler demoHandler = new DemoHandler(uiHandler, worderDistribution, worderHome);
+            demoHandler.prepareDemoFiles();
+
+            if (worderArgs == null)
+                worderArgs = "--demo=" + demoHandler.getDemoCatalog();
+            else
+                worderArgs += " --demo=" + demoHandler.getDemoCatalog();
+        }
 
         WorderRunner worderRunner = new WorderRunner(uiHandler, worderHome, descriptorsHandler.getHomeDescriptor(), runningType, worderArgs);
         worderRunner.runWorder();
@@ -107,21 +119,6 @@ public class App {
             launcherCmd = parsedCommands.isEmpty() ? null : parsedCommands.get(0);
         }
 
-
-        private void applyExecutionArguments() {
-            launcherArgs.forEach(it -> it.action.run());
-        }
-
-        private void executeCommandIfPresent() {
-            if (launcherCmd != null)
-                launcherCmd.action.run();
-        }
-
-        private boolean hasCommandToExecute() {
-            return launcherCmd != null;
-        }
-
-
         private static void setCustomWorderHome() {
             worderHome = new LocalExchanger(Path.of(LauncherArgument.WORDER_HOME.value));
         }
@@ -135,11 +132,14 @@ public class App {
         }
 
         private static void setWorderArgs() {
-            worderArgs = LauncherArgument.ARGS.value;
+            if (worderArgs == null)
+                worderArgs = LauncherArgument.ARGS.value;
+            else
+                worderArgs += " " + LauncherArgument.ARGS.value;
         }
 
-        private static void runDemo() {
-
+        private static void setDemoFlag() {
+            isDemoActive = true;
         }
 
         private static void printDescriptor(AppDescriptor descriptor) {
@@ -238,6 +238,19 @@ public class App {
             System.out.println("Worder Distribution:  " + worderDistribution);
         }
 
+        private void applyExecutionArguments() {
+            launcherArgs.forEach(it -> it.action.run());
+        }
+
+        private void executeCommandIfPresent() {
+            if (launcherCmd != null)
+                launcherCmd.action.run();
+        }
+
+        private boolean hasCommandToExecute() {
+            return launcherCmd != null;
+        }
+
 
         private enum LauncherArgument {
             ARGS(
@@ -247,9 +260,9 @@ public class App {
             ),
             DEMO(
                     "--demo",
-                    "Prepares demo-files if needed and runs Worder in demonstration mode.",
-                    ArgumentsHandler::runDemo
-                    ),
+                    "Prepares demo-files if needed and runs Worder in a demonstration mode.",
+                    ArgumentsHandler::setDemoFlag
+            ),
             WORDER_HOME(
                     "--worder-home",
                     "Sets specified path as a Worder Home Catalog.",

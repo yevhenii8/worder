@@ -4,8 +4,8 @@
  *
  * Name: <AppEntry.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <21/11/2020, 08:57:30 PM>
- * Version: <147>
+ * Modified: <21/11/2020, 11:14:27 PM>
+ * Version: <148>
  */
 
 package worder.gui
@@ -52,7 +52,7 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomSt
 
             if (!isConnectedToDemo(pathToDemo)) {
                 require(Files.exists(demoDB)) {
-                    "There's no demo files provided! Please check: $pathToDemo"
+                    "There's no demo database provided! Please check: $demoDB"
                 }
 
                 Files.copy(demoDB, demoTmpDB, StandardCopyOption.REPLACE_EXISTING)

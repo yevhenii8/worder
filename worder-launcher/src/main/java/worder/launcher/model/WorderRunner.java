@@ -4,8 +4,8 @@
  *
  * Name: <WorderRunner.java>
  * Created: <05/11/2020, 08:36:34 PM>
- * Modified: <17/11/2020, 10:30:29 PM>
- * Version: <367>
+ * Modified: <21/11/2020, 10:24:49 PM>
+ * Version: <369>
  */
 
 package worder.launcher.model;
@@ -29,7 +29,7 @@ public class WorderRunner {
     private final UiHandler uiHandler;
     private final AppDescriptor descriptor;
     private final List<URL> artifactUrls;
-    private final String worderArgs;
+    private final String[] worderArgs;
 
 
     public WorderRunner(
@@ -43,7 +43,7 @@ public class WorderRunner {
         this.runningType = runningType;
         this.descriptor = descriptor;
         this.artifactUrls = worderHome.listAsUrls("artifacts");
-        this.worderArgs = worderArgs;
+        this.worderArgs = (worderArgs == null) ? null : worderArgs.split(" ");
     }
 
 
@@ -65,7 +65,7 @@ public class WorderRunner {
         uiHandler.dispose(UI_DISPOSE_DELAY);
 
         Thread.currentThread().setContextClassLoader(loader);
-        mainMethod.invoke(null, mainClass, worderArgs == null ? new String[0] : worderArgs.split(" "));
+        mainMethod.invoke(null, mainClass, worderArgs == null ? new String[0] : worderArgs);
     }
 
     private void runSeparated() throws Exception {
@@ -89,7 +89,7 @@ public class WorderRunner {
         worderCommand.add(descriptor.getAppMainClass());
 
         if (worderArgs != null)
-            worderCommand.addAll(Arrays.asList(worderArgs.split(" ")));
+            worderCommand.addAll(Arrays.asList(worderArgs));
 
         uiHandler.dispose(UI_DISPOSE_DELAY);
 
