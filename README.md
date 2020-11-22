@@ -1,7 +1,7 @@
 # Worder
 
 ## Project structure
-1. **worder-gui** - the guest of honor. A GUI application that uses a [My Dictionary](https://play.google.com/store/apps/details?id=com.swotwords.lite) backup file in order to replace word translations with definitions and examples from Internet-dictionaries, i.e. update a word. Additionally, supports inserting new words from plain text files in the mode in which every line is a separate word or phrase. It doesn't work completely automatically. For every word you will be given a choice of definitions and examples. You will have to choose the appropriate ones or enter custom ones. Both graphical and command line interfaces are there at your service.
+1. **worder-gui** - the guest of honor. A GUI application that uses a [My Dictionary](https://play.google.com/store/apps/details?id=com.swotwords.lite) backup file in order to replace word translations with definitions and examples from the Internet-dictionaries, i.e. update a word. Additionally, supports inserting new words from plain text files in the mode in which every line is a separate word or phrase. It doesn't work completely automatically. For every word you will be given a choice of definitions and examples. You will have to choose the appropriate ones or enter custom ones. Both graphical and command line interfaces are there at your service.
    ```
    hell (ад) -> hell (an extremely unpleasant or difficult place, situation, or experience)
    ```
@@ -10,13 +10,13 @@
    - [Kotlin Coroutines](https://github.com/Kotlin/kotlinx.coroutines)
    - [SQLite JDBC](https://github.com/xerial/sqlite-jdbc)
    - [Exposed](https://github.com/JetBrains/Exposed)
-2. **worder-launcher** - a lightweight GUI application that has zero dependencies list and provides hassle-free running of *worder-gui*. Can be used as `jar file + local JRE 15` or with installation via native installers (`.exe for Windows and .deb for Linux are available`). The installers contain packed java image and therefore don't need JVM to be installed.
+2. **worder-launcher** - a lightweight GUI application that has zero dependencies list and provides hassle-free running of *worder-gui*. Can be used as `jar file + local JRE 15` or with an installation via native installers (`.exe for Windows and .deb for Linux are available`). The installers contain packed java image and therefore don't need JVM to be installed.
    - [Java](https://jdk.java.net/15/)
    - [Java Swing](https://en.wikipedia.org/wiki/Swing_(Java))
 3. **worder-commons** - common build logic that is used by both *buildSrc* and *worder-launcher*. It has zero dependencies list as well which, however, forced me to use `Java Serialization` instead of e.g. JSON or even more powerful [Kotlin Serialization](https://github.com/Kotlin/kotlinx.serialization).
    - [Java](https://jdk.java.net/15/)
    - [Java Serialization](https://www.tutorialspoint.com/java/java_serialization.htm)
-4. **bash-utils** - contains several bash scripts that were used at some point of development. 
+4. **bash-utils** - contains several bash scripts that were used at some point of the development. 
    - *generateFileStamps.sh* - was used for initial generation of source stamps. The problem it was solving stems from the fact that Java Standard Lib doesn't contain methods to access file creation time, and it's kind of [difficult](https://unix.stackexchange.com/questions/24441/get-file-created-creation-time) to obtain one in Ubuntu.
    - *binlog* - was used in order to investigate how exactly looks java-command with which gradle runs *worder-gui*. It allows to log all requests to any arbitrary executable just before passing them along. You can "listen" to several executable files simultaneously.
    - *linker* - was used by a first version of worder (CLI). It could use MTP of local-ftp for auto-delivery of a backup file to worder app and returning it back to phone. As for now it is deprecated, but planned to be implemented in Kotlin and merged with *worder-gui*.
@@ -55,9 +55,9 @@ First one. Usual use model.
    6. Now you can upgrade present words and add new ones.
    7. After some actions, you can disconnect from the database, push it back to phone and restore from it.
     
-Second one. There's a Demo mode if you want just to see how it looks and perform what's called 'smoke-test'. You just need to pass an argument to the launcher, ways how to do that are listed below.
+Second one. There's a Demo mode if you just want to see how it looks and perform what's called 'smoke-test'. You just need to pass an argument to the launcher, ways how to do that are listed below.
    1. On Windows or Linux: using JRE 15 and the launcher: `java -jar worder-launcher_v1.0.272.jar --demo`.
-   2. On Windows: after installation, open shortcut properties and add argument `--demo` to the `Target` field. Run through the icon.
+   2. On Windows: after installation, open shortcut properties of worder's icon and add argument `--demo` to the `Target` field.
    3. On Linux: after installation, go to `/usr/share/applications`, open `worder-launcher-Worder_Launcher.desktop` and add `--demo` argument to the `Exec` line.
 
 Additionally, with command line you can run
@@ -80,6 +80,6 @@ Additionally, with command line you can run
 
 1. Again, the launcher can be used only on Linux or Windows. On Mac you can run Worder only through [compiling it from the sources](#how-to-run-worder-).
 3. It was primarily developed and fully-tested on Ubuntu\Linux for Ubuntu\Linux and FHD. Good look is **not guaranteed** on other resolutions or systems.
-4. Project doesn't contain unit tests for test purposes. That's why they're disabled for `gradle build` task.
+4. Project doesn't contain unit tests for test purposes. That's why they're disabled for the `gradle build` task.
 5. Only smoke testing have been performed on Windows.
-6. You can upload the launcher from [Releases](https://github.com/yevhenii8/worder/releases) section.
+6. You can upload the launcher from the [Releases](https://github.com/yevhenii8/worder/releases) section.
