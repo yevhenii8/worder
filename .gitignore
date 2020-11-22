@@ -1,7 +1,7 @@
 .gradle
 .idea
 build
-sample-db_TMP.bck
+demo-db-backup-tmp.bck
 gradle.properties
 WorderLocalDistribution
 WorderLocalHome
