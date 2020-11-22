@@ -4,8 +4,8 @@
  *
  * Name: <AppEntry.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <22/11/2020, 12:29:18 AM>
- * Version: <151>
+ * Modified: <22/11/2020, 03:56:31 PM>
+ * Version: <153>
  */
 
 package worder.gui
@@ -80,6 +80,7 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomSt
         }
 
         fun printEnvInfo() {
+            println()
             println("Used JRE: ${Runtime.version()}")
             println("Used KotlinC: ${KotlinVersion.CURRENT}")
 
@@ -87,6 +88,7 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomSt
             println("worder classloader name: ${this::class.java.classLoader.name}")
             println("worder classloader parent: ${this::class.java.classLoader.parent}")
             println("worder classloader parent name: ${this::class.java.classLoader.parent.name}")
+            println()
 
             exitProcess(0)
         }
@@ -96,6 +98,7 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomSt
             val descMaxLen = WorderArgument.values().map { it.description.length }.max()!!
 
             println()
+
             println("-".repeat(7 + notationMaxLen + descMaxLen))
             println("Be aware, all of 'dev_' arguments are for dev purposes. Don't use them.")
             println("-".repeat(7 + notationMaxLen + descMaxLen))
@@ -104,6 +107,8 @@ class AppEntry : App(MainView::class, WorderDefaultStyles::class, WorderCustomSt
             WorderArgument.values().forEach {
                 println("    " + it.notation + " ".repeat(notationMaxLen - it.notation.length + 3) + it.description)
             }
+
+            println()
 
             exitProcess(0)
         }

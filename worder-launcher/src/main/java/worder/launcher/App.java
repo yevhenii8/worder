@@ -4,8 +4,8 @@
  *
  * Name: <App.java>
  * Created: <04/08/2020, 07:03:59 PM>
- * Modified: <22/11/2020, 12:24:27 AM>
- * Version: <646>
+ * Modified: <22/11/2020, 03:54:17 PM>
+ * Version: <647>
  */
 
 package worder.launcher;
@@ -202,6 +202,8 @@ public class App {
             System.out.println("Possible commands: ");
             for (LauncherCommand command : LauncherCommand.values())
                 System.out.println("    " + command.notation + " ".repeat(notationMaxLen - command.notation.length() + 3) + command.description);
+
+            System.out.println();
         }
 
         private static void printDistributionDescriptors() {
