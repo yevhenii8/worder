@@ -4,8 +4,8 @@
  *
  * Name: <ChoosableValues.kt>
  * Created: <31/07/2020, 04:56:09 PM>
- * Modified: <19/11/2020, 01:43:10 PM>
- * Version: <10>
+ * Modified: <02/12/2020, 05:25:20 PM>
+ * Version: <11>
  */
 
 package worder.gui.update.ui
@@ -36,6 +36,7 @@ class ChoosableValues<E>(initValues: Collection<E> = emptyList(), val chooseLimi
         choosables = initValues.distinct()
                 .map { ChoosableValue(it) }
                 .take(10)
+                .toMutableList()
                 .asObservable()
 
         values.bind(choosables) { it.value }

@@ -4,8 +4,8 @@
  *
  * Name: <SQLiteFile.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <22/11/2020, 12:11:10 AM>
- * Version: <62>
+ * Modified: <02/12/2020, 08:52:10 PM>
+ * Version: <71>
  */
 
 package worder.gui.database.model.impl
@@ -22,6 +22,7 @@ import org.jetbrains.exposed.sql.IntegerColumnType
 import org.jetbrains.exposed.sql.Query
 import org.jetbrains.exposed.sql.Random
 import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.SqlExpressionBuilder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.case
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
@@ -33,6 +34,7 @@ import org.jetbrains.exposed.sql.count
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.intParam
+import org.jetbrains.exposed.sql.not
 import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
@@ -44,7 +46,6 @@ import org.jetbrains.exposed.sql.update
 import org.sqlite.SQLiteConfig
 import org.sqlite.SQLiteConfig.TransactionMode.EXCLUSIVE
 import worder.gui.core.model.BareWord
-import worder.gui.core.model.applyWithMainUI
 import worder.gui.database.model.DatabaseWord
 import worder.gui.database.model.UpdatedWord
 import worder.gui.database.model.WorderDB
@@ -57,14 +58,15 @@ import worder.gui.database.model.WorderUpdateDB.SelectOrder.RANDOM
 import java.io.File
 import java.sql.Connection
 import java.time.Instant
+import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, WorderInsertDB {
     companion object {
-        private const val UPDATED_TAG = "(W) Updated"
-        private const val INSERTED_TAG = "(W) Inserted"
-        private const val RESET_TAG = "(W) Reset"
+        private const val UPDATED_TAG = "Worder-Updated"
+        private const val INSERTED_TAG = "Worder-Inserted"
+        private const val RESET_TAG = "Worder-Reset"
         private const val LANG_ID = 2
 
 
@@ -154,6 +156,7 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
     private var learned = -1
     private var unlearned = -1
     private var totalAmount = -1
+    private var toUpdate = -1
 
 
     /**
@@ -185,9 +188,9 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
 
                 resultRow[DictionaryTable.id].value
             }
-            updatedTagIdTmp = requestTagIdTxn(INSERTED_TAG)
-            insertedTagIdTmp = requestTagIdTxn(RESET_TAG)
-            resetTagIdTmp = requestTagIdTxn(UPDATED_TAG)
+            updatedTagIdTmp = requestTagIdTxn(INSERTED_TAG, dictionaryIdTmp)
+            insertedTagIdTmp = requestTagIdTxn(RESET_TAG, dictionaryIdTmp)
+            resetTagIdTmp = requestTagIdTxn(UPDATED_TAG, dictionaryIdTmp)
         }
 
         dictionaryId = dictionaryIdTmp
@@ -227,6 +230,7 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
         learned = this@SQLiteFile.learned
         unlearned = this@SQLiteFile.unlearned
         totalAmount = this@SQLiteFile.totalAmount
+        toUpdate = this@SQLiteFile.toUpdate
     }
 
     private fun requestTrackStatsTxn() {
@@ -248,23 +252,36 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
                 IntegerColumnType()
         )
 
-        val resultRow = WordTable.slice(totalColumn, learnedColumn, unlearnedColumn)
+        // TODO: https://github.com/JetBrains/Exposed/issues/1107
+        val toUpdateColumn = with(SqlExpressionBuilder) {
+            Sum(
+                    case().When(
+                            WordTable.rate neq 100 and not(WordTable.tags like "#$updatedTagId#") or WordTable.tags.isNull(),
+                            intParam(1)
+                    )
+                            .Else(intParam(0)),
+                    IntegerColumnType()
+            )
+        }
+
+        val resultRow = WordTable.slice(totalColumn, learnedColumn, unlearnedColumn, toUpdateColumn)
                 .selectAll()
                 .first()
 
         learned = resultRow[learnedColumn] ?: 0
         unlearned = resultRow[unlearnedColumn] ?: 0
         totalAmount = resultRow[totalColumn].toInt()
+        toUpdate = resultRow[toUpdateColumn] ?: 0
     }
 
     private fun requestWordsCountTxn(tagId: Int): Long = WordTable.select {
-        (WordTable.tags like "%$tagId%") and (WordTable.dictionaryId eq dictionaryId)
+        (WordTable.tags like "%#$tagId#%") and (WordTable.dictionaryId eq dictionaryId)
     }.count()
 
-    private fun requestTagIdTxn(tagName: String): Int {
+    private fun requestTagIdTxn(tagName: String, dictionaryId: Int): Int {
         val res = TagsTable.select { (TagsTable.name eq tagName) and (TagsTable.dictionaryId eq dictionaryId) }.firstOrNull()?.get(TagsTable.id)
                 ?: TagsTable.insert {
-                    it[dictionaryId] = this@SQLiteFile.dictionaryId
+                    it[this.dictionaryId] = dictionaryId
                     it[name] = tagName
                 }[TagsTable.id]
 
@@ -339,11 +356,11 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
         }
 
         MainScope().launch {
+            observableSummaryStats.toUpdate--
             observableTrackStats.apply {
                 totalAffected++
                 totalUpdated++
             }
-
             observableUpdaterStats.apply {
                 totalProcessed++
                 updated++
@@ -357,11 +374,11 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
         }
 
         MainScope().launch {
+            observableSummaryStats.toUpdate--
             observableSummaryStats.apply {
                 totalAmount--
                 unlearned--
             }
-
             observableUpdaterStats.apply {
                 totalProcessed++
                 removed++
@@ -374,9 +391,12 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
             skippedWords.add(bareWord.name)
         }
 
-        observableUpdaterStats.applyWithMainUI {
-            totalProcessed++
-            skipped++
+        MainScope().launch {
+            observableSummaryStats.toUpdate--
+            observableUpdaterStats.apply {
+                totalProcessed++
+                skipped++
+            }
         }
     }
 
@@ -390,11 +410,11 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
         }
 
         MainScope().launch {
+            observableSummaryStats.toUpdate--
             observableSummaryStats.apply {
                 learned++
                 unlearned--
             }
-
             observableUpdaterStats.apply {
                 totalProcessed++
                 learned++
@@ -430,8 +450,6 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
                 this.totalProcessed += resolveResult.size
             }
         }
-
-
 
         return resolveResult
     }

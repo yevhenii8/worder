@@ -7,7 +7,7 @@ import worder.commons.IOExchanger
 import worder.commons.impl.BintrayExchanger
 import worder.commons.impl.LocalExchanger
 
-version = "1.0.200"
+version = "1.0.216"
 
 plugins {
     application
@@ -25,9 +25,10 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:1.3.7")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.7")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.3.7")
-    implementation("org.xerial:sqlite-jdbc:3.32.3.1")
     implementation("org.jetbrains.exposed:exposed-core:0.26.1")
     implementation("org.jetbrains.exposed:exposed-jdbc:0.26.1")
+
+    implementation("org.xerial:sqlite-jdbc:3.32.3.1")
     implementation("no.tornado:tornadofx:2.0.0-SNAPSHOT")
     implementation(":worder-commons")
 

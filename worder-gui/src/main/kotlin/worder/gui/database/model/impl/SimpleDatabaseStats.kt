@@ -4,8 +4,8 @@
  *
  * Name: <SimpleDatabaseStats.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <04/08/2020, 07:11:08 PM>
- * Version: <10>
+ * Modified: <02/12/2020, 05:47:34 PM>
+ * Version: <11>
  */
 
 package worder.gui.database.model.impl
@@ -35,11 +35,13 @@ open class SimpleWorderSummaryStats(
 
         totalAmount: Int = 0,
         unlearned: Int = 0,
-        learned: Int = 0
+        learned: Int = 0,
+        toUpdate: Int = 0
 ) : BaseObservableStats(origin), ObservableWorderSummaryStats {
     override var totalAmount: Int by bindThroughValue(initValue = totalAmount, title = "Total amount")
     override var unlearned: Int by bindThroughValue(initValue = unlearned, title = "Unlearned")
     override var learned: Int by bindThroughValue(initValue = learned, title = "Learned")
+    override var toUpdate: Int by bindThroughValue(initValue = toUpdate, title = "To update")
 }
 
 open class SimpleUpdaterStats(
