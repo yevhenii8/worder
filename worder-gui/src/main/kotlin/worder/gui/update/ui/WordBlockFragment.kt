@@ -4,8 +4,8 @@
  *
  * Name: <WordBlockFragment.kt>
  * Created: <24/07/2020, 07:45:55 PM>
- * Modified: <18/11/2020, 06:13:53 PM>
- * Version: <381>
+ * Modified: <02/12/2020, 09:18:45 PM>
+ * Version: <388>
  */
 
 package worder.gui.update.ui
@@ -117,6 +117,7 @@ class WordBlockFragment : Fragment() {
 
         hbox(20) {
             label(block.id) {
+                usePrefSize = true
                 style {
                     fontSize = 20.px
                     alignment = Pos.TOP_CENTER

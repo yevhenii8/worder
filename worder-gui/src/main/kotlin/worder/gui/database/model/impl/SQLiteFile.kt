@@ -4,8 +4,8 @@
  *
  * Name: <SQLiteFile.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <02/12/2020, 08:52:10 PM>
- * Version: <71>
+ * Modified: <02/12/2020, 09:15:07 PM>
+ * Version: <73>
  */
 
 package worder.gui.database.model.impl
@@ -34,7 +34,6 @@ import org.jetbrains.exposed.sql.count
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.intParam
-import org.jetbrains.exposed.sql.not
 import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
@@ -188,9 +187,9 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
 
                 resultRow[DictionaryTable.id].value
             }
-            updatedTagIdTmp = requestTagIdTxn(INSERTED_TAG, dictionaryIdTmp)
-            insertedTagIdTmp = requestTagIdTxn(RESET_TAG, dictionaryIdTmp)
-            resetTagIdTmp = requestTagIdTxn(UPDATED_TAG, dictionaryIdTmp)
+            updatedTagIdTmp = requestTagIdTxn(UPDATED_TAG, dictionaryIdTmp)
+            insertedTagIdTmp = requestTagIdTxn(INSERTED_TAG, dictionaryIdTmp)
+            resetTagIdTmp = requestTagIdTxn(RESET_TAG, dictionaryIdTmp)
         }
 
         dictionaryId = dictionaryIdTmp
@@ -256,7 +255,7 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
         val toUpdateColumn = with(SqlExpressionBuilder) {
             Sum(
                     case().When(
-                            WordTable.rate neq 100 and not(WordTable.tags like "#$updatedTagId#") or WordTable.tags.isNull(),
+                            WordTable.rate neq 100 and (WordTable.tags notLike "%#$updatedTagId#%" or WordTable.tags.isNull()),
                             intParam(1)
                     )
                             .Else(intParam(0)),
@@ -294,7 +293,7 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
      */
 
     private fun selectNextTxn(): Query = WordTable.slice(WordTable.columns.drop(2) + WordTable.name).select {
-        (WordTable.tags notLike "%$updatedTagId%" or WordTable.tags.isNull()) and
+        (WordTable.tags notLike "%#$updatedTagId#%" or WordTable.tags.isNull()) and
                 (WordTable.rate less 100) and
                 (WordTable.name.notInList(skippedWords + cachedWords)) and
                 (WordTable.dictionaryId eq dictionaryId)
@@ -338,7 +337,7 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
     override suspend fun updateWord(updatedWord: UpdatedWord) {
         @Suppress("UNCHECKED_CAST")
         fun resolveTagId(tagId: Int) = case()
-                .When(WordTable.tags like "%$tagId%", WordTable.tags)
+                .When(WordTable.tags like "%#$tagId#%", WordTable.tags)
                 .When(WordTable.tags like "%#", Concat("", WordTable.tags as Column<String>, stringLiteral("$tagId#")))
                 .Else(stringLiteral("#$tagId#"))
 
@@ -475,7 +474,7 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
 
             @Suppress("UNCHECKED_CAST")
             it[tags] = case()
-                    .When(tags like "%$resetTagId%", tags)
+                    .When(tags like "%#$resetTagId#%", tags)
                     .When(tags like "%#", Concat("", tags as Column<String>, stringLiteral("$resetTagId#")))
                     .Else(stringLiteral("#$resetTagId#"))
         }

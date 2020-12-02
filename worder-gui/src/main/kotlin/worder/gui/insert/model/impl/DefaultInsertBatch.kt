@@ -4,8 +4,8 @@
  *
  * Name: <DefaultInsertBatch.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <04/08/2020, 07:11:08 PM>
- * Version: <25>
+ * Modified: <02/12/2020, 09:40:38 PM>
+ * Version: <26>
  */
 
 package worder.gui.insert.model.impl
@@ -107,9 +107,7 @@ class DefaultInsertBatch private constructor(private val database: WorderInsertD
 
     override suspend fun commitAllUnits() {
         coroutineScope {
-            ArrayList(readyToCommitUnits).apply {
-                forEach { launch { it.commit() } }
-            }
+            ArrayList(readyToCommitUnits).onEach { launch { it.commit() } }
         }
     }
 
