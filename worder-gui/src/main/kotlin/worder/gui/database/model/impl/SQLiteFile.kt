@@ -4,8 +4,8 @@
  *
  * Name: <SQLiteFile.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <02/12/2020, 09:15:07 PM>
- * Version: <73>
+ * Modified: <30/01/2021, 08:21:29 PM>
+ * Version: <75>
  */
 
 package worder.gui.database.model.impl
@@ -22,11 +22,12 @@ import org.jetbrains.exposed.sql.IntegerColumnType
 import org.jetbrains.exposed.sql.Query
 import org.jetbrains.exposed.sql.Random
 import org.jetbrains.exposed.sql.SortOrder
-import org.jetbrains.exposed.sql.SqlExpressionBuilder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.case
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.isNull
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.neq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.notLike
 import org.jetbrains.exposed.sql.Sum
 import org.jetbrains.exposed.sql.Transaction
 import org.jetbrains.exposed.sql.and
@@ -208,14 +209,14 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
 
 
     private suspend fun <T> sqlLiteTransactionAsync(statement: suspend Transaction.() -> T): T = newSuspendedTransaction(
-            context = sqliteContext,
-            db = connection,
-            statement = statement
+        context = sqliteContext,
+        db = connection,
+        statement = statement
     )
 
     private fun <T> sqlLiteTransaction(statement: Transaction.() -> T): T = transaction(
-            db = connection,
-            statement = statement
+        db = connection,
+        statement = statement
     )
 
     private fun SimpleWorderTrackStats.updateTrackStats() {
@@ -242,30 +243,25 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
         val totalColumn = WordTable.id.count()
 
         val learnedColumn = Sum(
-                case().When(WordTable.rate eq 100, intParam(1)).Else(intParam(0)),
-                IntegerColumnType()
+            case().When(WordTable.rate eq 100, intParam(1)).Else(intParam(0)),
+            IntegerColumnType()
         )
 
         val unlearnedColumn = Sum(
-                case().When(WordTable.rate neq 100, intParam(1)).Else(intParam(0)),
-                IntegerColumnType()
+            case().When(WordTable.rate neq 100, intParam(1)).Else(intParam(0)),
+            IntegerColumnType()
         )
 
-        // TODO: https://github.com/JetBrains/Exposed/issues/1107
-        val toUpdateColumn = with(SqlExpressionBuilder) {
-            Sum(
-                    case().When(
-                            WordTable.rate neq 100 and (WordTable.tags notLike "%#$updatedTagId#%" or WordTable.tags.isNull()),
-                            intParam(1)
-                    )
-                            .Else(intParam(0)),
-                    IntegerColumnType()
-            )
-        }
+        val toUpdateColumn = Sum(
+            case()
+                .When(WordTable.rate neq 100 and (WordTable.tags notLike "%#$updatedTagId#%" or WordTable.tags.isNull()), intParam(1))
+                .Else(intParam(0)),
+            IntegerColumnType()
+        )
 
         val resultRow = WordTable.slice(totalColumn, learnedColumn, unlearnedColumn, toUpdateColumn)
-                .selectAll()
-                .first()
+            .selectAll()
+            .first()
 
         learned = resultRow[learnedColumn] ?: 0
         unlearned = resultRow[unlearnedColumn] ?: 0
@@ -279,10 +275,10 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
 
     private fun requestTagIdTxn(tagName: String, dictionaryId: Int): Int {
         val res = TagsTable.select { (TagsTable.name eq tagName) and (TagsTable.dictionaryId eq dictionaryId) }.firstOrNull()?.get(TagsTable.id)
-                ?: TagsTable.insert {
-                    it[this.dictionaryId] = dictionaryId
-                    it[name] = tagName
-                }[TagsTable.id]
+            ?: TagsTable.insert {
+                it[this.dictionaryId] = dictionaryId
+                it[name] = tagName
+            }[TagsTable.id]
 
         return res.value
     }
@@ -318,28 +314,28 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
             cachedWords.removeAt(0)
 
         DatabaseWord(
-                name = word,
-                transcription = resultRow[WordTable.transcription],
-                rate = resultRow[WordTable.rate],
-                registered = resultRow[WordTable.register],
-                lastModified = resultRow[WordTable.lastModification],
-                lastRateModified = resultRow[WordTable.lastRateModification],
-                lastTrained = resultRow[WordTable.lastTraining],
-                examples = (resultRow[WordTable.example] ?: "").split("#").filter(String::isNotBlank).distinct(),
-                translations = run {
-                    val translations = (resultRow[WordTable.translation] ?: "").split("#").filter(String::isNotBlank)
-                    val translationAdditions = (resultRow[WordTable.translationAddition] ?: "").split("#").filter(String::isNotBlank)
-                    (translations + translationAdditions).distinct()
-                }
+            name = word,
+            transcription = resultRow[WordTable.transcription],
+            rate = resultRow[WordTable.rate],
+            registered = resultRow[WordTable.register],
+            lastModified = resultRow[WordTable.lastModification],
+            lastRateModified = resultRow[WordTable.lastRateModification],
+            lastTrained = resultRow[WordTable.lastTraining],
+            examples = (resultRow[WordTable.example] ?: "").split("#").filter(String::isNotBlank).distinct(),
+            translations = run {
+                val translations = (resultRow[WordTable.translation] ?: "").split("#").filter(String::isNotBlank)
+                val translationAdditions = (resultRow[WordTable.translationAddition] ?: "").split("#").filter(String::isNotBlank)
+                (translations + translationAdditions).distinct()
+            }
         )
     }
 
     override suspend fun updateWord(updatedWord: UpdatedWord) {
         @Suppress("UNCHECKED_CAST")
         fun resolveTagId(tagId: Int) = case()
-                .When(WordTable.tags like "%#$tagId#%", WordTable.tags)
-                .When(WordTable.tags like "%#", Concat("", WordTable.tags as Column<String>, stringLiteral("$tagId#")))
-                .Else(stringLiteral("#$tagId#"))
+            .When(WordTable.tags like "%#$tagId#%", WordTable.tags)
+            .When(WordTable.tags like "%#", Concat("", WordTable.tags as Column<String>, stringLiteral("$tagId#")))
+            .Else(stringLiteral("#$tagId#"))
 
         sqlLiteTransactionAsync {
             WordTable.update({ (WordTable.name eq updatedWord.name) and (WordTable.dictionaryId eq dictionaryId) }) { wordTable ->
@@ -349,8 +345,8 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
                 wordTable[tags] = resolveTagId(updatedTagId)
                 wordTable[example] = if (updatedWord.examples.isNotEmpty()) updatedWord.examples.joinToString("#") else null
                 wordTable[transcription] = case()
-                        .When(stringLiteral(updatedWord.transcription ?: "NULL") eq "NULL", transcription)
-                        .Else(stringLiteral(updatedWord.transcription!!))
+                    .When(stringLiteral(updatedWord.transcription ?: "NULL") eq "NULL", transcription)
+                    .Else(stringLiteral(updatedWord.transcription!!))
             }
         }
 
@@ -437,7 +433,7 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
         }
 
         val (reset, inserted) = resolveResult.entries
-                .partition { it.value == WorderInsertDB.ResolveRes.RESET }
+            .partition { it.value == WorderInsertDB.ResolveRes.RESET }
 
         MainScope().launch {
             observableSummaryStats.updateSummaryStats()
@@ -454,7 +450,7 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
     }
 
     private fun containsWordTxn(bareWord: BareWord): Boolean =
-            WordTable.select((WordTable.name eq bareWord.name) and (WordTable.dictionaryId eq dictionaryId)).count() > 0
+        WordTable.select((WordTable.name eq bareWord.name) and (WordTable.dictionaryId eq dictionaryId)).count() > 0
 
     private fun insertWordTxn(bareWord: BareWord): WorderInsertDB.ResolveRes {
         WordTable.insert {
@@ -474,9 +470,9 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
 
             @Suppress("UNCHECKED_CAST")
             it[tags] = case()
-                    .When(tags like "%#$resetTagId#%", tags)
-                    .When(tags like "%#", Concat("", tags as Column<String>, stringLiteral("$resetTagId#")))
-                    .Else(stringLiteral("#$resetTagId#"))
+                .When(tags like "%#$resetTagId#%", tags)
+                .When(tags like "%#", Concat("", tags as Column<String>, stringLiteral("$resetTagId#")))
+                .Else(stringLiteral("#$resetTagId#"))
         }
 
         return WorderInsertDB.ResolveRes.RESET
