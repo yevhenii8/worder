@@ -4,8 +4,8 @@
  *
  * Name: <LingvoRequester.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <04/08/2020, 07:11:08 PM>
- * Version: <12>
+ * Modified: <11/02/2021, 07:07:59 PM>
+ * Version: <13>
  */
 
 package worder.gui.update.model.impl.requesters
@@ -21,7 +21,7 @@ class LingvoRequester private constructor() : TranslationRequester, Transcriptio
     companion object {
         private const val SITE_URL = "https://www.lingvolive.com/en-us/translate/en-ru/"
 
-        private val TRANSCRIPTION_PATTERN = Regex("(?<=<span class=\"_2EnCi Zf_4w _3bSyz IAnu-\")( data-reactid=\".*?\">)(.*?)(?=</span>)")
+        private val TRANSCRIPTION_PATTERN = Regex("(?<=<span class=\"_2EnCi Zf_4w _3bSyz IAnu-\")( data-reactid=\".*?\">)\\[(.*?)\\](?=</span>)")
         private val TRANSLATION_PATTERN = Regex("(?<=<span class=\"_3zJig\").*?(?=</span>)")
         private val TRANSLATION_FILTER = Regex("(?U)[А-Яа-я ]+")
         private val TRANSLATION_BODY_FILTER = Regex("(?<=<div class=\"_1mexQ Zf_4w _3bSyz\").*?(?=</div><div class=\"(_3dLzG)|(#quote)\")")
@@ -44,13 +44,13 @@ class LingvoRequester private constructor() : TranslationRequester, Transcriptio
 
         translations = TRANSLATION_BODY_FILTER.find(body)?.let { matchResult ->
             TRANSLATION_PATTERN.findAll(matchResult.value)
-                    .map { it.value.replace(".*>".toRegex(), "").trim() }
-                    .filter { str -> TRANSLATION_FILTER.matches(str) }
-                    .toList()
+                .map { it.value.replace(".*>".toRegex(), "").trim() }
+                .filter { str -> TRANSLATION_FILTER.matches(str) }
+                .toList()
         } ?: emptyList()
 
         transcriptions = TRANSCRIPTION_PATTERN.findAll(body)
-                .map { it.groupValues[2].replace("&#x27;", "'") }
-                .toList()
+            .map { it.groupValues[2].replace("&#x27;", "'") }
+            .toList()
     }
 }

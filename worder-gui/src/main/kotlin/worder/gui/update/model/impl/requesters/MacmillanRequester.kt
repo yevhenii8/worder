@@ -4,8 +4,8 @@
  *
  * Name: <MacmillanRequester.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <18/11/2020, 06:56:11 PM>
- * Version: <22>
+ * Modified: <11/02/2021, 07:07:59 PM>
+ * Version: <23>
  */
 
 package worder.gui.update.model.impl.requesters
@@ -44,23 +44,23 @@ class MacmillanRequester private constructor() : DefinitionRequester, ExampleReq
 
     override suspend fun requestWord(word: BareWord) {
         val body = sendGetRequest(SITE_URL + word.name.replace(' ', '-'))
-                .plus(sendGetRequest("$SITE_URL${word.name.replace(' ', '-')}_1"))
+            .plus(sendGetRequest("$SITE_URL${word.name.replace(' ', '-')}_1"))
 
         definitions = DEFINITION_PATTERN.findAll(body)
-                .map { COMMON_FILTER.replace(it.value, "").trim() }
-                .toList()
+            .map { COMMON_FILTER.replace(it.value, "").trim() }
+            .toList()
 
         examples = EXAMPLE_PATTERN.findAll(body)
-                .map { COMMON_FILTER.replace(it.value, "").trim() }
-                .toList()
+            .map { COMMON_FILTER.replace(it.value, "").trim() }
+            .toList()
 
         transcriptions = TRANSCRIPTION_PATTERN.findAll(body)
-                .map {
-                    var str = it.value
-                    str = COMMON_FILTER.replace(str, "").trim()
-                    str = TRANSCRIPTION_FILTER.replace(str, "")
-                    "[$str]"
-                }
-                .toList()
+            .map {
+                var str = it.value
+                str = COMMON_FILTER.replace(str, "").trim()
+                str = TRANSCRIPTION_FILTER.replace(str, "")
+                str
+            }
+            .toList()
     }
 }

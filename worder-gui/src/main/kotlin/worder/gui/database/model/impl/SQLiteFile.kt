@@ -4,8 +4,8 @@
  *
  * Name: <SQLiteFile.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <30/01/2021, 08:21:29 PM>
- * Version: <75>
+ * Modified: <11/02/2021, 11:04:21 PM>
+ * Version: <80>
  */
 
 package worder.gui.database.model.impl
@@ -96,7 +96,7 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
             val tags: Column<String?> = text("tags").nullable()
             val translation: Column<String?> = text("translation").nullable()
             val translationAddition: Column<String?> = text("translation_addition").nullable()
-            val transcription: Column<String> = text("transcription").default("")
+            val transcription: Column<String?> = text("transcription").nullable()
             val example: Column<String?> = text("example").nullable()
             val exampleTranslation: Column<String?> = text("example_translation").nullable()
             val dictionaryId: Column<Int> = integer("dictionary_id")

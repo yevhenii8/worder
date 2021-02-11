@@ -4,8 +4,8 @@
  *
  * Name: <WooordHuntRequester.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <04/08/2020, 07:11:08 PM>
- * Version: <12>
+ * Modified: <11/02/2021, 07:07:59 PM>
+ * Version: <14>
  */
 
 package worder.gui.update.model.impl.requesters
@@ -21,8 +21,10 @@ class WooordHuntRequester private constructor() : TranslationRequester, Transcri
     companion object {
         private const val SITE_URL = "https://wooordhunt.ru/word/"
 
-        private val TRANSCRIPTION_PATTERN = Regex("(?<=<span title=\"американская транскрипция слова )(.*?)\" class=\"transcription\"> \\|(.*?)(?=\\|<)")
         private val TRANSLATION_PATTERN = Regex("(?<=<span class=\"t_inline_en\">).*?(?=</span>)")
+        private val TRANSCRIPTION_PATTERN = Regex(
+            "(?<=<span title=\"американская транскрипция слова )(.*?)\" class=\"transcription\"> \\|(.*?)(?=\\|<)"
+        )
 
         val instance: Requester by lazy {
             object : WebsiteRequesterDecorator(WooordHuntRequester()), TranslationRequester, TranscriptionRequester {}
@@ -39,13 +41,13 @@ class WooordHuntRequester private constructor() : TranslationRequester, Transcri
     override suspend fun requestWord(word: BareWord) {
         val body = sendGetRequest(SITE_URL + word.name.replace(" ", "%20"))
 
-        translations = (TRANSLATION_PATTERN.find(body)?.value ?: "")
-                .split(", ")
-                .map { it.trim().toLowerCase() }
-                .toList()
+        translations = TRANSLATION_PATTERN.find(body)?.value
+            ?.split(", ")
+            ?.map { it.trim().toLowerCase() }
+            ?.toList() ?: emptyList()
 
         transcriptions = TRANSCRIPTION_PATTERN.findAll(body)
-                .map { "[${it.groupValues[2]}]" }
-                .toList()
+            .map { it.groupValues[2] }
+            .toList()
     }
 }

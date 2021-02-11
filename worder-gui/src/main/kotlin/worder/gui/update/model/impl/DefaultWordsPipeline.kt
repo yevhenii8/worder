@@ -4,8 +4,8 @@
  *
  * Name: <DefaultWordsPipeline.kt>
  * Created: <20/07/2020, 11:22:35 PM>
- * Modified: <04/08/2020, 07:11:08 PM>
- * Version: <87>
+ * Modified: <11/02/2021, 10:58:44 PM>
+ * Version: <102>
  */
 
 package worder.gui.update.model.impl
@@ -118,6 +118,11 @@ class DefaultWordsPipeline private constructor(
         val translations = (translationRequesters.flatMap { it.translations } + dbWord.translations).distinct()
         val transcriptions = (listOf(dbWord.transcription) + transcriptionRequesters.flatMap { it.transcriptions }).filterNotNull().distinct()
 
+        transcriptionRequesters.forEach { println("$it (${it.transcriptions.size}): ${it.transcriptions}") }
+        println("${listOf(dbWord.transcription).size} => ${listOf(dbWord.transcription)}")
+        println("${transcriptions.size} => $transcriptions")
+        println()
+
         val newBlock = DefaultWordBlock(
                 id = "${blocksCounter++}",
                 originalWord = dbWord,
@@ -206,11 +211,11 @@ class DefaultWordsPipeline private constructor(
                 error("You can't update block with status: $status")
 
             updatedWord = UpdatedWord(
-                    name = originalWord.name,
-                    transcription = transcription,
-                    primaryDefinition = primaryDefinition,
-                    secondaryDefinition = secondaryDefinition,
-                    examples = examples
+                name = originalWord.name,
+                transcription = transcription,
+                primaryDefinition = primaryDefinition,
+                secondaryDefinition = secondaryDefinition,
+                examples = examples
             )
 
             resolution = WordBlock.WordBlockResolution.UPDATED
