@@ -4,8 +4,8 @@
  *
  * Name: <CambridgeRequester.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <18/11/2020, 06:56:11 PM>
- * Version: <20>
+ * Modified: <17/02/2021, 05:14:42 PM>
+ * Version: <24>
  */
 
 package worder.gui.update.model.impl.requesters
@@ -23,7 +23,7 @@ class CambridgeRequester private constructor() : DefinitionRequester, ExampleReq
 
         private val DEFINITION_PATTERN = Regex("(?<=<div class=\"def ddef_d db\">).*?(?=</div>)")
         private val EXAMPLE_PATTERN = Regex("(?<=<span class=\"eg deg\">).*?(?=</span></div>)")
-        private val COMMON_FILTER = Regex("(<.*?>)|(: )")
+        private val COMMON_FILTER = Regex("(<span class=\"lab dlab\">.*</span>)|(<.*?>)|(: )")
 
         val instance: Requester by lazy {
             object : WebsiteRequesterDecorator(CambridgeRequester()), DefinitionRequester, ExampleRequester {}

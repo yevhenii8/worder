@@ -4,8 +4,8 @@
  *
  * Name: <DatabaseStats.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <02/12/2020, 05:47:34 PM>
- * Version: <5>
+ * Modified: <17/02/2021, 05:03:06 PM>
+ * Version: <6>
  */
 
 package worder.gui.database.model
@@ -17,6 +17,7 @@ interface ObservableWorderSummaryStats : ObservableStats {
     val unlearned: Int
     val learned: Int
     val toUpdate: Int
+    val readyToTrain: Int
 }
 
 interface ObservableWorderTrackStats : ObservableStats {

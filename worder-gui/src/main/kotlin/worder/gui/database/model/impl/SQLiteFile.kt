@@ -4,8 +4,8 @@
  *
  * Name: <SQLiteFile.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <11/02/2021, 11:04:21 PM>
- * Version: <80>
+ * Modified: <17/02/2021, 05:18:47 PM>
+ * Version: <82>
  */
 
 package worder.gui.database.model.impl
@@ -157,6 +157,7 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
     private var unlearned = -1
     private var totalAmount = -1
     private var toUpdate = -1
+    private var readyToTrain = -1
 
 
     /**
@@ -231,6 +232,7 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
         unlearned = this@SQLiteFile.unlearned
         totalAmount = this@SQLiteFile.totalAmount
         toUpdate = this@SQLiteFile.toUpdate
+        readyToTrain = this@SQLiteFile.readyToTrain
     }
 
     private fun requestTrackStatsTxn() {
@@ -267,6 +269,7 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
         unlearned = resultRow[unlearnedColumn] ?: 0
         totalAmount = resultRow[totalColumn].toInt()
         toUpdate = resultRow[toUpdateColumn] ?: 0
+        readyToTrain = unlearned - toUpdate
     }
 
     private fun requestWordsCountTxn(tagId: Int): Long = WordTable.select {
@@ -344,14 +347,15 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
                 wordTable[exampleTranslation] = null
                 wordTable[tags] = resolveTagId(updatedTagId)
                 wordTable[example] = if (updatedWord.examples.isNotEmpty()) updatedWord.examples.joinToString("#") else null
-                wordTable[transcription] = case()
-                    .When(stringLiteral(updatedWord.transcription ?: "NULL") eq "NULL", transcription)
-                    .Else(stringLiteral(updatedWord.transcription!!))
+                wordTable[transcription] = updatedWord.transcription
             }
         }
 
         MainScope().launch {
-            observableSummaryStats.toUpdate--
+            observableSummaryStats.apply {
+                readyToTrain++
+                toUpdate--
+            }
             observableTrackStats.apply {
                 totalAffected++
                 totalUpdated++
@@ -369,10 +373,10 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
         }
 
         MainScope().launch {
-            observableSummaryStats.toUpdate--
             observableSummaryStats.apply {
                 totalAmount--
                 unlearned--
+                toUpdate--
             }
             observableUpdaterStats.apply {
                 totalProcessed++

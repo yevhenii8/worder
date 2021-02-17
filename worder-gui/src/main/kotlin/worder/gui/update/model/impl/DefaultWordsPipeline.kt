@@ -4,8 +4,8 @@
  *
  * Name: <DefaultWordsPipeline.kt>
  * Created: <20/07/2020, 11:22:35 PM>
- * Modified: <11/02/2021, 10:58:44 PM>
- * Version: <102>
+ * Modified: <17/02/2021, 05:18:47 PM>
+ * Version: <105>
  */
 
 package worder.gui.update.model.impl
@@ -110,6 +110,7 @@ class DefaultWordsPipeline private constructor(
             return null
         }
 
+//        val dbWord = DatabaseWord("sclerosis", null, 0, 0, 0, 0, 0, emptyList(), emptyList())
         val dbWord = database.getNextWord(selectOrder)
         usedRequesters.forEach { it.requestWord(dbWord) }
 
@@ -117,11 +118,6 @@ class DefaultWordsPipeline private constructor(
         val examples = (exampleRequesters.flatMap { it.examples } + dbWord.examples).distinct()
         val translations = (translationRequesters.flatMap { it.translations } + dbWord.translations).distinct()
         val transcriptions = (listOf(dbWord.transcription) + transcriptionRequesters.flatMap { it.transcriptions }).filterNotNull().distinct()
-
-        transcriptionRequesters.forEach { println("$it (${it.transcriptions.size}): ${it.transcriptions}") }
-        println("${listOf(dbWord.transcription).size} => ${listOf(dbWord.transcription)}")
-        println("${transcriptions.size} => $transcriptions")
-        println()
 
         val newBlock = DefaultWordBlock(
                 id = "${blocksCounter++}",
