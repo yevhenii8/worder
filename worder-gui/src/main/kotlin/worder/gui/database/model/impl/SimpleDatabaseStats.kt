@@ -4,8 +4,8 @@
  *
  * Name: <SimpleDatabaseStats.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <17/02/2021, 05:03:06 PM>
- * Version: <12>
+ * Modified: <05/03/2021, 09:16:44 PM>
+ * Version: <13>
  */
 
 package worder.gui.database.model.impl
@@ -50,13 +50,13 @@ open class SimpleUpdaterStats(
         origin: String = "Updater Session",
 
         totalProcessed: Int = 0,
-        removed: Int = 0,
+        deleted: Int = 0,
         updated: Int = 0,
         skipped: Int = 0,
         learned: Int = 0
 ) : BaseObservableStats(origin), ObservableUpdaterStats {
     override var totalProcessed: Int by bindThroughValue(initValue = totalProcessed, title = "Total processed")
-    override var removed: Int by bindThroughValue(initValue = removed, title = "Removed")
+    override var deleted: Int by bindThroughValue(initValue = deleted, title = "Deleted")
     override var updated: Int by bindThroughValue(initValue = updated, title = "Updated")
     override var skipped: Int by bindThroughValue(initValue = skipped, title = "Skipped")
     override var learned: Int by bindThroughValue(initValue = learned, title = "Learned")

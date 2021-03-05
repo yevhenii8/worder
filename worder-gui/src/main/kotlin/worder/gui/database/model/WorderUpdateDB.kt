@@ -4,8 +4,8 @@
  *
  * Name: <WorderUpdateDB.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <04/08/2020, 07:11:08 PM>
- * Version: <5>
+ * Modified: <05/03/2021, 09:16:44 PM>
+ * Version: <6>
  */
 
 package worder.gui.database.model
@@ -30,7 +30,7 @@ interface WorderUpdateDB {
 
     suspend fun updateWord(updatedWord: UpdatedWord)
 
-    suspend fun removeWord(bareWord: BareWord)
+    suspend fun deleteWord(bareWord: BareWord)
 
     suspend fun setAsSkipped(bareWord: BareWord)
 

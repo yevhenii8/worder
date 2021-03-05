@@ -4,8 +4,8 @@
  *
  * Name: <DefaultWordsPipeline.kt>
  * Created: <20/07/2020, 11:22:35 PM>
- * Modified: <17/02/2021, 05:18:47 PM>
- * Version: <105>
+ * Modified: <05/03/2021, 09:16:44 PM>
+ * Version: <106>
  */
 
 package worder.gui.update.model.impl
@@ -188,7 +188,7 @@ class DefaultWordsPipeline private constructor(
 
             when (resolution) {
                 WordBlock.WordBlockResolution.SKIPPED -> database.setAsSkipped(originalWord)
-                WordBlock.WordBlockResolution.REMOVED -> database.removeWord(originalWord)
+                WordBlock.WordBlockResolution.DELETED -> database.deleteWord(originalWord)
                 WordBlock.WordBlockResolution.LEARNED -> database.setAsLearned(originalWord)
                 WordBlock.WordBlockResolution.UPDATED -> database.updateWord(updatedWord!!)
                 WordBlock.WordBlockResolution.NO_RESOLUTION -> error("You can't commit block with NO_RESOLUTION!")
@@ -218,11 +218,11 @@ class DefaultWordsPipeline private constructor(
             status = WordBlock.WordBlockStatus.READY_TO_COMMIT
         }
 
-        override fun remove() {
+        override fun delete() {
             if (status == WordBlock.WordBlockStatus.COMMITTED)
-                error("You can't remove block with status: $status")
+                error("You can't delete block with status: $status")
 
-            resolution = WordBlock.WordBlockResolution.REMOVED
+            resolution = WordBlock.WordBlockResolution.DELETED
             status = WordBlock.WordBlockStatus.READY_TO_COMMIT
         }
 

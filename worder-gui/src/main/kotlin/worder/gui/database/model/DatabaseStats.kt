@@ -4,8 +4,8 @@
  *
  * Name: <DatabaseStats.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <17/02/2021, 05:03:06 PM>
- * Version: <6>
+ * Modified: <05/03/2021, 09:16:44 PM>
+ * Version: <7>
  */
 
 package worder.gui.database.model
@@ -29,7 +29,7 @@ interface ObservableWorderTrackStats : ObservableStats {
 
 interface ObservableUpdaterStats : ObservableStats {
     val totalProcessed: Int
-    val removed: Int
+    val deleted: Int
     val updated: Int
     val skipped: Int
     val learned: Int

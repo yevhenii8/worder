@@ -4,8 +4,8 @@
  *
  * Name: <WordBlockFragment.kt>
  * Created: <24/07/2020, 07:45:55 PM>
- * Modified: <02/12/2020, 09:18:45 PM>
- * Version: <388>
+ * Modified: <05/03/2021, 09:29:04 PM>
+ * Version: <391>
  */
 
 package worder.gui.update.ui
@@ -83,7 +83,7 @@ class WordBlockFragment : Fragment() {
                             transcription = block.transcriptions.firstOrNull(),
                             examples = chosenExamples
                     )
-                    WordBlock.WordBlockResolution.REMOVED -> block.remove()
+                    WordBlock.WordBlockResolution.DELETED -> block.delete()
                     WordBlock.WordBlockResolution.LEARNED -> block.learn()
                     WordBlock.WordBlockResolution.SKIPPED -> block.skip()
                     WordBlock.WordBlockResolution.NO_RESOLUTION -> error("You can't change presented resolution with NO_RESOLUTION!")
@@ -202,11 +202,12 @@ class WordBlockFragment : Fragment() {
         fun send(input: String) {
             if (input.startsWith("--")) {
                 when (input) {
-                    "--remove" -> resolutionUI.value = WordBlock.WordBlockResolution.REMOVED
+                    "--delete" -> resolutionUI.value = WordBlock.WordBlockResolution.DELETED
                     "--learn" -> resolutionUI.value = WordBlock.WordBlockResolution.LEARNED
                     "--skip" -> resolutionUI.value = WordBlock.WordBlockResolution.SKIPPED
                     "--commit" -> find<UpdateTabView>().commitLast()
                     "--help" -> clFragment.helpButton.onAction.handle(null)
+                    else -> tornadofx.error("Invalid command was passed!", "Please, use HELP button to check all possible commands.")
                 }
                 return
             }

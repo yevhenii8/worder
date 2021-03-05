@@ -4,8 +4,8 @@
  *
  * Name: <WordBlock.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <04/08/2020, 07:11:08 PM>
- * Version: <14>
+ * Modified: <05/03/2021, 09:16:44 PM>
+ * Version: <15>
  */
 
 package worder.gui.update.model
@@ -46,7 +46,7 @@ interface WordBlock {
             examples: List<String>
     )
 
-    fun remove()
+    fun delete()
     fun learn()
     fun skip()
 
@@ -58,6 +58,6 @@ interface WordBlock {
     }
 
     enum class WordBlockResolution {
-        NO_RESOLUTION, SKIPPED, REMOVED, LEARNED, UPDATED
+        NO_RESOLUTION, SKIPPED, DELETED, LEARNED, UPDATED
     }
 }

@@ -7,7 +7,7 @@ import worder.commons.IOExchanger
 import worder.commons.impl.BintrayExchanger
 import worder.commons.impl.LocalExchanger
 
-version = "1.0.271"
+version = "1.0.278"
 
 plugins {
     application

@@ -30,18 +30,18 @@
 
 
 <h2>Command Line Interface</h2>
-<p>Initially, Worder was a Java CLI application, then a Kotlin CLI application. As for now it's a GUI one :) But utilizing of CLI is still the most
-    convenient way to operate on WordBlocks. Some important notes here: </p>
+<p>Initially, Worder was a plain Java CLI application, then a Kotlin CLI application. As for now it's a GUI one :) But utilizing of CLI is still the most
+    convenient way of operating on WordBlocks. Some important notes here: </p>
 <ul>
     <li>CLI is connected only to the current NO_RESOLUTION block.</li>
-    <li>As the first resolution received, you can only change it through GUI.</li>
+    <li>As the first resolution was received, you can only change it through GUI.</li>
 </ul>
 
 <p>The intended way of CLI use is the next: you choose DEF (definition(s)), EXP (example(s)) and then CLI sets WordBlock's resolution to UPDATED. You
     can select from the proposed options (using their indexes) or from the custom one(s). Also, you can combine proposed and custom options in any
     way.</p>
 <dl>
-    <dt>Possible ways to choose definition(s) - DEF?</dt>
+    <dt>Possible ways to choose definition(s) - DEF:</dt>
     <dd>
         <ol>
             <li>Two proposed: (i1 i2) -> (ENTER)</li>
@@ -53,7 +53,7 @@
         </ol>
     </dd>
 
-    <dt>Possible ways to choose example(s) - EXP?</dt>
+    <dt>Possible ways to choose example(s) - EXP:</dt>
     <dd>
         <ol>
             <li>No example: (ENTER)</li>
@@ -67,7 +67,7 @@
     <dt>At any moment (DEF or EXP stages) you can set resolution different to UPDATED or ask for help:</dt>
     <dd>
         <ol>
-            <li>--remove -> immediately sets Removed resolution</li>
+            <li>--delete -> immediately sets Deleted resolution</li>
             <li>--learn -> immediately sets Learned resolution</li>
             <li>--skip -> immediately sets Skipped resolution</li>
             <li>--commit -> commits last READY_TO_COMMIT block</li>
@@ -99,7 +99,7 @@
     <dd>
         <ol>
             <li>Update</li>
-            <li>Set Removed</li>
+            <li>Set Deleted</li>
             <li>Set Learned</li>
             <li>Set Skipped</li>
         </ol>

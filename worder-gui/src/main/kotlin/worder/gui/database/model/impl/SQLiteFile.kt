@@ -4,8 +4,8 @@
  *
  * Name: <SQLiteFile.kt>
  * Created: <02/07/2020, 11:27:00 PM>
- * Modified: <17/02/2021, 05:18:47 PM>
- * Version: <82>
+ * Modified: <05/03/2021, 09:16:44 PM>
+ * Version: <83>
  */
 
 package worder.gui.database.model.impl
@@ -367,7 +367,7 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
         }
     }
 
-    override suspend fun removeWord(bareWord: BareWord) {
+    override suspend fun deleteWord(bareWord: BareWord) {
         sqlLiteTransactionAsync {
             WordTable.deleteWhere { (WordTable.name eq bareWord.name) and (WordTable.dictionaryId eq dictionaryId) }
         }
@@ -380,7 +380,7 @@ class SQLiteFile private constructor(file: File) : WorderDB, WorderUpdateDB, Wor
             }
             observableUpdaterStats.apply {
                 totalProcessed++
-                removed++
+                deleted++
             }
         }
     }
